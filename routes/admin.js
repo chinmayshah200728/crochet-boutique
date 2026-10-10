@@ -528,6 +528,51 @@ router.put('/orders/:id/status', authenticateAdmin, requirePermission('super_adm
   res.json({ message: 'Order status updated successfully', order });
 });
 
+// POST /api/admin/orders/:id/verify-upi (Approve or Reject customer UPI payment)
+router.post('/orders/:id/verify-upi', authenticateAdmin, requirePermission('super_admin', 'admin', 'order_manager'), (req, res) => {
+  const { action, note } = req.body; // 'approve' or 'reject'
+  const db = readDb();
+  const order = db.orders.find(o => o.id === req.params.id);
+  if (!order) return res.status(404).json({ error: 'Order not found.' });
+
+  const oldStatus = order.paymentStatus;
+  if (action === 'approve') {
+    order.paymentStatus = 'PAID';
+    order.status = 'Payment Confirmed & Verified';
+    order.orderStatus = 'Payment Confirmed & Verified';
+    order.paidAt = new Date().toISOString();
+    order.timeline = [
+      { status: 'Order Placed', date: order.createdAt || new Date().toLocaleString('en-IN'), done: true },
+      { status: 'Payment Confirmed & Verified', date: new Date().toLocaleString('en-IN'), done: true },
+      { status: 'Preparing Your Order', date: 'Pending', done: false },
+      { status: 'Packed', date: 'Pending', done: false },
+      { status: 'Handed to Courier', date: 'Pending', done: false },
+      { status: 'Out for Delivery', date: 'Pending', done: false },
+      { status: 'Delivered', date: 'Pending', done: false }
+    ];
+  } else if (action === 'reject') {
+    order.paymentStatus = 'FAILED';
+    order.status = 'Payment Verification Failed (Invalid UTR)';
+    order.orderStatus = 'Payment Verification Failed';
+    order.failureReason = note || 'Invalid UPI UTR reference number';
+  }
+
+  if (note) {
+    if (!order.adminNotes) order.adminNotes = [];
+    order.adminNotes.unshift({
+      admin: req.user.name,
+      note: sanitize(note),
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  writeDb(db);
+  logAudit(req.user, `UPI Payment ${action.toUpperCase()}`, 'Order Management', `Order #${order.id} payment ${action}d (UTR: ${order.utrNumber || 'N/A'})`);
+  sendSSEEvent('order_updated', { orderId: order.id, status: order.status, paymentStatus: order.paymentStatus });
+
+  res.json({ success: true, message: `Payment ${action}d successfully`, order });
+});
+
 // POST /api/admin/orders/:id/notes
 router.post('/orders/:id/notes', authenticateAdmin, requirePermission('super_admin', 'admin', 'order_manager'), (req, res) => {
   const { note } = req.body;

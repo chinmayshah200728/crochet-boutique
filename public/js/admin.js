@@ -461,10 +461,17 @@ async function loadOrders() {
           <small>${(o.items || []).map(i => `${i.name} (x${i.qty})`).join(', ')}</small>
         </td>
         <td><strong>₹${(o.total || 0).toFixed(2)}</strong></td>
-        <td><span class="status-pill ${getPaymentStatusClass(o.paymentStatus)}">${o.paymentStatus || 'PAID'}</span></td>
+        <td>
+          <span class="status-pill ${getPaymentStatusClass(o.paymentStatus)}">${o.paymentStatus || 'PAID'}</span>
+          ${o.utrNumber ? `<br><small style="font-family:monospace; color:#7C3AED; font-weight:bold;">UTR: ${o.utrNumber}</small>` : ''}
+        </td>
         <td><span class="status-pill ${getOrderStatusClass(o.status)}">${o.status}</span></td>
         <td>${o.date || 'Today'}</td>
-        <td>
+        <td style="white-space:nowrap;">
+          ${o.paymentStatus === 'PENDING_VERIFICATION' ? `
+            <button style="background:#059669; color:#fff; border:none; padding:5px 9px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer; margin-right:4px;" onclick="verifyUpiOrder('${o.id}', 'approve')" title="Approve Payment">✓ Approve</button>
+            <button style="background:#DC2626; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer; margin-right:4px;" onclick="verifyUpiOrder('${o.id}', 'reject')" title="Reject Payment">✕</button>
+          ` : ''}
           <button class="btn-secondary-admin" onclick="viewOrderDetails('${o.id}')">Manage</button>
           <a href="${getApiUrl('/api/admin/orders/' + o.id + '/invoice')}" target="_blank" class="btn-secondary-admin" title="Print Invoice"><i class="fa-solid fa-print"></i></a>
           <button class="btn-danger-admin" style="padding: 6px 10px; margin-left: 4px;" onclick="deleteOrder('${o.id}')" title="Delete Order Permanently"><i class="fa-solid fa-trash"></i></button>
@@ -532,9 +539,18 @@ async function viewOrderDetails(orderId) {
           <p><strong>Shipping Address:</strong><br>${order.shippingAddress ? `${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zip}` : 'N/A'}</p>
           
           <h4 style="color:#E89CAE; margin:16px 0 10px 0;">Payment Info</h4>
-          <p><strong>Method:</strong> ${order.paymentMethod || 'Online Gateway'}</p>
+          <p><strong>Method:</strong> ${order.paymentMethod || 'Direct UPI QR'}</p>
           <p><strong>Payment Status:</strong> <span class="status-pill ${getPaymentStatusClass(order.paymentStatus)}">${order.paymentStatus || 'PAID'}</span></p>
-          <p><strong>Txn Ref:</strong> ${order.paymentTxnId || order.razorpayPaymentId || 'N/A'}</p>
+          <p><strong>UPI UTR Reference:</strong> <span style="font-family:monospace; color:#7C3AED; font-weight:bold; font-size:13px;">${order.utrNumber || 'N/A'}</span></p>
+          ${order.paymentStatus === 'PENDING_VERIFICATION' ? `
+            <div style="background:#FFFBEB; border:1px solid #FDE68A; padding:10px; border-radius:10px; margin:12px 0;">
+              <div style="font-weight:bold; color:#92400E; font-size:12px; margin-bottom:6px;">⚠️ UPI Verification Action:</div>
+              <div style="display:flex; gap:6px;">
+                <button style="background:#059669; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;" onclick="verifyUpiOrder('${order.id}', 'approve')">✓ Approve &amp; Mark Paid</button>
+                <button style="background:#DC2626; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;" onclick="verifyUpiOrder('${order.id}', 'reject')">✕ Reject UTR</button>
+              </div>
+            </div>
+          ` : ''}
         </div>
 
         <div>
@@ -611,6 +627,26 @@ async function submitStatusUpdate(orderId) {
     loadOverview();
   } catch (err) {
     showToast(err.message, 'error');
+  }
+}
+
+async function verifyUpiOrder(orderId, action) {
+  const label = action === 'approve' ? 'Approve payment & mark as PAID for' : 'Reject UTR for';
+  if (!confirm(`Are you sure you want to ${label} Order #${orderId}?`)) return;
+
+  try {
+    await adminApiFetch(`/api/admin/orders/${orderId}/verify-upi`, {
+      method: 'POST',
+      body: JSON.stringify({ action })
+    });
+
+    showToast(`Order #${orderId} payment ${action}d successfully!`, 'success');
+    const modal = document.getElementById('modal-order-details');
+    if (modal) modal.classList.add('hidden');
+    loadOrders();
+    loadOverview();
+  } catch (err) {
+    showToast(`Action failed: ${err.message}`, 'error');
   }
 }
 

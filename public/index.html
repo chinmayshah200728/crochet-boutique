@@ -509,39 +509,35 @@
               </div>
             </div>
 
-            <!-- ONLINE PAYMENT ENFORCEMENT & RAZORPAY TEST MODE GUIDANCE -->
+            <!-- DIRECT UPI QR CODE PAYMENT OPTION -->
             <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-4">
-              <h2 class="font-display font-bold text-xl text-[#3D2C3D]">Payment Method (Online Only)</h2>
-              
-              <div class="bg-[#FFF0F6] p-4 rounded-2xl border border-[#FFC6FF] text-xs text-[#3D2C3D] space-y-2">
-                <div class="font-bold text-[#FF85A1] text-sm">💡 Why GPay / PhonePe shows "Can't pay with this QR Code":</div>
-                <ul class="list-disc pl-4 space-y-1 text-[#8B7A99]">
-                  <li><strong>Reason:</strong> Real UPI apps (GPay, PhonePe, Paytm) run on real banking networks and block Razorpay test mode QR codes because test money cannot be transferred.</li>
-                  <li><strong>How to test in Razorpay popup:</strong> Click <strong>Netbanking</strong> &rarr; Select <strong>HDFC / SBI</strong> &rarr; Click <strong>Pay</strong> &rarr; Click <strong>Success</strong>. Or select UPI &rarr; enter Test UPI ID: <code class="bg-white px-1.5 py-0.5 rounded text-[#FF85A1] font-bold">success@razorpay</code>.</li>
-                </ul>
+              <div class="flex items-center justify-between">
+                <h2 class="font-display font-bold text-xl text-[#3D2C3D]">Payment Method</h2>
+                <span class="badge-pill bg-[#E8D7FF] text-[#3D2C3D] text-[11px] font-bold">100% Secure &amp; Verified</span>
               </div>
-
-              <div class="space-y-3">
-                <label class="flex items-center gap-3 p-3.5 border border-[#EEDBF5] rounded-2xl cursor-pointer hover:border-[#FF85A1]">
-                  <input type="radio" name="payment-method" value="UPI Instant (GPay / PhonePe / Paytm)" checked class="accent-[#FF85A1]">
-                  <span class="font-bold text-sm">📲 Razorpay Secure Gateway (Netbanking / Test UPI / Cards)</span>
-                </label>
-                
-                <!-- INSTANT TEST ORDER SIMULATOR OPTION -->
-                <div class="p-4 bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div>
-                    <div class="font-bold text-xs text-[#15803D]">⚡ Instant Test Order Simulator</div>
-                    <div class="text-[11px] text-[#166534]">Bypass Razorpay popup and test order placement instantly</div>
+              
+              <div class="p-4 bg-gradient-to-r from-[#FFF0F6] to-[#FDF4FF] rounded-2xl border-2 border-[#FFC6FF] space-y-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-xl shrink-0">
+                    📲
                   </div>
-                  <button type="button" onclick="simulateInstantTestOrder()" class="bg-[#15803D] hover:bg-[#166534] text-white text-xs font-bold py-2.5 px-5 rounded-xl transition-colors shrink-0">
-                    ⚡ Place Instant Test Order
-                  </button>
+                  <div>
+                    <h4 class="font-display font-bold text-sm text-[#3D2C3D]">Direct UPI QR Code (GPay / PhonePe / Paytm / BHIM)</h4>
+                    <p class="text-xs text-[#8B7A99]">Scan QR code, make payment, and enter your 12-digit UTR reference ID</p>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                  <span class="bg-white px-2.5 py-1 rounded-full border border-[#EEDBF5] font-semibold text-[#3D2C3D] flex items-center gap-1.5"><i class="fa-brands fa-google-pay text-base text-blue-600"></i> Google Pay</span>
+                  <span class="bg-white px-2.5 py-1 rounded-full border border-[#EEDBF5] font-semibold text-[#3D2C3D] flex items-center gap-1.5"><span class="text-[#5f259f] font-bold">Pe</span> PhonePe</span>
+                  <span class="bg-white px-2.5 py-1 rounded-full border border-[#EEDBF5] font-semibold text-[#3D2C3D] flex items-center gap-1.5"><span class="text-[#00baf2] font-bold">P</span> Paytm</span>
+                  <span class="bg-white px-2.5 py-1 rounded-full border border-[#EEDBF5] font-semibold text-[#3D2C3D] flex items-center gap-1.5">✓ Any Bank UPI</span>
                 </div>
               </div>
             </div>
 
-            <button type="submit" class="w-full btn-terracotta py-4 text-base font-bold justify-center">
-              Proceed To Online Payment Verification ♡
+            <button type="submit" id="checkout-submit-btn" class="w-full btn-terracotta py-4 text-base font-bold justify-center shadow-lg hover:shadow-xl transition-all">
+              Proceed To UPI QR Code Payment ♡
             </button>
           </form>
         </div>
@@ -779,46 +775,71 @@
        MODALS & DRAWERS
        ========================================== -->
 
-  <!-- ONLINE PAYMENT VERIFICATION GATEWAY MODAL -->
+  <!-- DIRECT UPI QR CODE PAYMENT MODAL -->
   <div class="modal-backdrop" id="modal-payment-verify">
-    <div class="modal-container !max-w-lg text-center space-y-5">
+    <div class="modal-container !max-w-md text-center space-y-4 max-h-[92vh] overflow-y-auto">
       <button class="close-modal-btn" onclick="closePaymentVerifyModal()"><i class="fa-solid fa-xmark"></i></button>
 
       <div>
-        <span class="badge-pill bg-[#E8D7FF] text-[#3D2C3D]">🔒 Secure Online Payment Verification</span>
-        <h2 class="font-display font-bold text-2xl text-[#3D2C3D] mt-2">Complete Your UPI / Card Payment</h2>
-        <p class="text-xs text-[#8B7A99]">Scan QR or enter UPI Transaction Reference UTR number to verify with banking network.</p>
+        <span class="badge-pill bg-[#E8D7FF] text-[#3D2C3D] text-xs">🌸 Direct UPI Payment</span>
+        <h2 class="font-display font-bold text-2xl text-[#3D2C3D] mt-1.5">Scan &amp; Pay via UPI</h2>
+        <p class="text-xs text-[#8B7A99]">Use Google Pay, PhonePe, Paytm, or any UPI app</p>
       </div>
 
-      <!-- Simulated UPI QR Code -->
-      <div class="bg-[#FFF0F6] p-5 rounded-3xl border-2 border-[#FFC6FF] inline-block space-y-3">
-        <div class="bg-white p-3 rounded-2xl shadow-sm inline-block">
-          <!-- QR Graphic simulation -->
-          <svg class="w-36 h-36 mx-auto" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="100" height="100" fill="white"/>
-            <path d="M10 10H40V40H10V10ZM20 20V30H30V20H20Z" fill="#3D2C3D"/>
-            <path d="M60 10H90V40H60V10ZM70 20V30H80V20H70Z" fill="#3D2C3D"/>
-            <path d="M10 60H40V90H10V60ZM20 70V80H30V70H20Z" fill="#3D2C3D"/>
-            <path d="M50 50H60V60H50V50ZM70 50H80V60H70V50ZM60 70H70V80H60V70ZM80 80H90V90H80V80ZM50 80H60V90H50V80Z" fill="#3D2C3D"/>
-          </svg>
+      <!-- Real UPI QR Code Card -->
+      <div class="bg-[#FFF0F6] p-4 rounded-3xl border-2 border-[#FFC6FF] space-y-3">
+        <div class="bg-white p-2 rounded-2xl shadow-sm inline-block max-w-[270px]">
+          <img src="images/upi-qr-card.png" alt="Prisha Shah UPI QR Code" class="w-full h-auto rounded-xl mx-auto shadow-sm" />
         </div>
-        <div class="font-bold text-xs text-[#3D2C3D]">UPI VPA: <span class="text-[#FF85A1]">crochetbyprisha@upi</span></div>
-        <div class="font-display font-bold text-xl text-[#FF85A1]" id="pay-verify-amount">Payable: ₹0.00</div>
+        
+        <div class="bg-white p-3 rounded-2xl border border-[#EEDBF5] space-y-1.5 text-left text-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-[#8B7A99]">Payee Name:</span>
+            <span class="font-bold text-[#3D2C3D]">Prisha Shah</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[#8B7A99]">UPI ID:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-[#FF85A1] font-mono text-[11px]" id="pay-upi-id-text">prishashah1206@okicici</span>
+              <button type="button" onclick="copyUPIId()" class="text-[11px] text-[#3D2C3D] hover:text-[#FF85A1] bg-[#F3E8FF] px-2 py-0.5 rounded font-semibold" title="Copy UPI ID">
+                Copy
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1 border-t border-[#F0E6F5]">
+            <span class="text-[#8B7A99] font-bold">Payable Amount:</span>
+            <span class="font-display font-bold text-lg text-[#FF85A1]" id="pay-verify-amount">₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Mobile Quick Pay Link -->
+        <a id="pay-upi-intent-link" href="upi://pay?pa=prishashah1206@okicici&pn=Prisha%20Shah&cu=INR" class="block bg-gradient-to-r from-[#FF85A1] to-[#C8B6FF] text-white font-bold text-xs py-2.5 px-4 rounded-full shadow hover:opacity-95 transition-all">
+          📲 Tap to Open in Google Pay / PhonePe
+        </a>
       </div>
 
-      <!-- Payment Reference Input Form -->
-      <form onsubmit="handleVerifyPaymentSubmit(event)" class="space-y-4 text-left">
+      <!-- Instructions & UTR Input Form -->
+      <form onsubmit="handleVerifyPaymentSubmit(event)" class="space-y-3 text-left">
+        <div class="bg-[#F8FAFC] p-3 rounded-2xl border border-[#E2E8F0] text-xs text-[#475569] space-y-1">
+          <div class="font-bold text-[#334155] flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info text-[#FF85A1]"></i> Quick Steps to Confirm Order:
+          </div>
+          <ol class="list-decimal pl-4 space-y-0.5 text-[11px] text-[#64748B]">
+            <li>Scan the QR code above or pay to UPI ID <strong class="text-[#334155]">prishashah1206@okicici</strong>.</li>
+            <li>After paying, open payment details in your UPI app and find the <strong>12-digit UPI Ref / UTR number</strong>.</li>
+            <li>Enter the 12-digit UTR number below and click Confirm.</li>
+          </ol>
+        </div>
+
         <div>
-          <label class="block text-xs font-bold text-[#3D2C3D] uppercase tracking-wider mb-1">Enter UPI UTR / Transaction Reference Number *</label>
-          <input type="text" id="pay-utr-input" required placeholder="e.g. 123456789012 or UPI-992014" class="form-input text-sm">
+          <label class="block text-xs font-bold text-[#3D2C3D] uppercase tracking-wider mb-1">
+            Enter 12-Digit UPI Reference / UTR Number <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="pay-utr-input" required pattern="[0-9]{12}" minlength="12" maxlength="12" placeholder="e.g. 428901234567 (12 digits)" class="form-input text-sm font-mono tracking-widest text-center" title="Please enter the exact 12-digit UPI UTR number from your payment receipt">
         </div>
 
-        <button type="submit" id="pay-verify-btn" class="w-full btn-terracotta py-3.5 text-sm font-bold justify-center">
-          Verify Payment &amp; Place Order <i class="fa-solid fa-[#check] text-xs ml-1"></i>
-        </button>
-
-        <button type="button" onclick="autoSimulatePaymentUTR()" class="w-full bg-[#E8D7FF] hover:bg-[#C8B6FF] text-[#3D2C3D] font-bold py-2 rounded-full text-xs transition-all">
-          ⚡ Auto-Simulate Verified Payment Response
+        <button type="submit" id="pay-verify-btn" class="w-full btn-terracotta py-3.5 text-sm font-bold justify-center shadow-md hover:shadow-lg transition-all">
+          Confirm Order with UTR ♡
         </button>
       </form>
     </div>

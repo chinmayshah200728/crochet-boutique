@@ -832,7 +832,16 @@ async function handleApplyPromoCode() {
 let pendingPaymentOrderId = null;
 let pendingPollInterval = null;
 
-// END-TO-END RAZORPAY CHECKOUT LIFECYCLE
+function copyUPIId() {
+  const text = 'prishashah1206@okicici';
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✓ UPI ID copied: ' + text);
+  }).catch(() => {
+    showToast('UPI ID: ' + text);
+  });
+}
+
+// END-TO-END DIRECT UPI PAYMENT LIFECYCLE
 async function handlePlaceOrder(e) {
   e.preventDefault();
 
@@ -857,11 +866,11 @@ async function handlePlaceOrder(e) {
   const checkoutBtn = document.querySelector('#checkout-main-form button[type="submit"]');
   if (checkoutBtn) {
     checkoutBtn.disabled = true;
-    checkoutBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Initializing Razorpay Gateway... 🔒`;
+    checkoutBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Generating UPI Order... 🌸`;
   }
 
   try {
-    // 1. Send request to backend to validate prices server-side and create Razorpay order
+    // 1. Send request to backend to validate prices server-side and create internal order
     const orderPayload = {
       items: cart,
       customerName: name,
@@ -872,94 +881,33 @@ async function handlePlaceOrder(e) {
 
     const res = await apiFetch('/api/payments/create-order', 'POST', orderPayload);
 
-    if (!res.success || !res.razorpayOrderId) {
-      throw new Error(res.error || 'Failed to initialize payment gateway.');
+    if (!res.success || !res.orderId) {
+      throw new Error(res.error || 'Failed to initialize order.');
     }
 
     pendingPaymentOrderId = res.orderId;
+    pendingOrderData = res;
 
-    // 2. Launch Razorpay Secure Checkout SDK
-    if (window.Razorpay) {
-      const options = {
-        key: res.keyId,
-        amount: res.amount,
-        currency: res.currency,
-        name: "crochetbyprisha",
-        description: `Order #${res.orderId} - Handcrafted Crochet`,
-        image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=200&q=80",
-        order_id: res.razorpayOrderId,
-        prefill: {
-          name: res.customer.name,
-          email: res.customer.email,
-          contact: res.customer.phone || ''
-        },
-        theme: {
-          color: "#FF85A1"
-        },
-        handler: async function (rzpResponse) {
-          // EXPLICIT SERVER-SIDE SIGNATURE VERIFICATION
-          try {
-            showToast('Verifying payment signature with bank server...');
-            const verifyRes = await apiFetch('/api/payments/verify', 'POST', {
-              orderId: res.orderId,
-              razorpayOrderId: rzpResponse.razorpay_order_id,
-              razorpayPaymentId: rzpResponse.razorpay_payment_id,
-              razorpaySignature: rzpResponse.razorpay_signature
-            });
+    // 2. Populate UPI Modal details
+    const amountElem = document.getElementById('pay-verify-amount');
+    if (amountElem) amountElem.textContent = `₹${res.amountINR.toFixed(2)}`;
 
-            if (verifyRes.verified) {
-              cart = [];
-              localStorage.setItem('sp_cart', '[]');
-              updateCartBadge();
-              trigger3DConfetti();
-              navigate('payment-success?orderId=' + res.orderId);
-            } else {
-              navigate('payment-failed?reason=' + encodeURIComponent(verifyRes.error || 'Signature verification failed'));
-            }
-          } catch (err) {
-            navigate('payment-failed?reason=' + encodeURIComponent(err.message));
-          }
-        },
-        modal: {
-          ondismiss: async function () {
-            // USER CANCELLED / CLOSED PAYMENT WINDOW
-            try {
-              await apiFetch('/api/payments/cancel', 'POST', {
-                orderId: res.orderId,
-                reason: 'User closed payment window before completing checkout'
-              });
-            } catch (err) {}
-            showToast('Checkout window closed. Your cart remains intact.');
-            navigate('payment-failed?reason=' + encodeURIComponent('Payment window was closed before completing payment.'));
-          }
-        }
-      };
-
-      const rzpObj = new window.Razorpay(options);
-      rzpObj.on('payment.failed', function (resp) {
-        const failureReason = resp.error?.description || 'Payment Failed';
-        navigate('payment-failed?reason=' + encodeURIComponent(failureReason));
-      });
-
-      rzpObj.open();
-    } else {
-      // Fallback modal simulation test mode
-      pendingOrderData = {
-        orderId: res.orderId,
-        razorpayOrderId: res.razorpayOrderId,
-        amountINR: res.amountINR
-      };
-      const amountElem = document.getElementById('pay-verify-amount');
-      if (amountElem) amountElem.textContent = `Payable: ₹${res.amountINR.toFixed(2)}`;
-      openPaymentVerifyModal();
+    const intentLink = document.getElementById('pay-upi-intent-link');
+    if (intentLink) {
+      intentLink.href = `upi://pay?pa=prishashah1206@okicici&pn=Prisha%20Shah&am=${res.amountINR.toFixed(2)}&cu=INR&tn=Order%20${res.orderId}`;
     }
+
+    const utrInput = document.getElementById('pay-utr-input');
+    if (utrInput) utrInput.value = '';
+
+    // 3. Open Direct UPI QR Modal
+    openPaymentVerifyModal();
   } catch (err) {
-    showToast('Payment initialization error: ' + err.message);
-    navigate('payment-failed?reason=' + encodeURIComponent(err.message));
+    showToast('Order creation failed: ' + err.message);
   } finally {
     if (checkoutBtn) {
       checkoutBtn.disabled = false;
-      checkoutBtn.innerHTML = `Proceed To Online Payment Verification ♡`;
+      checkoutBtn.innerHTML = `Proceed To UPI QR Code Payment ♡`;
     }
   }
 }
@@ -1038,42 +986,47 @@ async function handleVerifyPaymentSubmit(e) {
 
   const utrInput = document.getElementById('pay-utr-input');
   const btn = document.getElementById('pay-verify-btn');
-  const paymentRef = utrInput ? utrInput.value.trim() : '';
+  const utrValue = utrInput ? utrInput.value.trim() : '';
 
   const orderIdToVerify = pendingPaymentOrderId || (pendingOrderData ? pendingOrderData.orderId : null);
 
-  if (!paymentRef || !orderIdToVerify) {
-    showToast('Missing payment reference or order ID.');
+  if (!orderIdToVerify) {
+    showToast('Order reference missing. Please try placing your order again.');
+    return;
+  }
+
+  if (!utrValue || utrValue.length < 6) {
+    showToast('Please enter your 12-digit UPI Reference / UTR Number.');
     return;
   }
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Verifying with Server... ⏳`;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Submitting UTR Reference... ⏳`;
   }
 
   try {
-    const verifyRes = await apiFetch('/api/payments/verify', 'POST', {
+    const res = await apiFetch('/api/payments/submit-utr', 'POST', {
       orderId: orderIdToVerify,
-      razorpayOrderId: (pendingOrderData && pendingOrderData.razorpayOrderId) ? pendingOrderData.razorpayOrderId : `order_${orderIdToVerify.replace(/-/g, '_')}`,
-      razorpayPaymentId: paymentRef.startsWith('pay_') ? paymentRef : `pay_${paymentRef}`,
-      razorpaySignature: `test_sig_${Date.now()}`
+      utrNumber: utrValue
     });
 
-    if (verifyRes.verified) {
+    if (res.success) {
       cart = [];
       localStorage.setItem('sp_cart', '[]');
       updateCartBadge();
       closePaymentVerifyModal();
       trigger3DConfetti();
-      navigate('payment-success?orderId=' + orderIdToVerify);
+      navigate('payment-success?orderId=' + orderIdToVerify + '&utr=' + encodeURIComponent(utrValue));
+    } else {
+      throw new Error(res.error || 'Failed to submit UTR');
     }
   } catch (err) {
-    showToast('Verification failed: ' + err.message);
+    showToast('Submission error: ' + err.message);
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = `Verify Payment &amp; Place Order <i class="fa-solid fa-check text-xs ml-1"></i>`;
+      btn.innerHTML = `Confirm Order with UTR ♡`;
     }
   }
 }
@@ -1088,6 +1041,7 @@ async function renderPaymentSuccessView(explicitOrderId) {
 
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
   const orderId = explicitOrderId || urlParams.get('orderId') || pendingPaymentOrderId;
+  const utrParam = urlParams.get('utr') || '';
 
   if (!orderId) {
     container.innerHTML = `<p class="text-red-500 font-bold">Order reference missing. Please check your order history in your account dashboard.</p>`;
@@ -1095,28 +1049,43 @@ async function renderPaymentSuccessView(explicitOrderId) {
   }
 
   try {
-    container.innerHTML = `<div class="text-center py-4 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Fetching server-verified payment status...</div>`;
+    container.innerHTML = `<div class="text-center py-4 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading order confirmation...</div>`;
     
-    // SERVER STATUS FETCH (Never trust frontend URL parameters!)
+    // SERVER STATUS FETCH
     const statusData = await apiFetch('/api/payments/status/' + orderId);
 
-    if (statusData.paymentStatus === 'PAID') {
+    const isPending = statusData.paymentStatus === 'PENDING_VERIFICATION' || statusData.paymentStatus === 'CREATED';
+    const isPaid = statusData.paymentStatus === 'PAID';
+
+    if (isPending || isPaid) {
       container.innerHTML = `
         <div class="flex justify-between border-b border-[#EEDBF5] pb-2">
           <span class="text-[#8B7A99]">Order Reference:</span>
           <strong class="text-[#FF85A1] font-mono">${statusData.orderId}</strong>
         </div>
         <div class="flex justify-between border-b border-[#EEDBF5] pb-2">
-          <span class="text-[#8B7A99]">Payment ID:</span>
-          <strong class="text-[#2E7D32] font-mono">${statusData.razorpayPaymentId || 'VERIFIED-GATEWAY'}</strong>
+          <span class="text-[#8B7A99]">UPI UTR Number:</span>
+          <strong class="text-[#7C3AED] font-mono">${statusData.utrNumber || utrParam || 'Submitted'}</strong>
         </div>
         <div class="flex justify-between border-b border-[#EEDBF5] pb-2">
-          <span class="text-[#8B7A99]">Verified Amount Paid:</span>
+          <span class="text-[#8B7A99]">Status:</span>
+          <span class="badge-pill ${isPaid ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#FEF3C7] text-[#92400E]'} font-bold text-xs">
+            ${isPaid ? '✓ Payment Verified &amp; Confirmed' : '⏳ UPI Payment Verification Pending'}
+          </span>
+        </div>
+        <div class="flex justify-between border-b border-[#EEDBF5] pb-2">
+          <span class="text-[#8B7A99]">Total Payable:</span>
           <strong class="text-[#3D2C3D] font-display text-sm">₹${statusData.amount.toFixed(2)} (${statusData.currency})</strong>
         </div>
         <div class="flex justify-between border-b border-[#EEDBF5] pb-2">
-          <span class="text-[#8B7A99]">Payment Timestamp:</span>
-          <span>${new Date(statusData.paidAt || statusData.createdAt).toLocaleString('en-IN')}</span>
+          <span class="text-[#8B7A99]">Order Placed At:</span>
+          <span>${new Date(statusData.createdAt || Date.now()).toLocaleString('en-IN')}</span>
+        </div>
+        <div class="p-3 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0] text-xs text-[#166534] text-left space-y-1">
+          <div class="font-bold flex items-center gap-1.5">
+            <span>🌸</span> Order Recorded Successfully!
+          </div>
+          <p>We have safely received your 12-digit UPI UTR reference. Prisha will match it in her UPI app and begin handcrafting your crochet pieces right away!</p>
         </div>
         <div class="pt-1">
           <div class="font-bold text-[#3D2C3D] mb-1">Items Included (${statusData.items ? statusData.items.length : 0}):</div>
@@ -1125,8 +1094,6 @@ async function renderPaymentSuccessView(explicitOrderId) {
           </div>
         </div>
       `;
-    } else if (statusData.paymentStatus === 'PAYMENT_PENDING' || statusData.paymentStatus === 'CREATED') {
-      navigate('payment-pending?orderId=' + orderId);
     } else {
       renderPaymentFailedView(statusData.failureReason || ('Payment status is ' + statusData.paymentStatus));
       navigate('payment-failed');

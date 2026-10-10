@@ -189,7 +189,8 @@ router.post('/create-order', async (req, res) => {
       amount: amountInPaise,
       amountINR: finalTotalINR,
       currency: PAYMENT_CURRENCY,
-      keyId: RAZORPAY_KEY_ID,
+      upiId: 'prishashah1206@okicici',
+      payeeName: 'Prisha Shah',
       customer: {
         name: nameToUse,
         email: emailToUse,
@@ -199,6 +200,58 @@ router.post('/create-order', async (req, res) => {
   } catch (err) {
     console.error('Error in /api/payments/create-order:', err);
     res.status(500).json({ error: 'Failed to create payment order. ' + err.message });
+  }
+});
+
+/* ==========================================
+   1B. SUBMIT UPI UTR REFERENCE NUMBER (POST /api/payments/submit-utr)
+   ========================================== */
+router.post('/submit-utr', async (req, res) => {
+  try {
+    const { orderId, utrNumber } = req.body;
+    if (!orderId || !utrNumber) {
+      return res.status(400).json({ error: 'Order ID and 12-digit UTR Number are required.' });
+    }
+
+    const cleanUtr = String(utrNumber).trim();
+    if (cleanUtr.length < 6) {
+      return res.status(400).json({ error: 'Invalid UTR Number. Must be a valid UPI reference.' });
+    }
+
+    const db = readDb();
+    const order = db.orders.find(o => o.id === orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+
+    order.paymentMethod = 'UPI_QR';
+    order.utrNumber = cleanUtr;
+    order.paymentStatus = 'PENDING_VERIFICATION';
+    order.orderStatus = 'Payment Verification Pending';
+    order.status = 'Payment Verification Pending';
+    order.updatedAt = new Date().toISOString();
+
+    // Deduct stock for the ordered items
+    if (order.items && Array.isArray(order.items)) {
+      order.items.forEach(item => {
+        const prod = db.products.find(p => p.id === item.productId || p.id === item.id);
+        if (prod) {
+          prod.stock = Math.max(0, (prod.stock || 0) - (item.qty || 1));
+        }
+      });
+    }
+
+    writeDb(db);
+
+    return res.json({
+      success: true,
+      orderId: order.id,
+      utrNumber: cleanUtr,
+      message: 'UTR submitted successfully. Payment is under verification.'
+    });
+  } catch (err) {
+    console.error('Error submitting UTR:', err);
+    res.status(500).json({ error: 'Failed to submit UTR: ' + err.message });
   }
 });
 
@@ -405,6 +458,8 @@ router.get('/status/:orderId', (req, res) => {
       razorpayPaymentId: order.razorpayPaymentId,
       paymentStatus: order.paymentStatus,
       orderStatus: order.orderStatus,
+      utrNumber: order.utrNumber || null,
+      paymentMethod: order.paymentMethod || 'UPI_QR',
       amount: order.total,
       currency: order.currency,
       paidAt: order.paidAt || null,
