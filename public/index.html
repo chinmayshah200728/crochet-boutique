@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>crochetbyprisha | made with love, kept forever ♡</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,8 +12,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Three.js 3D WebGL Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- Razorpay Official Checkout SDK -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
@@ -453,57 +451,73 @@
     <!-- ==========================================
          VIEW 5: CHECKOUT PAGE (LOGIN REQUIRED + ONLINE PAYMENT)
          ========================================== -->
-    <section id="view-checkout" class="view-panel hidden py-12 max-w-6xl mx-auto px-4">
-      <h1 class="font-display text-3xl font-bold text-[#3D2C3D] mb-8">Order Checkout</h1>
-
-      <div id="checkout-auth-guard-banner" class="hidden mb-8 bg-[#FFF0F6] p-6 rounded-3xl border-2 border-[#FFC6FF] text-center space-y-3">
-        <div class="text-3xl">🔒</div>
-        <h3 class="font-display font-bold text-xl text-[#3D2C3D]">Customer Login Required</h3>
-        <p class="text-xs text-[#8B7A99] max-w-md mx-auto">
-          Please <strong>Log In</strong> or <strong>Create an Account</strong> first to add your shipping address and proceed with online payment verification!
-        </p>
-        <button onclick="openAuthModal()" class="btn-terracotta text-xs py-3 px-8">
-          Sign In / Create Account ♡
+    <section id="view-checkout" class="view-panel hidden py-6 sm:py-8 max-w-4xl mx-auto px-3 sm:px-4">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="font-display text-2xl sm:text-3xl font-bold text-[#3D2C3D]">Order Checkout</h1>
+        <button type="button" onclick="navigate('shop')" class="text-xs text-[#FF85A1] font-bold hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-arrow-left"></i> Continue Shopping
         </button>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="checkout-main-content">
-        <div class="lg:col-span-2 space-y-6">
-          <form id="checkout-main-form" onsubmit="handlePlaceOrder(event)" class="space-y-6">
+      <!-- Non-blocking Account / Sign-In Quick Banner -->
+      <div id="checkout-auth-banner" class="mb-4 bg-gradient-to-r from-[#FFF0F6] to-[#FDF4FF] p-3 sm:p-4 rounded-2xl border border-[#FFC6FF] flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🌸</span>
+          <div>
+            <span id="checkout-auth-status-title" class="font-bold text-[#3D2C3D] block sm:inline">Already have an account?</span>
+            <span id="checkout-auth-status-desc" class="text-[#8B7A99] block sm:inline"> Sign in to auto-fill your saved address</span>
+          </div>
+        </div>
+        <button type="button" id="checkout-auth-btn" onclick="openAuthModal()" class="btn-terracotta !py-1.5 !px-3.5 text-xs font-bold shrink-0 shadow-sm">
+          Sign In
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="checkout-main-content">
+        <div class="lg:col-span-2 space-y-4">
+          <form id="checkout-main-form" onsubmit="handlePlaceOrder(event)" class="space-y-4">
             
-            <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5]">
-              <h2 class="font-display font-bold text-xl text-[#3D2C3D] mb-4">Contact Information</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EEDBF5] space-y-3">
+              <h2 class="font-display font-bold text-base sm:text-lg text-[#3D2C3D] flex items-center gap-2">
+                <span>👤</span> Contact Information
+              </h2>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label class="block text-xs font-bold text-[#8B7A99] mb-1">Full Name *</label>
-                  <input type="text" id="checkout-name" required placeholder="Aria Sharma" class="form-input text-sm">
+                  <input type="text" id="checkout-name" required placeholder="Aria Sharma" class="form-input text-sm !py-2.5">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-[#8B7A99] mb-1">Phone Number *</label>
+                  <input type="tel" id="checkout-phone" required placeholder="9876543210" class="form-input text-sm !py-2.5">
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-[#8B7A99] mb-1">Email Address *</label>
-                  <input type="email" id="checkout-email" required placeholder="aria@example.com" class="form-input text-sm">
+                  <input type="email" id="checkout-email" required placeholder="aria@example.com" class="form-input text-sm !py-2.5">
                 </div>
               </div>
             </div>
 
-            <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5]">
-              <h2 class="font-display font-bold text-xl text-[#3D2C3D] mb-4">Shipping Address</h2>
-              <div class="space-y-4">
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EEDBF5] space-y-3">
+              <h2 class="font-display font-bold text-base sm:text-lg text-[#3D2C3D] flex items-center gap-2">
+                <span>📍</span> Shipping Address
+              </h2>
+              <div class="space-y-3">
                 <div>
-                  <label class="block text-xs font-bold text-[#8B7A99] mb-1">Street Address *</label>
-                  <input type="text" id="checkout-address" required placeholder="124 Lavender Lane, Bandra" class="form-input text-sm">
+                  <label class="block text-xs font-bold text-[#8B7A99] mb-1">Street Address, Flat / House No., Landmark *</label>
+                  <input type="text" id="checkout-address" required placeholder="124 Lavender Lane, Near Central Park" class="form-input text-sm !py-2.5">
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-3 gap-2 sm:gap-3">
                   <div>
                     <label class="block text-xs font-bold text-[#8B7A99] mb-1">City *</label>
-                    <input type="text" id="checkout-city" required placeholder="Mumbai" class="form-input text-sm">
+                    <input type="text" id="checkout-city" required placeholder="Mumbai" class="form-input text-sm !py-2.5">
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-[#8B7A99] mb-1">State *</label>
-                    <input type="text" id="checkout-state" required placeholder="Maharashtra" class="form-input text-sm">
+                    <input type="text" id="checkout-state" required placeholder="Maharashtra" class="form-input text-sm !py-2.5">
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-[#8B7A99] mb-1">PIN Code *</label>
-                    <input type="text" id="checkout-zip" required placeholder="400050" class="form-input text-sm">
+                    <input type="text" id="checkout-zip" required pattern="[0-9]{6}" maxlength="6" placeholder="400050" class="form-input text-sm !py-2.5 font-mono">
                   </div>
                 </div>
               </div>
@@ -867,63 +881,81 @@
     </div>
   </div>
 
-  <!-- Auth Modal -->
+  <!-- Compact Mobile-Friendly Auth Modal -->
   <div class="modal-backdrop" id="modal-auth">
-    <div class="modal-container !max-w-md">
+    <div class="modal-container !max-w-sm !p-5 rounded-3xl text-left">
       <button class="close-modal-btn" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
-      <div class="flex border-b border-[#EEDBF5] mb-6">
-        <button onclick="switchAuthTab('login')" id="auth-tab-login-btn" class="flex-1 py-3 font-bold border-b-2 border-[#FF85A1]">Login</button>
-        <button onclick="switchAuthTab('register')" id="auth-tab-register-btn" class="flex-1 py-3 font-bold text-[#8B7A99]">Sign Up</button>
+      
+      <div class="text-center mb-4">
+        <span class="text-3xl">🌸</span>
+        <h3 class="font-display font-bold text-xl text-[#3D2C3D] mt-1">Crochet by Prisha</h3>
+        <p class="text-xs text-[#8B7A99]">Sign in for 1-tap checkout &amp; order tracking</p>
       </div>
 
-      <form id="auth-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+      <div class="flex border-b border-[#EEDBF5] mb-4">
+        <button onclick="switchAuthTab('login')" id="auth-tab-login-btn" class="flex-1 py-2 font-bold border-b-2 border-[#FF85A1] text-sm text-[#3D2C3D]">Login</button>
+        <button onclick="switchAuthTab('register')" id="auth-tab-register-btn" class="flex-1 py-2 font-bold text-[#8B7A99] text-sm">Sign Up</button>
+      </div>
+
+      <form id="auth-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-3">
         <div>
-          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Email Address or Login ID</label>
-          <input type="text" id="login-email" required placeholder="Email or Login ID" class="form-input text-sm">
+          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Email or Phone</label>
+          <input type="text" id="login-email" required placeholder="name@example.com" class="form-input text-sm !py-2.5">
         </div>
         <div>
           <label class="block text-xs font-bold text-[#8B7A99] mb-1">Password</label>
-          <input type="password" id="login-pass" required placeholder="••••••••" class="form-input text-sm">
+          <input type="password" id="login-pass" required placeholder="••••••••" class="form-input text-sm !py-2.5">
         </div>
-        <button type="submit" class="w-full btn-terracotta py-3 text-sm font-bold justify-center">Sign In</button>
+        <button type="submit" id="auth-login-btn" class="w-full btn-terracotta !py-3 text-sm font-bold justify-center shadow-md">
+          Sign In ♡
+        </button>
       </form>
 
-      <form id="auth-register-form" onsubmit="handleRegisterSubmit(event)" class="space-y-4 hidden">
+      <form id="auth-register-form" onsubmit="handleRegisterSubmit(event)" class="space-y-3 hidden">
         <div>
-          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Full Name</label>
-          <input type="text" id="reg-name" required placeholder="Aria Sharma" class="form-input text-sm">
+          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Full Name *</label>
+          <input type="text" id="reg-name" required placeholder="Aria Sharma" class="form-input text-sm !py-2.5">
         </div>
         <div>
-          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Email Address</label>
-          <input type="email" id="reg-email" required placeholder="aria@example.com" class="form-input text-sm">
+          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Email Address *</label>
+          <input type="email" id="reg-email" required placeholder="aria@example.com" class="form-input text-sm !py-2.5">
         </div>
         <div>
-          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Password</label>
-          <input type="password" id="reg-pass" required placeholder="••••••••" class="form-input text-sm">
+          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Phone Number</label>
+          <input type="tel" id="reg-phone" placeholder="9876543210" class="form-input text-sm !py-2.5">
         </div>
-        <button type="submit" class="w-full btn-terracotta py-3 text-sm font-bold justify-center">Create Account</button>
+        <div>
+          <label class="block text-xs font-bold text-[#8B7A99] mb-1">Create Password *</label>
+          <input type="password" id="reg-pass" required minlength="6" placeholder="Min 6 characters" class="form-input text-sm !py-2.5">
+        </div>
+        <button type="submit" id="auth-reg-btn" class="w-full btn-terracotta !py-3 text-sm font-bold justify-center shadow-md">
+          Create Account &amp; Sign In ♡
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- Cart Drawer Panel -->
+  <!-- Cart Drawer Panel (Mobile Fixed Viewport) -->
   <div class="cart-drawer-backdrop" id="cart-drawer-backdrop" onclick="toggleCartDrawer()"></div>
   <aside class="cart-drawer-panel" id="cart-drawer-panel">
-    <div class="p-6 border-b border-[#EEDBF5] flex justify-between items-center">
-      <h3 class="font-display font-bold text-xl text-[#3D2C3D]">Your Basket ♡</h3>
-      <button onclick="toggleCartDrawer()" class="text-lg text-[#8B7A99] hover:text-[#3D2C3D]"><i class="fa-solid fa-xmark"></i></button>
+    <div class="p-4 sm:p-5 border-b border-[#EEDBF5] flex justify-between items-center bg-white shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🌸</span>
+        <h3 class="font-display font-bold text-lg sm:text-xl text-[#3D2C3D]">Your Basket ♡</h3>
+      </div>
+      <button onclick="toggleCartDrawer()" class="w-8 h-8 rounded-full bg-[#FFF0F6] text-[#FF85A1] flex items-center justify-center hover:bg-[#FFE0EB] transition-colors"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <div class="flex-1 p-6 overflow-y-auto space-y-4" id="cart-drawer-items">
+    <div class="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3" id="cart-drawer-items" style="min-height: 0; -webkit-overflow-scrolling: touch;">
       <!-- Rendered by JS -->
     </div>
 
-    <div class="p-6 border-t border-[#EEDBF5] bg-[#FFF7FA] space-y-4">
-      <div class="flex justify-between font-bold text-lg text-[#3D2C3D]">
+    <div class="p-4 sm:p-5 border-t border-[#EEDBF5] bg-[#FFF7FA] space-y-3 shrink-0 sticky bottom-0 z-10 shadow-lg">
+      <div class="flex justify-between items-center font-bold text-base text-[#3D2C3D]">
         <span>Subtotal</span>
-        <span id="cart-drawer-subtotal" class="text-[#FF85A1] font-display">₹0.00</span>
+        <span id="cart-drawer-subtotal" class="text-[#FF85A1] font-display text-xl">₹0.00</span>
       </div>
-      <button onclick="navigate('checkout'); toggleCartDrawer();" class="w-full btn-terracotta py-4 text-base font-bold justify-center">
+      <button onclick="navigate('checkout'); toggleCartDrawer();" class="w-full btn-terracotta py-3.5 text-sm sm:text-base font-bold justify-center shadow-md hover:shadow-lg transition-all">
         Proceed To Checkout ♡
       </button>
     </div>

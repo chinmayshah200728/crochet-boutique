@@ -733,56 +733,94 @@ function removeCartItem(index) {
    ========================================== */
 
 function renderCheckoutView() {
-  const authBanner = document.getElementById('checkout-auth-guard-banner');
-  const mainContent = document.getElementById('checkout-main-content');
+  const authTitle = document.getElementById('checkout-auth-status-title');
+  const authDesc = document.getElementById('checkout-auth-status-desc');
+  const authBtn = document.getElementById('checkout-auth-btn');
 
-  // ENFORCE AUTHENTICATION GUARD BEFORE ALLOWING ADDRESS OR CHECKOUT
-  if (!currentUser) {
-    if (authBanner) authBanner.classList.remove('hidden');
-    if (mainContent) mainContent.classList.add('opacity-50', 'pointer-events-none');
-    showToast('🔒 Please log in or sign up first to add your address and checkout');
-    openAuthModal();
-    return;
+  // Customer Account & Saved Details Management
+  if (currentUser) {
+    if (authTitle) authTitle.textContent = `✓ Logged in as ${currentUser.name}`;
+    if (authDesc) authDesc.textContent = ` (${currentUser.email})`;
+    if (authBtn) {
+      authBtn.textContent = 'Sign Out';
+      authBtn.onclick = handleLogout;
+      authBtn.className = 'btn-outline-terracotta !py-1 !px-3 text-xs shrink-0';
+    }
   } else {
-    if (authBanner) authBanner.classList.add('hidden');
-    if (mainContent) mainContent.classList.remove('opacity-50', 'pointer-events-none');
+    if (authTitle) authTitle.textContent = 'Already have an account?';
+    if (authDesc) authDesc.textContent = ' Sign in for 1-tap checkout';
+    if (authBtn) {
+      authBtn.textContent = 'Sign In';
+      authBtn.onclick = openAuthModal;
+      authBtn.className = 'btn-terracotta !py-1.5 !px-3.5 text-xs font-bold shrink-0 shadow-sm';
+    }
   }
 
   const itemsContainer = document.getElementById('checkout-items-list');
   if (!itemsContainer) return;
 
   if (cart.length === 0) {
-    itemsContainer.innerHTML = `<p class="text-xs text-[#8B7A99] py-4">Your cart is empty.</p>`;
+    itemsContainer.innerHTML = `<p class="text-xs text-[#8B7A99] py-4">Your basket is empty.</p>`;
   } else {
     itemsContainer.innerHTML = cart.map(i => `
-      <div class="py-3 flex justify-between items-center text-xs">
+      <div class="py-2.5 flex justify-between items-center text-xs">
         <div>
           <div class="font-bold text-[#3D2C3D]">${i.qty}x ${i.name}</div>
-          <div class="text-[#FF85A1] font-bold">${i.giftWrap}</div>
+          <div class="text-[#FF85A1] font-semibold text-[11px]">${i.giftWrap}</div>
         </div>
         <div class="font-bold text-[#3D2C3D]">₹${(i.price * i.qty).toFixed(2)}</div>
       </div>
     `).join('');
   }
 
-  const nameInput = document.getElementById('checkout-name');
-  const emailInput = document.getElementById('checkout-email');
-  if (nameInput) nameInput.value = currentUser.name || '';
-  if (emailInput) emailInput.value = currentUser.email || '';
-  
-  if (currentUser.addresses && currentUser.addresses.length) {
-    const addr = currentUser.addresses[0];
+  // Pre-fill user data: First check currentUser, then fallback to saved customer in localStorage
+  let savedData = null;
+  if (currentUser) {
+    savedData = {
+      name: currentUser.name || '',
+      email: currentUser.email || '',
+      phone: currentUser.phone || '',
+      ...(currentUser.addresses && currentUser.addresses[0] ? currentUser.addresses[0] : {})
+    };
+  } else {
+    try {
+      savedData = JSON.parse(localStorage.getItem('sp_saved_customer') || 'null');
+    } catch (e) {}
+  }
+
+  if (savedData) {
+    const nameInput = document.getElementById('checkout-name');
+    const phoneInput = document.getElementById('checkout-phone');
+    const emailInput = document.getElementById('checkout-email');
     const streetInput = document.getElementById('checkout-address');
     const cityInput = document.getElementById('checkout-city');
     const stateInput = document.getElementById('checkout-state');
     const zipInput = document.getElementById('checkout-zip');
-    if (streetInput) streetInput.value = addr.address || '';
-    if (cityInput) cityInput.value = addr.city || '';
-    if (stateInput) stateInput.value = addr.state || '';
-    if (zipInput) zipInput.value = addr.zip || '';
+
+    if (nameInput && savedData.name && !nameInput.value) nameInput.value = savedData.name;
+    if (phoneInput && savedData.phone && !phoneInput.value) phoneInput.value = savedData.phone;
+    if (emailInput && savedData.email && !emailInput.value) emailInput.value = savedData.email;
+    if (streetInput && savedData.address && !streetInput.value) streetInput.value = savedData.address;
+    if (cityInput && savedData.city && !cityInput.value) cityInput.value = savedData.city;
+    if (stateInput && savedData.state && !stateInput.value) stateInput.value = savedData.state;
+    if (zipInput && savedData.zip && !zipInput.value) zipInput.value = savedData.zip;
   }
 
   calculateCheckoutTotals();
+}
+
+function handleLogout() {
+  currentUser = null;
+  authToken = null;
+  localStorage.removeItem('sp_token');
+  localStorage.removeItem('sp_user');
+  updateHeaderUI();
+  showToast('Signed out safely.');
+  if (window.location.hash === '#checkout') {
+    renderCheckoutView();
+  } else {
+    navigate('home');
+  }
 }
 
 function calculateCheckoutTotals() {
@@ -845,23 +883,27 @@ function copyUPIId() {
 async function handlePlaceOrder(e) {
   e.preventDefault();
 
-  if (!currentUser) {
-    showToast('🔒 Please Log In or Sign Up first before placing your order');
-    openAuthModal();
-    return;
-  }
-
   if (cart.length === 0) {
-    showToast('Your cart is empty!');
+    showToast('Your basket is empty!');
     return;
   }
 
-  const name = document.getElementById('checkout-name').value;
-  const email = document.getElementById('checkout-email').value;
-  const address = document.getElementById('checkout-address').value;
-  const city = document.getElementById('checkout-city').value;
-  const state = document.getElementById('checkout-state').value;
-  const zip = document.getElementById('checkout-zip').value;
+  const name = document.getElementById('checkout-name').value.trim();
+  const phone = document.getElementById('checkout-phone')?.value.trim() || '';
+  const email = document.getElementById('checkout-email').value.trim();
+  const address = document.getElementById('checkout-address').value.trim();
+  const city = document.getElementById('checkout-city').value.trim();
+  const state = document.getElementById('checkout-state').value.trim();
+  const zip = document.getElementById('checkout-zip').value.trim();
+
+  // Remember customer details locally so next time checkout is 1-tap
+  localStorage.setItem('sp_saved_customer', JSON.stringify({ name, phone, email, address, city, state, zip }));
+
+  if (currentUser) {
+    currentUser.phone = phone;
+    currentUser.addresses = [{ address, city, state, zip }];
+    localStorage.setItem('sp_user', JSON.stringify(currentUser));
+  }
 
   const checkoutBtn = document.querySelector('#checkout-main-form button[type="submit"]');
   if (checkoutBtn) {
@@ -875,6 +917,7 @@ async function handlePlaceOrder(e) {
       items: cart,
       customerName: name,
       customerEmail: email,
+      phone: phone,
       shippingAddress: { address, city, state, zip, country: 'India' },
       couponCode: activeDiscount.code
     };
@@ -1358,12 +1401,13 @@ async function handleLoginSubmit(e) {
 
 async function handleRegisterSubmit(e) {
   e.preventDefault();
-  const name = document.getElementById('reg-name').value;
-  const email = document.getElementById('reg-email').value;
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone')?.value.trim() || '';
   const password = document.getElementById('reg-pass').value;
 
   try {
-    const res = await apiFetch('/api/auth/register', 'POST', { name, email, password });
+    const res = await apiFetch('/api/auth/register', 'POST', { name, email, password, phone });
     if (res.token && res.user) {
       authToken = res.token;
       currentUser = res.user;
@@ -1381,7 +1425,7 @@ async function handleRegisterSubmit(e) {
       }
     }
   } catch (err) {
-    showToast('Registration failed');
+    showToast('Registration failed: ' + (err.message || 'Invalid details'));
   }
 }
 
