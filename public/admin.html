@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard & Store Management | Crochet by Prisha</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Admin Stylesheet -->
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <!-- ADMIN AUTH LOGIN MODAL (Rendered if unauthenticated) -->
+  <div id="admin-login-screen" class="login-overlay">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand-logo">🧶</div>
+        <h2>crochetbyprisha</h2>
+        <p class="subtitle">Store & Order Management System</p>
+      </div>
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label><i class="fa-solid fa-user"></i> Login ID / Username</label>
+          <input type="text" id="login-email" placeholder="Enter Login ID" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-lock"></i> Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary-admin" id="btn-admin-login">
+          <i class="fa-solid fa-right-to-bracket"></i> Login to Management Portal
+        </button>
+      </form>
+      <div id="login-error-msg" class="error-banner hidden"></div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD APPLICATION WRAPPER -->
+  <div id="admin-app" class="admin-wrapper hidden">
+    
+    <!-- TOP NAVIGATION HEADER BAR (Replaces Left Sidebar) -->
+    <header class="admin-top-header">
+      <div class="top-header-main">
+        <div class="top-brand">
+          <span class="logo-icon">🧶</span>
+          <span class="logo-text">Prisha Admin</span>
+        </div>
+
+        <div class="topbar-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="global-search" placeholder="Search orders, SKU, customers, tracking ID, payments...">
+        </div>
+
+        <div class="topbar-actions">
+          <div class="sse-status-pill" id="sse-status">
+            <span class="dot"></span> <span id="sse-text">Live Sync</span>
+          </div>
+
+          <div class="notifications-dropdown-container">
+            <button class="btn-icon-topbar" id="btn-notifications" title="Notifications">
+              <i class="fa-solid fa-bell"></i>
+              <span class="notif-badge" id="notif-count">0</span>
+            </button>
+            <div class="notif-dropdown hidden" id="notif-menu">
+              <div class="notif-header">
+                <h4>Notifications & Alerts</h4>
+              </div>
+              <div class="notif-list" id="notif-list">
+                <!-- Notifications populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <a href="/" target="_blank" class="btn-storefront-link">
+            <i class="fa-solid fa-store"></i> <span>View Storefront</span>
+          </a>
+
+          <div class="admin-user-info">
+            <img id="admin-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar" class="avatar-sm">
+            <div class="user-meta">
+              <strong id="admin-user-name">Prisha (Owner)</strong>
+              <span class="role-badge" id="admin-role-badge">SUPER ADMIN</span>
+            </div>
+          </div>
+
+          <button id="btn-admin-logout" class="btn-icon-logout" title="Logout & Exit">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+
+      <nav class="top-header-nav">
+        <a href="#overview" class="nav-item active" data-target="sec-overview">
+          <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
+        </a>
+        <a href="#orders" class="nav-item" data-target="sec-orders">
+          <i class="fa-solid fa-box"></i> <span>Orders</span>
+          <span class="nav-badge" id="nav-pending-count">0</span>
+        </a>
+        <a href="#products" class="nav-item" data-target="sec-products">
+          <i class="fa-solid fa-tags"></i> <span>Products</span>
+        </a>
+        <a href="#inventory" class="nav-item" data-target="sec-inventory">
+          <i class="fa-solid fa-warehouse"></i> <span>Inventory</span>
+          <span class="nav-badge badge-warning" id="nav-lowstock-count">0</span>
+        </a>
+        <a href="#customers" class="nav-item" data-target="sec-customers">
+          <i class="fa-solid fa-users"></i> <span>Customers</span>
+        </a>
+        <a href="#payments" class="nav-item" data-target="sec-payments">
+          <i class="fa-solid fa-credit-card"></i> <span>Payments & Refunds</span>
+        </a>
+        <a href="#analytics" class="nav-item" data-target="sec-analytics">
+          <i class="fa-solid fa-chart-line"></i> <span>Analytics & Reports</span>
+        </a>
+      </nav>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="admin-main">
+
+      <!-- SECTION 1: OVERVIEW DASHBOARD -->
+      <section id="sec-overview" class="view-section active">
+        <div class="section-title">
+          <h2>Store Overview</h2>
+          <p>Real-time analytics, sales metrics, and active fulfillment summary.</p>
+        </div>
+
+        <!-- METRIC CARDS GRID (13 Real Database Metrics) -->
+        <div class="metrics-grid">
+          <div class="metric-card highlight">
+            <div class="icon-wrap"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            <div class="metric-info">
+              <span class="label">Today's Sales</span>
+              <h3 id="stat-today-sales">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-bag-shopping"></i></div>
+            <div class="metric-info">
+              <span class="label">Today's Orders</span>
+              <h3 id="stat-today-orders">0</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div class="metric-info">
+              <span class="label">Total Revenue</span>
+              <h3 id="stat-total-revenue">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-cubes"></i></div>
+            <div class="metric-info">
+              <span class="label">Total Products</span>
+              <h3 id="stat-total-products">0</h3>
+            </div>
+          </div>
+          <div class="metric-card warning">
+            <div class="icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="metric-info">
+              <span class="label">Low Stock Warning</span>
+              <h3 id="stat-low-stock">0</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-clock"></i></div>
+            <div class="metric-info">
+              <span class="label">Pending Orders</span>
+              <h3 id="stat-pending-orders">0</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-box-open"></i></div>
+            <div class="metric-info">
+              <span class="label">Being Packed</span>
+              <h3 id="stat-packed-orders">0</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-truck-fast"></i></div>
+            <div class="metric-info">
+              <span class="label">Shipped / In Transit</span>
+              <h3 id="stat-shipped-orders">0</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-house-chimney-crack"></i></div>
+            <div class="metric-info">
+              <span class="label">Out for Delivery</span>
+              <h3 id="stat-ofd-orders">0</h3>
+            </div>
+          </div>
+          <div class="metric-card success">
+            <div class="icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="metric-info">
+              <span class="label">Delivered Orders</span>
+              <h3 id="stat-delivered-orders">0</h3>
+            </div>
+          </div>
+          <div class="metric-card danger">
+            <div class="icon-wrap"><i class="fa-solid fa-ban"></i></div>
+            <div class="metric-info">
+              <span class="label">Cancelled Orders</span>
+              <h3 id="stat-cancelled-orders">0</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <div class="metric-info">
+              <span class="label">Total Refunds</span>
+              <h3 id="stat-total-refunds">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="icon-wrap"><i class="fa-solid fa-users"></i></div>
+            <div class="metric-info">
+              <span class="label">Customers</span>
+              <h3 id="stat-total-customers">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- SALES GRAPH & CHARTS -->
+        <div class="analytics-row">
+          <div class="chart-container-card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-chart-area"></i> Interactive Sales & Revenue Performance</h3>
+              <div class="period-selector">
+                <button class="btn-period active" data-period="7days">7 Days</button>
+                <button class="btn-period" data-period="30days">30 Days</button>
+                <button class="btn-period" data-period="3months">3 Months</button>
+                <button class="btn-period" data-period="this_year">This Year</button>
+              </div>
+            </div>
+            <div class="chart-body">
+              <canvas id="salesChart" height="280"></canvas>
+            </div>
+          </div>
+
+          <div class="side-widgets-column">
+            <!-- LOW STOCK ALERTS WIDGET -->
+            <div class="widget-card">
+              <div class="widget-header">
+                <h4><i class="fa-solid fa-triangle-exclamation"></i> Low Stock Alerts</h4>
+              </div>
+              <div class="widget-body" id="low-stock-widget-body">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- RECENT AUDIT TRAIL WIDGET -->
+            <div class="widget-card">
+              <div class="widget-header">
+                <h4><i class="fa-solid fa-list-check"></i> Recent Admin Audit Activity</h4>
+              </div>
+              <div class="widget-body" id="recent-audit-widget-body">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECENT ORDERS SUMMARY TABLE -->
+        <div class="table-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Orders</h3>
+            <button class="btn-secondary-sm" onclick="switchTab('sec-orders')">View All Orders</button>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Total Amount</th>
+                  <th>Payment Status</th>
+                  <th>Order Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recent-orders-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: ORDER MANAGEMENT -->
+      <section id="sec-orders" class="view-section">
+        <div class="section-title">
+          <h2>Order & Delivery Management</h2>
+          <p>Process, fulfill, track shipping dispatches, and manage customer orders.</p>
+        </div>
+
+        <!-- FILTERS & ACTIONS BAR -->
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="order-filter-search" placeholder="Search Order ID, name, email, phone, tracking...">
+          </div>
+
+          <select id="order-filter-status" class="select-admin">
+            <option value="all">All Order Statuses</option>
+            <option value="Order Created">Order Created</option>
+            <option value="Payment Confirmed & Verified">Payment Confirmed</option>
+            <option value="Preparing Your Order">Preparing / Processing</option>
+            <option value="Packed">Packed</option>
+            <option value="Handed to Courier">Handed to Courier / Dispatched</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+
+          <select id="order-filter-payment" class="select-admin">
+            <option value="all">All Payment Statuses</option>
+            <option value="PAID">PAID</option>
+            <option value="Payment Confirmed & Verified">Confirmed</option>
+            <option value="PAYMENT_PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+            <option value="REFUNDED">Refunded</option>
+            <option value="PARTIALLY_REFUNDED">Partially Refunded</option>
+          </select>
+
+          <button class="btn-secondary-admin" id="btn-export-orders-csv">
+            <i class="fa-solid fa-file-csv"></i> Export Orders CSV
+          </button>
+        </div>
+
+        <!-- ORDERS TABLE -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Items & Details</th>
+                  <th>Amount</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-footer" id="orders-pagination">
+            <!-- Pagination buttons -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: PRODUCT CATALOG MANAGEMENT -->
+      <section id="sec-products" class="view-section">
+        <div class="section-title">
+          <div class="title-with-btn">
+            <div>
+              <h2>Products & Catalog Management</h2>
+              <p>Add, edit, manage pricing, SKU barcodes, images, and archive products safely.</p>
+            </div>
+            <button class="btn-primary-admin" id="btn-open-add-product">
+              <i class="fa-solid fa-plus"></i> Add New Product
+            </button>
+          </div>
+        </div>
+
+        <!-- PRODUCT FILTERS -->
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="prod-filter-search" placeholder="Search product name, SKU, category...">
+          </div>
+
+          <select id="prod-filter-category" class="select-admin">
+            <option value="all">All Categories</option>
+            <option value="cat-flowers">Flowers</option>
+            <option value="cat-keychains">Keychains</option>
+            <option value="cat-hair">Hair Accessories</option>
+            <option value="cat-hampers">Gift Hampers</option>
+          </select>
+
+          <select id="prod-filter-stock" class="select-admin">
+            <option value="all">All Stock Statuses</option>
+            <option value="in_stock">In Stock</option>
+            <option value="low_stock">Low Stock</option>
+            <option value="out_of_stock">Out of Stock</option>
+          </select>
+
+          <select id="prod-filter-status" class="select-admin">
+            <option value="all">All Statuses (Active & Archived)</option>
+            <option value="active" selected>Active Only</option>
+            <option value="archived">Archived Only</option>
+          </select>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Cost Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: INVENTORY MANAGEMENT -->
+      <section id="sec-inventory" class="view-section">
+        <div class="section-title">
+          <h2>Inventory & Warehouse Stock</h2>
+          <p>Track stock levels, record inventory additions/damage, and set low stock warnings.</p>
+        </div>
+
+        <!-- INVENTORY TABLE -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>SKU</th>
+                  <th>Current Stock</th>
+                  <th>Low Threshold</th>
+                  <th>Stock State</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- INVENTORY ADJUSTMENT LOGS -->
+        <div class="table-card margin-top">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-history"></i> Inventory Adjustment History Log</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Change Qty</th>
+                  <th>New Stock</th>
+                  <th>Reason</th>
+                  <th>Admin</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-logs-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: CUSTOMER MANAGEMENT -->
+      <section id="sec-customers" class="view-section">
+        <div class="section-title">
+          <h2>Customer Directory</h2>
+          <p>View registered customer accounts, purchase history, and spending profiles.</p>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="cust-filter-search" placeholder="Search customer name, email, phone...">
+          </div>
+          <button class="btn-secondary-admin" id="btn-export-cust-csv">
+            <i class="fa-solid fa-file-csv"></i> Export Customers CSV
+          </button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Total Orders</th>
+                  <th>Total Spent</th>
+                  <th>Last Order Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customers-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 6: PAYMENTS & REFUNDS -->
+      <section id="sec-payments" class="view-section">
+        <div class="section-title">
+          <h2>Payment & Refund Management</h2>
+          <p>Razorpay gateway transaction verification and administrator refund controller.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-shield-heart"></i> Razorpay Payment Transactions</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Razorpay Order ID</th>
+                  <th>Razorpay Payment ID</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Payment Status</th>
+                  <th>Refund Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="payments-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 7: ANALYTICS & REPORTS -->
+      <section id="sec-analytics" class="view-section">
+        <div class="section-title">
+          <h2>Revenue Reports & Sales Breakdown</h2>
+          <p>Detailed breakdown of gross revenue, net sales, taxes, discounts, and category performance.</p>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="label">Gross Sales</span>
+              <h3 id="rev-gross">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card highlight">
+            <div class="metric-info">
+              <span class="label">Net Sales</span>
+              <h3 id="rev-net">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="label">Total Refunded</span>
+              <h3 id="rev-refunds">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="label">GST / Taxes Collected</span>
+              <h3 id="rev-taxes">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="label">Shipping Revenue</span>
+              <h3 id="rev-shipping">₹0.00</h3>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="label">Average Order Value (AOV)</span>
+              <h3 id="rev-aov">₹0.00</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-row margin-top">
+          <div class="table-card full-width">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-trophy"></i> Best Selling Products Performance</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Units Sold</th>
+                    <th>Total Revenue</th>
+                    <th>Stock Left</th>
+                  </tr>
+                </thead>
+                <tbody id="best-products-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: ORDER DETAILS & FULFILLMENT DRAWER -->
+  <div id="modal-order-details" class="modal-overlay hidden">
+    <div class="modal-container modal-lg">
+      <div class="modal-header">
+        <h3 id="modal-order-title">Order Details</h3>
+        <button class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modal-order-body">
+        <!-- Order details populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT PRODUCT (Ultra-Clean Modern Dark Design) -->
+  <div id="modal-product" class="modal-overlay hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85) !important; backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 999999 !important; padding: 16px;">
+    <div class="modal-container modal-clean-edit" style="background: #1E293B !important; color: #F8FAFC !important; border: 1px solid #334155 !important; border-radius: 20px !important; max-width: 580px !important; width: 95% !important; max-height: 90vh !important; overflow-y: auto !important; margin: auto !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;">
+      <div class="modal-header-clean" style="padding: 20px 24px 16px 24px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #334155;">
+        <div class="header-title-wrap">
+          <h3 id="modal-product-title" style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #E89CAE; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-pen-to-square"></i> Edit Product Details</h3>
+          <p id="modal-product-subtitle" class="modal-subtitle" style="font-size: 13px; color: #94A3B8; margin-top: 4px; line-height: 1.4;">Update selling price, MRP, image URL, category, stock count, and detailed description.</p>
+        </div>
+        <button type="button" class="btn-close-modal" style="background: rgba(255,255,255,0.08); border: none; color: #94A3B8; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body-clean" style="padding: 20px 24px;">
+        <form id="form-product">
+          <input type="hidden" id="prod-edit-id">
+
+          <!-- Product Name -->
+          <div class="form-group-clean" style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Product Name *</label>
+            <input type="text" id="prod-name" required placeholder="e.g. Handmade Crochet Tulip Bouquet" class="input-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+          </div>
+
+          <!-- Category with + Add Category button -->
+          <div class="form-group-clean" style="margin-bottom: 16px;">
+            <div class="label-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-weight: 600; font-size: 13.5px; color: #CBD5E1;">Category *</label>
+              <button type="button" class="btn-inline-action" id="btn-add-category-prompt" style="background: none; border: none; color: #E89CAE; font-weight: 700; font-size: 12.5px; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Category</button>
+            </div>
+            <select id="prod-category" required class="select-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+              <option value="cat-flowers">Flowers</option>
+              <option value="cat-keychains">Keychains</option>
+              <option value="cat-hair">Hair Accessories</option>
+              <option value="cat-hampers">Gift Hampers</option>
+              <option value="cat-plushies">Amigurumi Plushies</option>
+            </select>
+          </div>
+
+          <!-- Selling Price & MRP -->
+          <div class="form-row-clean" style="display: flex; gap: 14px; margin-bottom: 16px;">
+            <div class="form-group-clean flex-1" style="flex: 1;">
+              <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Selling Price (₹) *</label>
+              <input type="number" id="prod-saleprice" required step="1" min="1" placeholder="649" class="input-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+            </div>
+            <div class="form-group-clean flex-1" style="flex: 1;">
+              <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">MRP / Original Price (₹)</label>
+              <input type="number" id="prod-price" step="1" min="1" placeholder="899" class="input-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+            </div>
+          </div>
+
+          <!-- Stock Quantity & Availability -->
+          <div class="form-row-clean" style="display: flex; gap: 14px; align-items: center; margin-bottom: 16px;">
+            <div class="form-group-clean flex-1" style="flex: 1;">
+              <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Stock Units Remaining</label>
+              <input type="number" id="prod-stock" required min="0" value="10" class="input-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+            </div>
+            <div class="form-checkbox-clean" style="display: flex; align-items: center; gap: 10px; margin-top: 22px;">
+              <input type="checkbox" id="prod-in-stock" checked style="width: 18px; height: 18px; accent-color: #E89CAE; cursor: pointer;">
+              <label for="prod-in-stock" style="font-weight: 600; font-size: 13.5px; color: #CBD5E1; cursor: pointer;">In Stock</label>
+            </div>
+          </div>
+
+          <!-- Product Photo Section (Compact 80px Thumbnail + Device Upload) -->
+          <div class="form-group-clean" style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Product Photo</label>
+            <div class="photo-upload-box" style="background: #0F172A; border: 1px dashed #334155; border-radius: 14px; padding: 14px;">
+              <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <img id="prod-photo-preview" src="https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=300&q=80" alt="Preview" class="preview-img" style="width: 80px !important; height: 80px !important; min-width: 80px !important; min-height: 80px !important; max-width: 80px !important; max-height: 80px !important; object-fit: cover !important; border-radius: 12px !important; border: 2px solid #334155 !important; flex-shrink: 0 !important; background: #1E293B; display: block !important;">
+                <div style="flex: 1; min-width: 200px;">
+                  <label for="prod-photo-file" class="btn-upload-device" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: #1E293B; border: 1px solid #334155; border-radius: 20px; color: #F8FAFC; font-weight: 600; font-size: 13px; cursor: pointer;">
+                    <i class="fa-solid fa-folder-open" style="color: #E89CAE;"></i> Upload Photo from Device
+                  </label>
+                  <input type="file" id="prod-photo-file" accept="image/*" class="hidden-file-input" style="display: none;">
+                  <p class="upload-hint" style="font-size: 12px; color: #94A3B8; margin: 6px 0 6px 0;">Or edit image URL below:</p>
+                  <input type="text" id="prod-image" placeholder="https://..." class="input-clean input-image-url" style="width: 100%; padding: 8px 12px; background: #151D2A; border: 1px solid #334155; border-radius: 8px; color: #FFF; font-size: 13px; outline: none; box-sizing: border-box;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Short Tagline -->
+          <div class="form-group-clean" style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Short Tagline / Craft Specs</label>
+            <input type="text" id="prod-yarntype" placeholder="100% Combed Milk Cotton / Handcrafted with Love" class="input-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+          </div>
+
+          <!-- Detailed Description -->
+          <div class="form-group-clean" style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Detailed Description</label>
+            <textarea id="prod-description" rows="3" placeholder="Write item details, dimensions, care instructions..." class="input-clean textarea-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box; font-family: inherit;"></textarea>
+          </div>
+
+          <!-- Hidden SKU & Cost Price fields -->
+          <input type="hidden" id="prod-sku">
+          <input type="hidden" id="prod-costprice">
+          <input type="hidden" id="prod-threshold" value="5">
+
+          <!-- Action Buttons -->
+          <div class="modal-footer-clean" style="display: flex; align-items: center; gap: 12px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #334155;">
+            <button type="submit" class="btn-save-green" id="btn-save-product" style="background: #E89CAE; color: #0F172A; border: none; padding: 11px 26px; border-radius: 30px; font-weight: 700; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;"><i class="fa-solid fa-floppy-disk"></i> Save Product Changes</button>
+            <button type="button" class="btn-cancel-pill btn-close-modal" style="background: transparent; color: #94A3B8; border: 1px solid #334155; padding: 10px 22px; border-radius: 30px; font-weight: 600; font-size: 14px; cursor: pointer;">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INVENTORY ADJUSTMENT -->
+  <div id="modal-inventory-adjust" class="modal-overlay hidden">
+    <div class="modal-container modal-sm">
+      <div class="modal-header">
+        <h3>Adjust Stock Level</h3>
+        <button class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-inventory-adjust">
+          <input type="hidden" id="inv-adj-prod-id">
+          <p>Product: <strong id="inv-adj-prod-name">--</strong></p>
+          <p>Current Stock: <strong id="inv-adj-current-stock">0</strong></p>
+          
+          <div class="form-group margin-top">
+            <label>Stock Adjustment Quantity (+ / -)</label>
+            <input type="number" id="inv-adj-qty" required placeholder="e.g. +10 or -2">
+          </div>
+
+          <div class="form-group">
+            <label>Reason for Adjustment</label>
+            <select id="inv-adj-reason" class="select-admin" required>
+              <option value="Stock Received">Stock Received (+)</option>
+              <option value="Damaged / Defective">Damaged / Defective (-)</option>
+              <option value="Customer Return">Customer Return (+)</option>
+              <option value="Manual Adjustment">Manual Correction</option>
+              <option value="Physical Audit">Physical Audit</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary-admin btn-close-modal">Cancel</button>
+            <button type="submit" class="btn-primary-admin">Update Stock</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INITIATE REFUND -->
+  <div id="modal-refund" class="modal-overlay hidden">
+    <div class="modal-container modal-sm">
+      <div class="modal-header">
+        <h3>Initiate Razorpay Refund</h3>
+        <button class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-refund">
+          <input type="hidden" id="refund-order-id">
+          <p>Order ID: <strong id="refund-display-order-id">--</strong></p>
+          <p>Razorpay Payment ID: <strong id="refund-display-pay-id">--</strong></p>
+          <p>Order Total: <strong id="refund-display-total">₹0.00</strong></p>
+
+          <div class="form-group margin-top">
+            <label>Refund Amount (₹)</label>
+            <input type="number" id="refund-amount" required step="0.01" min="1">
+          </div>
+
+          <div class="form-group">
+            <label>Reason for Refund</label>
+            <textarea id="refund-reason" rows="2" required placeholder="Mandatory unboxing video verified / Customer request..."></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary-admin btn-close-modal">Cancel</button>
+            <button type="submit" class="btn-danger-admin">Confirm Refund</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Admin JavaScript Engine -->
+  <script src="js/admin.js"></script>
+</body>
+</html>

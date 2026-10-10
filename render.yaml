@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: crochetbyprisha-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: crochet_by_prisha_secret_key_2026
+      - key: PAYMENT_CURRENCY
+        value: INR
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_TlRB6uFCHebgx1
+      - key: RAZORPAY_KEY_SECRET
+        value: LU54viun0uBS6DkEVuxSjofH
