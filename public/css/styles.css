@@ -522,7 +522,7 @@ h1, h2, h3, h4, .font-display, .brand-logo {
 .floating-support-btn {
   position: fixed;
   bottom: 24px;
-  right: 24px;
+  left: 24px;
   z-index: 1500;
   background: linear-gradient(135deg, var(--primary-pink), var(--pastel-purple));
   color: white;
@@ -575,6 +575,11 @@ h1, h2, h3, h4, .font-display, .brand-logo {
    MOBILE & TOUCH DEVICE OPTIMIZATIONS
    ========================================== */
 @media (max-width: 768px) {
+  /* Hide 3D floating canvas clutter on phones to prevent obstructing images/text */
+  #hero-3d-canvas {
+    display: none !important;
+  }
+
   /* Disable heavy 3D perspective transforms on mobile touch screens */
   body {
     perspective: none !important;
@@ -582,6 +587,16 @@ h1, h2, h3, h4, .font-display, .brand-logo {
   
   .product-card:hover {
     transform: none !important;
+  }
+
+  /* Center mobile hero carousel container and adjust height */
+  #hero-carousel-container {
+    max-width: 92vw !important;
+    margin: 0 auto !important;
+  }
+
+  #hero-carousel-slides {
+    height: 380px !important;
   }
 
   /* 2-Column Mobile Product Grid for Phone Screens */

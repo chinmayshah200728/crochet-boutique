@@ -6,9 +6,40 @@ let wishlist = JSON.parse(localStorage.getItem('sp_wishlist') || '[]');
 
 let categories = [
   { id: "cat-flowers", name: "Flowers", slug: "flowers", icon: "💐", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=600&q=80", description: "Everlasting handcrafted crochet floral arrangements. Gift wrapping optional." },
-  { id: "cat-hair", name: "Hair Accessories", slug: "hair-accessories", icon: "✨", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80", description: "Hand-stitched floral scrunchies, aesthetic clips, and tulip headbands." },
+  { id: "cat-hair", name: "Hair Accessories", slug: "hair-accessories", icon: "✨", image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80", description: "Hand-stitched floral scrunchies, aesthetic clips, and tulip headbands." },
   { id: "cat-keychains", name: "Keychains", slug: "keychains", icon: "🎀", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80", description: "Pocket-sized crochet cuteness for your bags, keys, and backpacks." },
   { id: "cat-hampers", name: "Gift Hampers", slug: "gift-hampers", icon: "🎁", image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=600&q=80", description: "Curated gift hampers with flowers, keychains, clips, and gift boxes. Gift wrapping optional." }
+];
+
+let heroSlides = [
+  {
+    id: "slide-1",
+    title: "Tulip & Rose Handmade Bouquet",
+    subtitle: "100% Cotton Yarn • Gift wrapping optional",
+    icon: "💐",
+    image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: "slide-2",
+    title: "Floral Hair Clips & Scrunchies",
+    subtitle: "Soft on Hair • Everlasting Handcrafted Charms",
+    icon: "✨",
+    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: "slide-3",
+    title: "Forever Sunflower Single Stem",
+    subtitle: "Golden Cotton Petals • Never Wilts",
+    icon: "🌻",
+    image: "https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: "slide-4",
+    title: "Deluxe Handcrafted Gift Hamper",
+    subtitle: "Bouquet, Clips & Keychain • Gift wrapping optional",
+    icon: "🎁",
+    image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"
+  }
 ];
 
 let products = [
@@ -182,9 +213,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const hash = window.location.hash.replace('#', '') || 'home';
   navigate(hash);
 
-  // Asynchronously sync latest products & categories from backend
+  // Asynchronously sync latest products, categories & hero carousel from backend
   await loadCategories();
   await loadProducts();
+  await loadHeroSlides();
 
   // Initialize 3D Motion, WebGL Scene, Carousel & 3D Cursor Trail
   setTimeout(() => {
@@ -283,11 +315,17 @@ function updateCartBadge() {
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
   const badge = document.getElementById('cart-badge');
   if (badge) badge.textContent = count;
+  const floatingBadge = document.getElementById('floating-cart-badge');
+  if (floatingBadge) floatingBadge.textContent = count;
+  const drawerBadge = document.getElementById('mobile-drawer-cart-badge');
+  if (drawerBadge) drawerBadge.textContent = count;
 }
 
 function updateWishlistBadge() {
   const badge = document.getElementById('wishlist-badge');
   if (badge) badge.textContent = wishlist.length;
+  const drawerBadge = document.getElementById('mobile-drawer-wish-badge');
+  if (drawerBadge) drawerBadge.textContent = wishlist.length;
 }
 
 /* ==========================================
@@ -295,6 +333,7 @@ function updateWishlistBadge() {
    ========================================== */
 
 function renderHomeView() {
+  renderHeroCarousel();
   const catGrid = document.getElementById('home-categories-grid');
   if (catGrid && categories.length) {
     catGrid.innerHTML = categories.map(c => `
@@ -1513,6 +1552,17 @@ async function switchAdminTab(tab) {
   const container = document.getElementById('admin-panel-content');
   if (!container) return;
 
+  ['overview', 'products', 'orders', 'payments', 'carousel'].forEach(t => {
+    const btn = document.getElementById(`adm-tab-${t}`);
+    if (btn) {
+      if (t === tab) {
+        btn.className = 'btn-terracotta text-xs';
+      } else {
+        btn.className = 'btn-outline-terracotta text-xs';
+      }
+    }
+  });
+
   if (tab === 'overview') {
     const analytics = await apiFetch('/api/admin/analytics');
     container.innerHTML = `
@@ -1600,6 +1650,8 @@ async function switchAdminTab(tab) {
     `;
   } else if (tab === 'payments') {
     renderAdminPaymentsTab();
+  } else if (tab === 'carousel') {
+    renderAdminCarouselTab();
   }
 }
 
@@ -1796,6 +1848,190 @@ async function deleteAdminProduct(productId) {
     } catch (err) {
       showToast('Failed to delete product');
     }
+  }
+}
+
+/* ==========================================
+   ADMIN HERO CAROUSEL MANAGER
+   ========================================== */
+
+function renderAdminCarouselTab() {
+  const container = document.getElementById('admin-panel-content');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-[#EEDBF5]">
+        <div>
+          <h3 class="font-display font-bold text-xl text-[#3D2C3D]">🎨 Hero Showcase Carousel Images</h3>
+          <p class="text-xs text-[#8B7A99]">Edit the rotating photos, titles, and details displayed prominently on the homepage front cover</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="addAdminCarouselSlide()" class="btn-outline-terracotta text-xs !py-2 !px-3">
+            <i class="fa-solid fa-plus"></i> Add Slide
+          </button>
+          <button onclick="saveAdminCarouselSlides()" class="btn-terracotta text-xs !py-2 !px-4">
+            <i class="fa-solid fa-floppy-disk"></i> Save Hero Slides
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="admin-carousel-slides-list">
+        ${heroSlides.map((slide, idx) => `
+          <div class="bg-[#FFF9FB] p-4 rounded-2xl border border-[#EEDBF5] space-y-3 relative group" data-slide-index="${idx}">
+            <div class="flex justify-between items-center">
+              <span class="badge-pill bg-white text-[#FF85A1] text-xs font-bold border border-[#FFC6FF]">
+                Slide #${idx + 1}
+              </span>
+              <div class="flex items-center gap-2">
+                ${heroSlides.length > 1 ? `
+                  <button type="button" onclick="deleteAdminCarouselSlide(${idx})" class="text-red-400 hover:text-red-600 text-xs font-bold" title="Delete Slide">
+                    <i class="fa-solid fa-trash-can"></i> Remove
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Image Preview Box -->
+            <div class="relative w-full h-44 rounded-xl overflow-hidden bg-white border border-[#EEDBF5]">
+              <img id="admin-slide-preview-${idx}" src="${slide.image}" alt="Preview" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80'">
+              <div class="absolute bottom-2 left-2 right-2 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#3D2C3D] truncate flex items-center gap-1.5">
+                <span>${slide.icon || '🌸'}</span>
+                <span class="truncate">${slide.title || 'Slide Title'}</span>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div>
+                <label class="block font-bold text-[#8B7A99] mb-1">Image URL / Path *</label>
+                <input type="text" value="${slide.image}" oninput="updateAdminSlidePreview(${idx}, this.value)" class="form-input text-xs !py-1.5 font-mono admin-slide-image-input" placeholder="https://images.unsplash.com/... or images/photo.png">
+              </div>
+              <div class="grid grid-cols-4 gap-2">
+                <div class="col-span-3">
+                  <label class="block font-bold text-[#8B7A99] mb-1">Title *</label>
+                  <input type="text" value="${slide.title || ''}" class="form-input text-xs !py-1.5 admin-slide-title-input" placeholder="e.g. Tulip & Rose Handmade Bouquet">
+                </div>
+                <div>
+                  <label class="block font-bold text-[#8B7A99] mb-1">Icon Emoji</label>
+                  <input type="text" value="${slide.icon || '💐'}" class="form-input text-xs !py-1.5 text-center admin-slide-icon-input" placeholder="💐">
+                </div>
+              </div>
+              <div>
+                <label class="block font-bold text-[#8B7A99] mb-1">Subtitle / Features *</label>
+                <input type="text" value="${slide.subtitle || ''}" class="form-input text-xs !py-1.5 admin-slide-subtitle-input" placeholder="e.g. 100% Cotton Yarn • Gift wrapping optional">
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-[#EEDBF5]">
+        <button type="button" onclick="resetAdminCarouselSlides()" class="text-xs text-[#8B7A99] hover:text-[#3D2C3D] underline">
+          ↺ Reset to Default Curated Slides
+        </button>
+        <button onclick="saveAdminCarouselSlides()" class="btn-terracotta text-xs w-full sm:w-auto">
+          <i class="fa-solid fa-check"></i> Save &amp; Publish Hero Slides
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function updateAdminSlidePreview(idx, url) {
+  const img = document.getElementById(`admin-slide-preview-${idx}`);
+  if (img && url) {
+    img.src = url.trim();
+  }
+}
+
+function addAdminCarouselSlide() {
+  heroSlides.push({
+    id: `slide-${Date.now()}`,
+    title: 'Floral Hair Accessories',
+    subtitle: '100% Cotton Yarn • Gift wrapping optional',
+    icon: '✨',
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80'
+  });
+  renderAdminCarouselTab();
+}
+
+function deleteAdminCarouselSlide(idx) {
+  if (heroSlides.length <= 1) {
+    showToast('Carousel must have at least one slide.');
+    return;
+  }
+  heroSlides.splice(idx, 1);
+  renderAdminCarouselTab();
+}
+
+async function resetAdminCarouselSlides() {
+  if (!confirm('Reset hero carousel back to default curated slides?')) return;
+  heroSlides = [
+    {
+      id: "slide-1",
+      title: "Tulip & Rose Handmade Bouquet",
+      subtitle: "100% Cotton Yarn • Gift wrapping optional",
+      icon: "💐",
+      image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "slide-2",
+      title: "Floral Hair Clips & Scrunchies",
+      subtitle: "Soft on Hair • Everlasting Handcrafted Charms",
+      icon: "✨",
+      image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "slide-3",
+      title: "Forever Sunflower Single Stem",
+      subtitle: "Golden Cotton Petals • Never Wilts",
+      icon: "🌻",
+      image: "https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "slide-4",
+      title: "Deluxe Handcrafted Gift Hamper",
+      subtitle: "Bouquet, Clips & Keychain • Gift wrapping optional",
+      icon: "🎁",
+      image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"
+    }
+  ];
+  await saveAdminCarouselSlides();
+}
+
+async function saveAdminCarouselSlides() {
+  const cards = document.querySelectorAll('#admin-carousel-slides-list > div');
+  const updated = [];
+  cards.forEach((card, idx) => {
+    const imgInput = card.querySelector('.admin-slide-image-input');
+    const titleInput = card.querySelector('.admin-slide-title-input');
+    const iconInput = card.querySelector('.admin-slide-icon-input');
+    const subInput = card.querySelector('.admin-slide-subtitle-input');
+    if (imgInput && titleInput) {
+      updated.push({
+        id: (heroSlides[idx] && heroSlides[idx].id) || `slide-${idx + 1}`,
+        title: titleInput.value.trim() || 'Handcrafted Crochet Piece',
+        subtitle: (subInput ? subInput.value.trim() : '') || '100% Cotton Yarn • Gift wrapping optional',
+        icon: (iconInput ? iconInput.value.trim() : '') || '🌸',
+        image: imgInput.value.trim() || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80'
+      });
+    }
+  });
+
+  if (updated.length > 0) {
+    heroSlides = updated;
+  }
+
+  try {
+    const res = await apiFetch('/api/carousel', 'PUT', { slides: heroSlides });
+    if (res && res.slides) {
+      heroSlides = res.slides;
+    }
+    showToast('🌸 Hero carousel slides saved successfully!');
+    renderAdminCarouselTab();
+    renderHeroCarousel();
+  } catch (err) {
+    showToast('Failed to save carousel slides: ' + err.message);
   }
 }
 
@@ -2352,6 +2588,47 @@ function updateCustom3DColor(hexColor, name) {
    ========================================== */
 let currentHeroSlide = 0;
 let heroCarouselInterval = null;
+
+async function loadHeroSlides() {
+  try {
+    const data = await apiFetch('/api/carousel');
+    if (Array.isArray(data) && data.length > 0) {
+      heroSlides = data;
+    }
+  } catch (err) {
+    console.warn('Could not load dynamic carousel slides, using defaults:', err.message);
+  }
+  renderHeroCarousel();
+}
+
+function renderHeroCarousel() {
+  const track = document.getElementById('hero-carousel-slides');
+  const dotsContainer = document.getElementById('hero-carousel-dots');
+  if (!track || !heroSlides || heroSlides.length === 0) return;
+
+  track.innerHTML = heroSlides.map((slide, index) => `
+    <div class="hero-slide ${index === 0 ? 'active opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'} absolute inset-0 transition-opacity duration-700 ease-in-out" data-index="${index}">
+      <img src="${slide.image}" alt="${slide.title}" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+      <div class="absolute bottom-6 left-4 right-4 sm:left-5 sm:right-5 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+        <div class="w-11 h-11 rounded-full bg-[#FFE5EC] flex items-center justify-center text-xl shrink-0">${slide.icon || '🌸'}</div>
+        <div class="min-w-0">
+          <div class="font-display font-bold text-sm text-[#3D2C3D] truncate">${slide.title}</div>
+          <div class="text-xs text-[#FF85A1] font-bold truncate">${slide.subtitle}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  if (dotsContainer) {
+    dotsContainer.innerHTML = heroSlides.map((_, index) => `
+      <button onclick="goToHeroSlide(${index})" aria-label="Go to slide ${index + 1}" class="${index === 0 ? 'w-3 bg-white' : 'w-2 bg-white/50'} h-2 rounded-full transition-all hero-dot"></button>
+    `).join('');
+  }
+
+  currentHeroSlide = 0;
+  initHeroCarousel();
+}
 
 function initHeroCarousel() {
   const slides = document.querySelectorAll('.hero-slide');

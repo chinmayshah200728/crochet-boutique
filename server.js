@@ -239,6 +239,37 @@ app.get('/api/products/:id', (req, res) => {
   res.json({ product, reviews, related });
 });
 
+/* ==========================================
+   HERO CAROUSEL SLIDES API (EDITABLE HOMEPAGE IMAGES)
+   ========================================== */
+app.get('/api/carousel', (req, res) => {
+  const db = readDb();
+  res.json(db.heroSlides || []);
+});
+
+app.put('/api/carousel', authenticateToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin authorization required.' });
+  }
+
+  const { slides } = req.body;
+  if (!Array.isArray(slides) || slides.length === 0) {
+    return res.status(400).json({ error: 'Array of slides is required.' });
+  }
+
+  const db = readDb();
+  db.heroSlides = slides.map((s, idx) => ({
+    id: s.id || `slide-${idx + 1}`,
+    title: sanitizeInput(s.title || 'Handcrafted Crochet'),
+    subtitle: sanitizeInput(s.subtitle || '100% Cotton Yarn • Gift wrapping optional'),
+    icon: sanitizeInput(s.icon || '🌸'),
+    image: sanitizeInput(s.image || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80')
+  }));
+
+  writeDb(db);
+  res.json({ success: true, slides: db.heroSlides });
+});
+
 app.post('/api/products', authenticateToken, (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin authorization required' });
 

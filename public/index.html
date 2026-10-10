@@ -59,37 +59,52 @@
         </nav>
 
         <!-- Right Action Icons -->
-        <div class="flex items-center space-x-5">
-          <button onclick="openSearchModal()" class="text-[#3D2C3D] hover:text-[#FF85A1] text-lg p-2 transition-colors" title="Search Store">
+        <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
+          <button onclick="openSearchModal()" class="text-[#3D2C3D] hover:text-[#FF85A1] text-base sm:text-lg p-1.5 sm:p-2 transition-colors" title="Search Store">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
 
-          <button onclick="openWishlistModal()" class="relative text-[#3D2C3D] hover:text-[#FF85A1] text-lg p-2 transition-colors" title="My Wishlist">
+          <button onclick="openWishlistModal()" class="hidden sm:block relative text-[#3D2C3D] hover:text-[#FF85A1] text-lg p-2 transition-colors" title="My Wishlist">
             <i class="fa-regular fa-heart"></i>
             <span class="badge-count" id="wishlist-badge">0</span>
           </button>
 
-          <button onclick="handleAccountClick()" class="relative text-[#3D2C3D] hover:text-[#FF85A1] text-lg p-2 transition-colors" title="Account">
+          <button onclick="handleAccountClick()" class="hidden sm:block relative text-[#3D2C3D] hover:text-[#FF85A1] text-lg p-2 transition-colors" title="Account">
             <i class="fa-regular fa-user"></i>
           </button>
 
-          <button onclick="toggleCartDrawer()" class="btn-terracotta !py-2 !px-4 text-sm relative" title="Shopping Cart">
-            <i class="fa-solid fa-basket-shopping"></i>
-            <span class="hidden sm:inline">Basket</span>
-            <span class="bg-white text-[#FF85A1] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ml-1" id="cart-badge">0</span>
+          <button onclick="toggleCartDrawer()" class="btn-terracotta !py-1.5 !px-3 sm:!py-2 sm:!px-4 text-xs sm:text-sm relative shrink-0 flex items-center gap-1.5 shadow-md" title="Shopping Cart">
+            <i class="fa-solid fa-basket-shopping text-sm sm:text-base"></i>
+            <span class="font-bold">Basket</span>
+            <span class="bg-white text-[#FF85A1] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ml-0.5" id="cart-badge">0</span>
           </button>
         </div>
       </div>
     </div>
 
     <!-- Mobile Drawer Nav -->
-    <div id="mobile-nav-panel" class="hidden md:hidden bg-[#FFF7FA] border-b border-[#EEDBF5] px-6 py-4 space-y-3">
-      <a href="#home" onclick="navigate('home'); toggleMobileNav();" class="block font-semibold py-2">Home</a>
-      <a href="#shop" onclick="navigate('shop'); toggleMobileNav();" class="block font-semibold py-2">Shop Catalog</a>
-      <a href="#custom-order" onclick="navigate('custom-order'); toggleMobileNav();" class="block font-semibold py-2">Request Custom Order 🎨</a>
-      <a href="#track-order" onclick="navigate('track-order'); toggleMobileNav();" class="block font-semibold py-2">Track Order Status 📦</a>
-      <a href="#support" onclick="navigate('support'); toggleMobileNav();" class="block font-semibold py-2">Return &amp; Refund Policy 🎥</a>
-      <a href="#admin" onclick="navigate('admin'); toggleMobileNav();" class="block font-semibold py-2 text-[#FF85A1]">Prisha Seller Dashboard 🔒</a>
+    <div id="mobile-nav-panel" class="hidden md:hidden bg-[#FFF7FA] border-b border-[#EEDBF5] px-6 py-4 space-y-2.5">
+      <a href="#home" onclick="navigate('home'); toggleMobileNav();" class="block font-semibold py-1.5">Home</a>
+      <a href="#shop" onclick="navigate('shop'); toggleMobileNav();" class="block font-semibold py-1.5">Shop Catalog</a>
+      <a href="#custom-order" onclick="navigate('custom-order'); toggleMobileNav();" class="block font-semibold py-1.5">Request Custom Order 🎨</a>
+      <a href="#track-order" onclick="navigate('track-order'); toggleMobileNav();" class="block font-semibold py-1.5">Track Order Status 📦</a>
+      <a href="#support" onclick="navigate('support'); toggleMobileNav();" class="block font-semibold py-1.5">Return &amp; Refund Policy 🎥</a>
+      <div class="border-t border-[#EEDBF5] pt-2 space-y-2">
+        <a href="#" onclick="toggleCartDrawer(); toggleMobileNav();" class="block font-bold py-1.5 text-[#FF85A1] flex items-center justify-between">
+          <span><i class="fa-solid fa-basket-shopping mr-2"></i>View Shopping Basket</span>
+          <span class="bg-[#FF85A1] text-white text-xs px-2 py-0.5 rounded-full" id="mobile-drawer-cart-badge">0</span>
+        </a>
+        <a href="#" onclick="openWishlistModal(); toggleMobileNav();" class="block font-semibold py-1.5 text-xs text-[#3D2C3D] flex items-center justify-between">
+          <span><i class="fa-regular fa-heart mr-2 text-[#FF85A1]"></i>My Wishlist</span>
+          <span class="text-xs text-[#8B7A99]" id="mobile-drawer-wish-badge">0</span>
+        </a>
+        <a href="#" onclick="handleAccountClick(); toggleMobileNav();" class="block font-semibold py-1.5 text-xs text-[#3D2C3D]">
+          <i class="fa-regular fa-user mr-2 text-[#FF85A1]"></i>My Account &amp; Past Orders
+        </a>
+        <a href="#admin" onclick="navigate('admin'); toggleMobileNav();" class="block font-semibold py-1.5 text-[#FF85A1] text-xs">
+          <i class="fa-solid fa-lock mr-2"></i>Prisha Seller Dashboard
+        </a>
+      </div>
     </div>
   </header>
 
@@ -106,26 +121,26 @@
         <!-- 3D WebGL Yarn Canvas -->
         <canvas id="hero-3d-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-80"></canvas>
 
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
-          <div class="space-y-6 text-center md:text-left">
-            <span class="badge-pill">🌸 Handcrafted Collection &amp; Flowers</span>
-            <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-[#3D2C3D] leading-tight">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center relative z-10">
+          <div class="space-y-6 text-center flex flex-col items-center max-w-2xl mx-auto px-2">
+            <span class="badge-pill inline-block mx-auto">🌸 Handcrafted Collection &amp; Flowers</span>
+            <h1 class="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#3D2C3D] leading-tight text-center">
               Crochet <span class="text-[#FF85A1]">by Prisha</span>
             </h1>
-            <p class="font-display text-2xl md:text-3xl text-[#8B7A99] font-medium italic">
+            <p class="font-display text-xl sm:text-2xl md:text-3xl text-[#8B7A99] font-medium italic text-center">
               made with love, kept forever ♡
             </p>
-            <p class="text-[#8B7A99] text-base max-w-xl font-medium">
+            <p class="text-[#8B7A99] text-sm sm:text-base max-w-xl mx-auto font-medium text-center leading-relaxed">
               Explore everlasting crochet flower bouquets (Gift wrapping optional), cute keychains, aesthetic hair accessories, and luxurious curated gift hampers!
             </p>
 
-            <div class="bg-white/80 backdrop-blur p-3 rounded-2xl border border-[#EEDBF5] text-xs text-[#3D2C3D] font-bold inline-flex items-center gap-2">
+            <div class="bg-white/90 backdrop-blur p-3 rounded-2xl border border-[#EEDBF5] text-xs text-[#3D2C3D] font-bold flex flex-wrap justify-center items-center gap-2 max-w-md mx-auto text-center shadow-sm">
               <span>📲 <strong>Verified Online Payment Only</strong> (UPI / GPay / Cards)</span>
-              <span>•</span>
+              <span class="hidden sm:inline">•</span>
               <span>🎥 <strong>Unboxing Video Required</strong> for Returns</span>
             </div>
 
-            <div class="flex flex-wrap gap-4 justify-center md:justify-start pt-2">
+            <div class="flex flex-wrap gap-3 sm:gap-4 justify-center items-center pt-2">
               <button onclick="navigate('shop')" class="btn-terracotta">
                 Explore Shop <i class="fa-solid fa-heart text-xs ml-1"></i>
               </button>
@@ -135,36 +150,36 @@
             </div>
 
             <!-- Highlights below Custom Orders -->
-            <div class="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-[#EEDBF5] text-center md:text-left max-w-lg">
-              <div onclick="filterShopByCategory('cat-flowers')" class="cursor-pointer hover:opacity-80 transition">
+            <div class="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 border-t border-[#EEDBF5] text-center max-w-lg mx-auto w-full">
+              <div onclick="filterShopByCategory('cat-flowers')" class="cursor-pointer hover:opacity-80 transition text-center p-2 rounded-xl hover:bg-white/50">
                 <div class="font-display text-base font-bold text-[#3D2C3D]">💐 Flowers</div>
                 <div class="text-xs text-[#8B7A99]">Gift wrapping optional</div>
               </div>
-              <div onclick="filterShopByCategory('cat-hair')" class="cursor-pointer hover:opacity-80 transition">
+              <div onclick="filterShopByCategory('cat-hair')" class="cursor-pointer hover:opacity-80 transition text-center p-2 rounded-xl hover:bg-white/50">
                 <div class="font-display text-base font-bold text-[#3D2C3D]">✨ Hair Accessories</div>
                 <div class="text-xs text-[#8B7A99]">Clips &amp; Bands</div>
               </div>
-              <div onclick="filterShopByCategory('cat-keychains')" class="cursor-pointer hover:opacity-80 transition">
+              <div onclick="filterShopByCategory('cat-keychains')" class="cursor-pointer hover:opacity-80 transition text-center p-2 rounded-xl hover:bg-white/50">
                 <div class="font-display text-base font-bold text-[#3D2C3D]">🎀 Keychains</div>
                 <div class="text-xs text-[#8B7A99]">Cute Charms</div>
               </div>
-              <div onclick="filterShopByCategory('cat-hampers')" class="cursor-pointer hover:opacity-80 transition">
+              <div onclick="filterShopByCategory('cat-hampers')" class="cursor-pointer hover:opacity-80 transition text-center p-2 rounded-xl hover:bg-white/50">
                 <div class="font-display text-base font-bold text-[#3D2C3D]">🎁 Hampers</div>
                 <div class="text-xs text-[#8B7A99]">Curated Sets</div>
               </div>
             </div>
           </div>
 
-          <!-- Hero Image Rotating Showcase Carousel -->
-          <div class="relative flex justify-center">
+          <!-- Hero Image Rotating Showcase Carousel (Centered) -->
+          <div class="relative flex justify-center w-full max-w-md mx-auto">
             <div id="hero-carousel-container" class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border-4 border-white group select-none">
               <!-- Slides Track -->
-              <div class="relative w-full h-[430px] overflow-hidden" id="hero-carousel-slides">
+              <div class="relative w-full h-[400px] sm:h-[430px] overflow-hidden" id="hero-carousel-slides">
                 <!-- Slide 1: Tulip & Rose Handmade Crochet Bouquet -->
                 <div class="hero-slide active absolute inset-0 transition-opacity duration-700 ease-in-out opacity-100 z-10" data-index="0">
                   <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80" alt="Handcrafted Crochet Bouquet" class="w-full h-full object-cover">
                   <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                  <div class="absolute bottom-6 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+                  <div class="absolute bottom-6 left-4 right-4 sm:left-5 sm:right-5 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
                     <div class="w-11 h-11 rounded-full bg-[#FFE5EC] flex items-center justify-center text-xl shrink-0">💐</div>
                     <div class="min-w-0">
                       <div class="font-display font-bold text-sm text-[#3D2C3D] truncate">Tulip &amp; Rose Handmade Bouquet</div>
@@ -175,9 +190,9 @@
 
                 <!-- Slide 2: Aesthetic Floral Hair Accessories -->
                 <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 pointer-events-none z-0" data-index="1">
-                  <img src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80" alt="Crochet Hair Accessories" class="w-full h-full object-cover">
+                  <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80" alt="Crochet Hair Accessories" class="w-full h-full object-cover">
                   <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                  <div class="absolute bottom-6 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+                  <div class="absolute bottom-6 left-4 right-4 sm:left-5 sm:right-5 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
                     <div class="w-11 h-11 rounded-full bg-[#E8D7FF] flex items-center justify-center text-xl shrink-0">✨</div>
                     <div class="min-w-0">
                       <div class="font-display font-bold text-sm text-[#3D2C3D] truncate">Floral Hair Clips &amp; Scrunchies</div>
@@ -841,6 +856,7 @@
         <button onclick="switchAdminTab('products')" class="btn-outline-terracotta text-xs" id="adm-tab-products">Manage &amp; Edit Catalog</button>
         <button onclick="switchAdminTab('orders')" class="btn-outline-terracotta text-xs" id="adm-tab-orders">Track &amp; Remove Orders</button>
         <button onclick="switchAdminTab('payments')" class="btn-outline-terracotta text-xs" id="adm-tab-payments">💳 Payments &amp; Refunds</button>
+        <button onclick="switchAdminTab('carousel')" class="btn-outline-terracotta text-xs" id="adm-tab-carousel">🎨 Hero Carousel Images</button>
       </div>
 
       <div id="admin-panel-content">
@@ -1172,11 +1188,12 @@
   <!-- Interactive 3D Cursor Particle Trail Canvas -->
   <canvas id="cursor-trail-canvas" class="fixed inset-0 pointer-events-none z-40 w-full h-full opacity-90"></canvas>
 
-  <!-- Floating 3D Basket Widget Button -->
-  <div class="fixed bottom-6 left-6 z-40">
-    <button onclick="toggleCartDrawer()" class="bg-gradient-to-r from-[#FF85A1] to-[#C8B6FF] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center border-2 border-white group" title="Quick Basket Preview">
-      <span class="text-2xl group-hover:rotate-12 transition-transform">🌸</span>
-      <span class="absolute -top-2 -right-2 bg-[#3D2C3D] text-[#FFC6FF] text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border border-white" id="floating-cart-badge">0</span>
+  <!-- Floating Shopping Basket Button (Always visible & accessible on phone & desktop) -->
+  <div class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50">
+    <button onclick="toggleCartDrawer()" class="bg-[#FF85A1] hover:bg-[#ff6b8b] text-white py-3 px-5 rounded-full shadow-2xl flex items-center gap-2.5 border-2 border-white transition-all active:scale-95 font-bold text-sm" title="View Shopping Basket">
+      <i class="fa-solid fa-basket-shopping text-base"></i>
+      <span>Basket</span>
+      <span class="bg-white text-[#FF85A1] text-xs font-extrabold w-5 h-5 rounded-full flex items-center justify-center ml-0.5" id="floating-cart-badge">0</span>
     </button>
   </div>
 
