@@ -955,9 +955,6 @@ async function handlePlaceOrder(e) {
     }
   } catch (err) {
     showToast('Payment initialization error: ' + err.message);
-    }
-  } catch (err) {
-    showToast('Payment initialization error: ' + err.message);
     navigate('payment-failed?reason=' + encodeURIComponent(err.message));
   } finally {
     if (checkoutBtn) {
