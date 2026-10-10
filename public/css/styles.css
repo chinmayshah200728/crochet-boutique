@@ -80,6 +80,18 @@ h1, h2, h3, h4, .font-display, .brand-logo {
   transition: var(--transition);
 }
 
+.brand-logo-text {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  display: block;
+}
+
+.brand-tagline-text {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  display: block;
+}
+
 .nav-link {
   font-weight: 600;
   color: var(--charcoal);

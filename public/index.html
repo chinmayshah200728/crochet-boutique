@@ -34,28 +34,28 @@
       <div class="flex items-center justify-between h-20">
         
         <!-- Mobile Menu Button & Brand Logo -->
-        <div class="flex items-center gap-4">
-          <button class="md:hidden text-2xl text-[#3D2C3D]" id="mobile-menu-btn" onclick="toggleMobileNav()">
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button class="md:hidden text-xl text-[#3D2C3D] p-1" id="mobile-menu-btn" onclick="toggleMobileNav()">
             <i class="fa-solid fa-bars-staggered"></i>
           </button>
           
-          <a href="#" onclick="navigate('home')" class="flex items-center gap-2">
-            <span class="text-3xl">🌸</span>
-            <div>
-              <span class="font-display text-2xl font-bold tracking-tight text-[#3D2C3D]">Crochet <span class="text-[#FF85A1]">by Prisha</span></span>
-              <span class="block text-[11px] font-semibold text-[#8B7A99] tracking-wider">made with love, kept forever ♡</span>
+          <a href="#" onclick="navigate('home')" class="flex items-center gap-2 shrink-0 whitespace-nowrap">
+            <span class="text-xl sm:text-2xl shrink-0">🌸</span>
+            <div class="whitespace-nowrap leading-tight">
+              <span class="brand-logo-text font-display text-base sm:text-lg md:text-xl font-bold tracking-tight text-[#3D2C3D]">Crochet <span class="text-[#FF85A1]">by Prisha</span></span>
+              <span class="brand-tagline-text text-[9px] sm:text-[10px] font-semibold text-[#8B7A99] tracking-wider">made with love, kept forever ♡</span>
             </div>
           </a>
         </div>
 
         <!-- Desktop Navigation Links -->
-        <nav class="hidden md:flex items-center space-x-8">
-          <a href="#home" onclick="navigate('home')" class="nav-link" id="nav-home">Home</a>
-          <a href="#shop" onclick="navigate('shop')" class="nav-link" id="nav-shop">Shop Catalog</a>
-          <a href="#crochet-guide" onclick="scrollToSection('about-crochet-section')" class="nav-link">About Crochet</a>
-          <a href="#custom-order" onclick="navigate('custom-order')" class="nav-link" id="nav-custom">Custom Orders</a>
-          <a href="#track-order" onclick="navigate('track-order')" class="nav-link" id="nav-track">Track Order</a>
-          <a href="#support" onclick="navigate('support')" class="nav-link" id="nav-support">Policies &amp; FAQ</a>
+        <nav class="hidden md:flex items-center space-x-3 lg:space-x-6 xl:space-x-8 text-xs lg:text-sm font-semibold">
+          <a href="#home" onclick="navigate('home')" class="nav-link whitespace-nowrap" id="nav-home">Home</a>
+          <a href="#shop" onclick="navigate('shop')" class="nav-link whitespace-nowrap" id="nav-shop">Shop Catalog</a>
+          <a href="#crochet-guide" onclick="scrollToSection('about-crochet-section')" class="nav-link whitespace-nowrap">About Crochet</a>
+          <a href="#custom-order" onclick="navigate('custom-order')" class="nav-link whitespace-nowrap" id="nav-custom">Custom Orders</a>
+          <a href="#track-order" onclick="navigate('track-order')" class="nav-link whitespace-nowrap" id="nav-track">Track Order</a>
+          <a href="#support" onclick="navigate('support')" class="nav-link whitespace-nowrap" id="nav-support">Policies &amp; FAQ</a>
         </nav>
 
         <!-- Right Action Icons -->
