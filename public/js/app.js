@@ -5,37 +5,17 @@ let cart = JSON.parse(localStorage.getItem('sp_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('sp_wishlist') || '[]');
 
 let categories = [
-  { id: "cat-flowers", name: "Flowers", slug: "flowers", icon: "💐", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=600&q=80", description: "Everlasting pastel crochet floral arrangements with gift wrapping options." },
-  { id: "cat-plushies", name: "Amigurumi Plushies", slug: "plushies", icon: "🧸", image: "https://images.unsplash.com/photo-1558679908-541bcf1249ff?auto=format&fit=crop&w=600&q=80", description: "Soft, velvet-yarn cuddly plushies stitched with love." },
-  { id: "cat-keychains", name: "Keychains", slug: "keychains", icon: "🔑", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80", description: "Pocket-sized crochet cuteness for your bags, keys, and backpacks." },
-  { id: "cat-hair", name: "Hair Accessories", slug: "hair-accessories", icon: "🎀", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80", description: "Hand-stitched floral scrunchies, aesthetic clips, and tulip headbands." },
-  { id: "cat-hampers", name: "Gift Hampers", slug: "gift-hampers", icon: "🎁", image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=600&q=80", description: "Curated pastel gift hampers with flowers, keychains, clips, and ribbon gift boxes." }
+  { id: "cat-flowers", name: "Flowers", slug: "flowers", icon: "💐", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=600&q=80", description: "Everlasting handcrafted crochet floral arrangements. Gift wrapping optional." },
+  { id: "cat-hair", name: "Hair Accessories", slug: "hair-accessories", icon: "✨", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80", description: "Hand-stitched floral scrunchies, aesthetic clips, and tulip headbands." },
+  { id: "cat-keychains", name: "Keychains", slug: "keychains", icon: "🎀", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80", description: "Pocket-sized crochet cuteness for your bags, keys, and backpacks." },
+  { id: "cat-hampers", name: "Gift Hampers", slug: "gift-hampers", icon: "🎁", image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=600&q=80", description: "Curated gift hampers with flowers, keychains, clips, and gift boxes. Gift wrapping optional." }
 ];
 
 let products = [
   {
-    id: "prod-plush-1",
-    name: "Mochi the Soft Strawberry Bunny Plushie",
-    slug: "mochi-strawberry-bunny-plushie",
-    category: "cat-plushies",
-    price: 749,
-    salePrice: 649,
-    isSale: true,
-    isBestseller: true,
-    isNew: true,
-    rating: 5.0,
-    reviewsCount: 36,
-    stock: 15,
-    yarnType: "Ultra-Soft Velvet Chenille Yarn",
-    colors: ["Blush Pink & Cream", "Pastel Lavender", "Matcha Mint"],
-    description: "Handcrafted with ultra-soft velvety chenille yarn, Mochi features sweet blush rosy cheeks, floppy ears, and stitched strawberry charm details. Hypoallergenic and wonderfully cuddly!",
-    images: ["https://images.unsplash.com/photo-1558679908-541bcf1249ff?auto=format&fit=crop&w=800&q=80"],
-    customization: { allowGiftWrap: true, giftWrapPrice: 99, allowColorPicker: true, allowCustomText: true, textLabel: "Gift Card Message" }
-  },
-  {
     id: "prod-1",
-    name: "Pastel Tulip & Rose Handmade Crochet Bouquet",
-    slug: "pastel-tulip-rose-handmade-crochet-bouquet",
+    name: "Tulip & Rose Handmade Crochet Bouquet",
+    slug: "tulip-rose-handmade-crochet-bouquet",
     category: "cat-flowers",
     price: 899,
     salePrice: 799,
@@ -45,10 +25,10 @@ let products = [
     rating: 5,
     reviewsCount: 48,
     stock: 15,
-    yarnType: "Premium Milk Cotton Thread",
-    colors: ["Pastel Pink & Lavender", "Soft Yellow & White", "Peach & Sage Green"],
-    description: "Our signature bouquet featuring handcrafted blush roses, tulips, and eucalyptus foliage. Guaranteed to stay vibrant forever!",
-    images: ["https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=800&q=80"],
+    yarnType: "100% Natural Cotton Yarn",
+    colors: ["Soft Pink & Lavender", "Soft Yellow & White", "Peach & Sage Green"],
+    description: "The cotton yarn is a soft, breathable, natural-fibre yarn with a smooth texture, ideal for creating detailed crochet flowers, accessories, keychains, and other handmade pieces. Gift wrapping optional.",
+    images: ["https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: true, giftWrapPrice: 99, allowColorPicker: true, allowCustomText: true }
   },
   {
@@ -64,11 +44,30 @@ let products = [
     rating: 5,
     reviewsCount: 32,
     stock: 10,
-    yarnType: "Premium Milk Cotton Yarns",
-    colors: ["Pastel Dream Box", "Lavender Blush Box"],
-    description: "The ultimate gift hamper! Includes 1 Pastel Tulip Bouquet, 1 Mini Bunny Keychain, 1 Daisy Hair Scrunchie, and personalized handwritten card inside a satin ribbon-tied aesthetic box.",
+    yarnType: "100% Natural Cotton Yarn",
+    colors: ["Floral Dream Box", "Lavender Blush Box"],
+    description: "The ultimate gift hamper! Includes 1 Tulip Bouquet, 1 Mini Bunny Keychain, 1 Daisy Hair Scrunchie, and personalized handwritten card inside an aesthetic box. Gift wrapping optional.",
     images: ["https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: true }
+  },
+  {
+    id: "prod-3",
+    name: "Vintage Daisy Crochet Hair Scrunchie Set",
+    slug: "vintage-daisy-hair-scrunchie-set",
+    category: "cat-hair",
+    price: 299,
+    salePrice: null,
+    isSale: false,
+    isBestseller: true,
+    isNew: false,
+    rating: 4.9,
+    reviewsCount: 28,
+    stock: 17,
+    yarnType: "100% Natural Cotton Yarn",
+    colors: ["Blush Pink, Lavender & Blue", "Cream, Peach & Sage"],
+    description: "Super cute set of 3 hand-stitched floral scrunchies. Soft on hair, no pulling or creasing. Features cute 3D daisy flower accents. Gift wrapping optional.",
+    images: ["https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80"],
+    customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: false }
   },
   {
     id: "prod-4",
@@ -83,9 +82,9 @@ let products = [
     rating: 5,
     reviewsCount: 41,
     stock: 30,
-    yarnType: "Soft Plush Cotton Thread",
+    yarnType: "100% Natural Cotton Yarn",
     colors: ["Baby Pink Bunny", "Lavender Purple Bunny", "Sky Blue Bunny"],
-    description: "Pocket-sized crochet joy! Set of 3 adorable mini plush bunny keychains with shiny pearl beads and silver keyrings attached.",
+    description: "Pocket-sized crochet joy! Set of 3 adorable mini bunny keychains with shiny pearl beads and silver keyrings attached. Gift wrapping optional.",
     images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: true }
   },
@@ -102,16 +101,16 @@ let products = [
     rating: 4.8,
     reviewsCount: 35,
     stock: 20,
-    yarnType: "Milk Cotton Yarn",
-    colors: ["Golden Sunflower", "Pastel Yellow Sunflower"],
-    description: "A single radiant sunflower crafted with golden petals and textured center seeds, complete with wired stem and green leaves.",
+    yarnType: "100% Natural Cotton Yarn",
+    colors: ["Golden Sunflower", "Soft Yellow Sunflower"],
+    description: "A single radiant sunflower crafted with golden petals and textured center seeds, complete with wired stem and green leaves. Gift wrapping optional.",
     images: ["https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: true, giftWrapPrice: 49, allowColorPicker: true, allowCustomText: true }
   },
   {
     id: "prod-6",
-    name: "Pastel Crochet Floral Hair Clip Set",
-    slug: "pastel-crochet-floral-hair-clip-set",
+    name: "Crochet Floral Hair Clip Set",
+    slug: "crochet-floral-hair-clip-set",
     category: "cat-hair",
     price: 249,
     salePrice: null,
@@ -121,9 +120,9 @@ let products = [
     rating: 4.9,
     reviewsCount: 19,
     stock: 22,
-    yarnType: "Fine Mercerized Cotton",
-    colors: ["Pastel Pink & Blue Floral", "Lavender & Peach Floral"],
-    description: "Hand-stitched mini flower clips with sturdy alligator clip backings. Ideal for adding a touch of floral magic to any hairstyle!",
+    yarnType: "100% Natural Cotton Yarn",
+    colors: ["Blush Pink & Sky Blue Floral", "Lavender & Peach Floral"],
+    description: "Hand-stitched mini flower clips with sturdy alligator clip backings. Ideal for adding a touch of floral magic to any hairstyle! Gift wrapping optional.",
     images: ["https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: false }
   }
@@ -187,11 +186,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCategories();
   await loadProducts();
 
-  // Initialize 3D Motion, WebGL Scene & 3D Cursor Trail
+  // Initialize 3D Motion, WebGL Scene, Carousel & 3D Cursor Trail
   setTimeout(() => {
     init3DHeroScene();
     init3DTiltCards();
     init3DCursorTrail();
+    initHeroCarousel();
   }, 200);
 });
 
@@ -239,7 +239,7 @@ function navigate(viewNameWithQuery) {
     const activeNav = document.getElementById(`nav-${cleanViewName}`);
     if (activeNav) activeNav.classList.add('active');
 
-    if (cleanViewName === 'home') { renderHomeView(); setTimeout(() => { init3DHeroScene(); init3DTiltCards(); }, 100); }
+    if (cleanViewName === 'home') { renderHomeView(); setTimeout(() => { init3DHeroScene(); init3DTiltCards(); initHeroCarousel(); }, 100); }
     if (cleanViewName === 'shop') { renderShopView(); setTimeout(() => init3DTiltCards(), 100); }
     if (cleanViewName === 'custom-order') { setTimeout(() => initCustom3DVisualizer(), 100); }
     if (cleanViewName === 'account') renderAccountView();
@@ -329,8 +329,8 @@ function renderHomeView() {
             <div class="text-[#FF85A1] text-xs">★★★★★ <span class="text-[#8B7A99] ml-1">Verified Purchase</span></div>
           </div>
         </div>
-        <p class="text-[#8B7A99] text-sm italic">"Prisha's bouquet is so incredibly gorgeous! The gift wrapping with the lavender ribbon was so aesthetically pleasing. Made with love indeed ♡"</p>
-        <div class="text-xs font-bold text-[#FF85A1]">Purchased: Pastel Rose &amp; Tulip Bouquet (With Gift Wrap)</div>
+        <p class="text-[#8B7A99] text-sm italic">"Prisha's bouquet is so incredibly gorgeous! The handmade flowers and gift wrapping were so aesthetically pleasing. Made with love indeed ♡"</p>
+        <div class="text-xs font-bold text-[#FF85A1]">Purchased: Rose &amp; Tulip Bouquet (Gift wrapping optional)</div>
       </div>
       <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] shadow-sm space-y-4">
         <div class="flex items-center gap-3">
@@ -544,8 +544,8 @@ function openProductModal(productId) {
               <span>Without Gift Wrap (Stem Only)</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-[#3D2C3D]">
-              <input type="radio" name="gift-wrap-choice" value="With Gift Wrap & Satin Ribbon" onchange="toggleGiftWrapSelection(this, ${wrapCost})" class="accent-[#FF85A1]">
-              <span>With Gift Wrap &amp; Satin Ribbon (+ ₹${wrapCost.toFixed(2)}) 🎀</span>
+              <input type="radio" name="gift-wrap-choice" value="With Gift Wrap (Optional)" onchange="toggleGiftWrapSelection(this, ${wrapCost})" class="accent-[#FF85A1]">
+              <span>Gift wrapping optional (+ ₹${wrapCost.toFixed(2)}) 🎁</span>
             </label>
           </div>
         </div>
@@ -826,7 +826,7 @@ function handleLogout() {
 function calculateCheckoutTotals() {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const discountAmount = subtotal * (activeDiscount.percent / 100);
-  const shipping = (subtotal >= 699 || activeDiscount.freeShipping || subtotal === 0) ? 0 : 79;
+  const shipping = (subtotal >= 499 || activeDiscount.freeShipping || subtotal === 0) ? 0 : 79;
   const tax = (subtotal - discountAmount) * 0.05;
   const total = Math.max(0, (subtotal - discountAmount) + shipping + tax);
 
@@ -1733,7 +1733,7 @@ function openAdminProductModal() {
   document.getElementById('adm-prod-price').value = "";
   document.getElementById('adm-prod-saleprice').value = "";
   document.getElementById('adm-prod-stock').value = "15";
-  document.getElementById('adm-prod-yarn').value = "100% Combed Milk Cotton";
+  document.getElementById('adm-prod-yarn').value = "100% Natural Cotton Yarn";
   document.getElementById('adm-prod-desc').value = "";
   document.getElementById('modal-admin-product')?.classList.add('active');
 }
@@ -1864,7 +1864,7 @@ async function handleSupportSubmit(e) {
 
 function handleNewsletterSubmit(e) {
   e.preventDefault();
-  showToast('Subscribed to Pastel Club! Use code LOVE10 for 10% off. ♡');
+  showToast('Thank you for subscribing to Crochet by Prisha! ♡');
   e.target.reset();
 }
 
@@ -1921,8 +1921,8 @@ function init3DHeroScene() {
   dirLight2.position.set(-5, -5, 5);
   heroScene.add(dirLight2);
 
-  // Pastel Materials & Geometries for 3D Crochet Yarn Objects
-  const pastelColors = [0xFF85A1, 0xC8B6FF, 0xA0C4FF, 0xFFC6FF, 0xFDFFB6];
+  // Vibrant Materials & Geometries for 3D Crochet Yarn Objects
+  const cottonYarnColors = [0xFF85A1, 0xC8B6FF, 0xA0C4FF, 0xFFC6FF, 0xFDFFB6];
   
   const geometries = [
     new THREE.SphereGeometry(0.85, 32, 32),
@@ -1933,7 +1933,7 @@ function init3DHeroScene() {
 
   for (let i = 0; i < 14; i++) {
     const geom = geometries[i % geometries.length];
-    const color = pastelColors[i % pastelColors.length];
+    const color = cottonYarnColors[i % cottonYarnColors.length];
     const mat = new THREE.MeshStandardMaterial({
       color: color,
       roughness: 0.55,
@@ -2344,5 +2344,76 @@ function updateCustom3DColor(hexColor, name) {
     customMesh.material.color.set(hexColor);
     trigger3DConfetti();
     showToast(`3D Yarn Preview updated to ${name}! ♡`);
+  }
+}
+
+/* ==========================================
+   HERO ROTATING CAROUSEL CONTROLLER
+   ========================================== */
+let currentHeroSlide = 0;
+let heroCarouselInterval = null;
+
+function initHeroCarousel() {
+  const slides = document.querySelectorAll('.hero-slide');
+  if (!slides || slides.length === 0) return;
+
+  const container = document.getElementById('hero-carousel-container');
+  if (container && !container.dataset.carouselInit) {
+    container.dataset.carouselInit = 'true';
+    container.addEventListener('mouseenter', () => clearInterval(heroCarouselInterval));
+    container.addEventListener('mouseleave', () => startHeroCarouselTimer());
+    container.addEventListener('touchstart', () => clearInterval(heroCarouselInterval), { passive: true });
+    container.addEventListener('touchend', () => startHeroCarouselTimer(), { passive: true });
+  }
+
+  goToHeroSlide(0);
+  startHeroCarouselTimer();
+}
+
+function startHeroCarouselTimer() {
+  clearInterval(heroCarouselInterval);
+  heroCarouselInterval = setInterval(() => {
+    nextHeroSlide();
+  }, 4200);
+}
+
+function nextHeroSlide() {
+  const slides = document.querySelectorAll('.hero-slide');
+  if (!slides || slides.length === 0) return;
+  goToHeroSlide((currentHeroSlide + 1) % slides.length);
+}
+
+function prevHeroSlide() {
+  const slides = document.querySelectorAll('.hero-slide');
+  if (!slides || slides.length === 0) return;
+  goToHeroSlide((currentHeroSlide - 1 + slides.length) % slides.length);
+}
+
+function goToHeroSlide(index) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  if (!slides || slides.length === 0) return;
+
+  currentHeroSlide = index;
+  slides.forEach((slide, i) => {
+    if (i === currentHeroSlide) {
+      slide.classList.add('opacity-100', 'z-10');
+      slide.classList.remove('opacity-0', 'pointer-events-none', 'z-0');
+    } else {
+      slide.classList.remove('opacity-100', 'z-10');
+      slide.classList.add('opacity-0', 'pointer-events-none', 'z-0');
+    }
+  });
+
+  if (dots && dots.length > 0) {
+    dots.forEach((dot, i) => {
+      if (i === currentHeroSlide) {
+        dot.classList.add('bg-white', 'w-3');
+        dot.classList.remove('bg-white/50', 'w-2');
+      } else {
+        dot.classList.remove('bg-white', 'w-3');
+        dot.classList.add('bg-white/50', 'w-2');
+      }
+    });
   }
 }

@@ -676,3 +676,20 @@ h1, h2, h3, h4, .font-display, .brand-logo {
     font-size: 0.8rem !important;
   }
 }
+
+/* ==========================================
+   HERO ROTATING CAROUSEL STYLES
+   ========================================== */
+.hero-slide {
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
+}
+
+.hero-dot {
+  transition: all 0.3s ease;
+}
+
+.hero-dot.active {
+  width: 1.25rem !important;
+  border-radius: 9999px !important;
+}

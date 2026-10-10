@@ -265,9 +265,9 @@ app.post('/api/products', authenticateToken, (req, res) => {
     rating: 5.0,
     reviewsCount: 0,
     stock: Math.max(0, parseInt(stock, 10) || 10),
-    yarnType: sanitizeInput(yarnType || 'Combed Milk Cotton Yarn'),
+    yarnType: sanitizeInput(yarnType || '100% Natural Cotton Yarn'),
     dimensions: sanitizeInput(dimensions || 'Handcrafted Standard'),
-    colors: colors || ['Default Pastel'],
+    colors: colors || ['Standard Handcrafted'],
     description: description || 'Beautiful handmade crochet item by Prisha.',
     images: images && images.length ? images : ['https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=800&q=80'],
     customization: customization || { allowGiftWrap: category === 'cat-flowers', giftWrapPrice: 99.00, allowColorPicker: true, allowCustomText: true }
@@ -402,7 +402,7 @@ app.post('/api/orders', authenticateToken, (req, res) => {
       name: p ? p.name : sanitizeInput(item.name),
       price: unitPrice,
       qty: qty,
-      color: sanitizeInput(item.color || 'Standard Pastel'),
+      color: sanitizeInput(item.color || 'Standard Handcrafted'),
       giftWrap: sanitizeInput(item.giftWrap || 'Without Gift Wrap'),
       customText: sanitizeInput(item.customText || '')
     };
@@ -416,7 +416,7 @@ app.post('/api/orders', authenticateToken, (req, res) => {
     }
   }
 
-  const shippingCost = subtotal >= 699 ? 0 : 79;
+  const shippingCost = subtotal >= 499 ? 0 : 79;
   const tax = (subtotal - discountAmount) * 0.05;
   const total = Math.max(0, (subtotal - discountAmount) + shippingCost + tax);
 

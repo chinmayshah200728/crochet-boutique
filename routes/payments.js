@@ -96,8 +96,7 @@ router.post('/create-order', async (req, res) => {
     if (couponCode) {
       const cleanCoupon = couponCode.toUpperCase().trim();
       const validCoupons = {
-        'LOVE10': { percent: 10, freeShipping: false },
-        'PASTEL20': { percent: 20, freeShipping: false },
+        'PRISHA15': { percent: 15, freeShipping: false },
         'FREESHIP': { percent: 0, freeShipping: true }
       };
       if (validCoupons[cleanCoupon]) {
@@ -107,7 +106,7 @@ router.post('/create-order', async (req, res) => {
     }
 
     const discountAmount = calculatedSubtotal * (discountPercent / 100);
-    const shippingCost = (calculatedSubtotal >= 699 || freeShipping || calculatedSubtotal === 0) ? 0 : 79;
+    const shippingCost = (calculatedSubtotal >= 499 || freeShipping || calculatedSubtotal === 0) ? 0 : 79;
     const taxAmount = (calculatedSubtotal - discountAmount) * 0.05; // 5% GST
     const finalTotalINR = Math.max(0, parseFloat(((calculatedSubtotal - discountAmount) + shippingCost + taxAmount).toFixed(2)));
     const amountInPaise = Math.round(finalTotalINR * 100);

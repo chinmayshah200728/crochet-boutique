@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>crochetbyprisha | made with love, kept forever ♡</title>
+  <title>Crochet by Prisha | Made with love, kept forever ♡</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Custom Stylesheet -->
@@ -17,9 +17,9 @@
 
   <!-- Top Announcement Bar -->
   <div class="bg-[#3D2C3D] text-[#FFF7FA] text-xs py-2 px-4 text-center font-medium flex justify-between items-center max-w-full overflow-hidden">
-    <div class="hidden md:block">🎀 <strong>crochetbyprisha</strong> • <i>made with love, kept forever ♡</i></div>
+    <div class="hidden md:block">🎀 <strong>Crochet by Prisha</strong> • <i>made with love, kept forever ♡</i></div>
     <div class="mx-auto md:mx-0">
-      <span>Free Shipping over ₹699 | <strong>Online Payment Only</strong> | Use code <strong class="text-[#FFC6FF]">LOVE10</strong></span>
+      <span>Free Shipping over ₹499 | <strong>Online Payment Only</strong></span>
     </div>
     <div class="hidden md:flex items-center gap-4 text-xs">
       <a href="#return-policy" onclick="scrollToSection('return-policy-section')" class="hover:underline text-[#FFC6FF]">Return &amp; Refund Policy</a>
@@ -42,7 +42,7 @@
           <a href="#" onclick="navigate('home')" class="flex items-center gap-2">
             <span class="text-3xl">🌸</span>
             <div>
-              <span class="font-display text-2xl font-bold tracking-tight text-[#3D2C3D]">crochet<span class="text-[#FF85A1]">byprisha</span></span>
+              <span class="font-display text-2xl font-bold tracking-tight text-[#3D2C3D]">Crochet <span class="text-[#FF85A1]">by Prisha</span></span>
               <span class="block text-[11px] font-semibold text-[#8B7A99] tracking-wider">made with love, kept forever ♡</span>
             </div>
           </a>
@@ -108,15 +108,15 @@
 
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
           <div class="space-y-6 text-center md:text-left">
-            <span class="badge-pill">🌸 Handcrafted Pastel Collection</span>
+            <span class="badge-pill">🌸 Handcrafted Collection &amp; Flowers</span>
             <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-[#3D2C3D] leading-tight">
-              crochet<span class="text-[#FF85A1]">byprisha</span>
+              Crochet <span class="text-[#FF85A1]">by Prisha</span>
             </h1>
             <p class="font-display text-2xl md:text-3xl text-[#8B7A99] font-medium italic">
               made with love, kept forever ♡
             </p>
             <p class="text-[#8B7A99] text-base max-w-xl font-medium">
-              Explore everlasting crochet flower bouquets (with optional satin ribbon gift wrap!), cute keychains, aesthetic hair accessories, and luxurious curated gift hampers!
+              Explore everlasting crochet flower bouquets (Gift wrapping optional), cute keychains, aesthetic hair accessories, and luxurious curated gift hampers!
             </p>
 
             <div class="bg-white/80 backdrop-blur p-3 rounded-2xl border border-[#EEDBF5] text-xs text-[#3D2C3D] font-bold inline-flex items-center gap-2">
@@ -134,34 +134,99 @@
               </button>
             </div>
 
-            <!-- Highlights -->
-            <div class="pt-6 grid grid-cols-3 gap-6 border-t border-[#EEDBF5] text-center md:text-left max-w-lg">
-              <div>
-                <div class="font-display text-xl font-bold text-[#3D2C3D]">💐 Flowers</div>
-                <div class="text-xs text-[#8B7A99]">Gift Wrap Option</div>
+            <!-- Highlights below Custom Orders -->
+            <div class="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-[#EEDBF5] text-center md:text-left max-w-lg">
+              <div onclick="filterShopByCategory('cat-flowers')" class="cursor-pointer hover:opacity-80 transition">
+                <div class="font-display text-base font-bold text-[#3D2C3D]">💐 Flowers</div>
+                <div class="text-xs text-[#8B7A99]">Gift wrapping optional</div>
               </div>
-              <div>
-                <div class="font-display text-xl font-bold text-[#3D2C3D]">🔑 Keychains</div>
-                <div class="text-xs text-[#8B7A99]">Cutest Charms</div>
+              <div onclick="filterShopByCategory('cat-hair')" class="cursor-pointer hover:opacity-80 transition">
+                <div class="font-display text-base font-bold text-[#3D2C3D]">✨ Hair Accessories</div>
+                <div class="text-xs text-[#8B7A99]">Clips &amp; Bands</div>
               </div>
-              <div>
-                <div class="font-display text-xl font-bold text-[#3D2C3D]">🎁 Hampers</div>
-                <div class="text-xs text-[#8B7A99]">Ribbon Boxed</div>
+              <div onclick="filterShopByCategory('cat-keychains')" class="cursor-pointer hover:opacity-80 transition">
+                <div class="font-display text-base font-bold text-[#3D2C3D]">🎀 Keychains</div>
+                <div class="text-xs text-[#8B7A99]">Cute Charms</div>
+              </div>
+              <div onclick="filterShopByCategory('cat-hampers')" class="cursor-pointer hover:opacity-80 transition">
+                <div class="font-display text-base font-bold text-[#3D2C3D]">🎁 Hampers</div>
+                <div class="text-xs text-[#8B7A99]">Curated Sets</div>
               </div>
             </div>
           </div>
 
-          <!-- Hero Image Showcase -->
+          <!-- Hero Image Rotating Showcase Carousel -->
           <div class="relative flex justify-center">
-            <div class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-              <img src="https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=800&q=80" alt="Pastel Crochet Flowers" class="w-full h-[420px] object-cover">
-              
-              <div class="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/50 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-[#FFE5EC] flex items-center justify-center text-xl">💐</div>
-                <div>
-                  <div class="font-display font-bold text-sm text-[#3D2C3D]">Pastel Rose &amp; Tulip Bouquet</div>
-                  <div class="text-xs text-[#FF85A1] font-bold">With or Without Gift Wrap Options</div>
+            <div id="hero-carousel-container" class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border-4 border-white group select-none">
+              <!-- Slides Track -->
+              <div class="relative w-full h-[430px] overflow-hidden" id="hero-carousel-slides">
+                <!-- Slide 1: Tulip & Rose Handmade Crochet Bouquet -->
+                <div class="hero-slide active absolute inset-0 transition-opacity duration-700 ease-in-out opacity-100 z-10" data-index="0">
+                  <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80" alt="Handcrafted Crochet Bouquet" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                  <div class="absolute bottom-6 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-[#FFE5EC] flex items-center justify-center text-xl shrink-0">💐</div>
+                    <div class="min-w-0">
+                      <div class="font-display font-bold text-sm text-[#3D2C3D] truncate">Tulip &amp; Rose Handmade Bouquet</div>
+                      <div class="text-xs text-[#FF85A1] font-bold">100% Cotton Yarn • Gift wrapping optional</div>
+                    </div>
+                  </div>
                 </div>
+
+                <!-- Slide 2: Aesthetic Floral Hair Accessories -->
+                <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 pointer-events-none z-0" data-index="1">
+                  <img src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80" alt="Crochet Hair Accessories" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                  <div class="absolute bottom-6 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-[#E8D7FF] flex items-center justify-center text-xl shrink-0">✨</div>
+                    <div class="min-w-0">
+                      <div class="font-display font-bold text-sm text-[#3D2C3D] truncate">Floral Hair Clips &amp; Scrunchies</div>
+                      <div class="text-xs text-[#C8B6FF] font-bold">Soft on Hair • Everlasting Handcrafted Charms</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Slide 3: Everlasting Sunflower Stems -->
+                <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 pointer-events-none z-0" data-index="2">
+                  <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80" alt="Forever Sunflower Stem" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                  <div class="absolute bottom-6 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-[#FFF9DB] flex items-center justify-center text-xl shrink-0">🌻</div>
+                    <div class="min-w-0">
+                      <div class="font-display font-bold text-sm text-[#3D2C3D] truncate">Forever Sunflower Single Stem</div>
+                      <div class="text-xs text-[#E67700] font-bold">Golden Cotton Petals • Never Wilts</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Slide 4: Luxury Gift Hamper -->
+                <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0 pointer-events-none z-0" data-index="3">
+                  <img src="https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80" alt="Handmade Gift Hamper" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                  <div class="absolute bottom-6 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-[#FFF0F6] flex items-center justify-center text-xl shrink-0">🎁</div>
+                    <div class="min-w-0">
+                      <div class="font-display font-bold text-sm text-[#3D2C3D] truncate">Deluxe Handcrafted Gift Hamper</div>
+                      <div class="text-xs text-[#FF85A1] font-bold">Bouquet, Clips &amp; Keychain • Gift wrapping optional</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Carousel Arrow Navigation Controls -->
+              <button onclick="prevHeroSlide()" aria-label="Previous image" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-[#3D2C3D] flex items-center justify-center shadow-md backdrop-blur-sm transition-all opacity-80 group-hover:opacity-100 active:scale-95">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+              </button>
+              <button onclick="nextHeroSlide()" aria-label="Next image" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-[#3D2C3D] flex items-center justify-center shadow-md backdrop-blur-sm transition-all opacity-80 group-hover:opacity-100 active:scale-95">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+              </button>
+
+              <!-- Indicators / Dots -->
+              <div class="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full" id="hero-carousel-dots">
+                <button onclick="goToHeroSlide(0)" class="w-3 h-2 rounded-full bg-white transition-all hero-dot active"></button>
+                <button onclick="goToHeroSlide(1)" class="w-2 h-2 rounded-full bg-white/50 transition-all hero-dot"></button>
+                <button onclick="goToHeroSlide(2)" class="w-2 h-2 rounded-full bg-white/50 transition-all hero-dot"></button>
+                <button onclick="goToHeroSlide(3)" class="w-2 h-2 rounded-full bg-white/50 transition-all hero-dot"></button>
               </div>
             </div>
           </div>
@@ -173,7 +238,7 @@
         <div class="text-center max-w-2xl mx-auto mb-14">
           <span class="text-[#FF85A1] font-bold text-sm uppercase tracking-widest">Handcrafted With ♡</span>
           <h2 class="font-display text-3xl md:text-4xl font-bold text-[#3D2C3D] mt-2">Explore Our Categories</h2>
-          <p class="text-[#8B7A99] mt-2">Pastel flowers, cute keychains, hair accessories &amp; hampers</p>
+          <p class="text-[#8B7A99] mt-2">Handcrafted collection &amp; flowers, cute keychains, hair accessories &amp; hampers</p>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="home-categories-grid">
@@ -206,7 +271,7 @@
           <span class="badge-pill">🧶 The Art of Handcrafted Crochet</span>
           <h2 class="font-display text-3xl md:text-4xl font-bold text-[#3D2C3D]">Why Handmade Crochet is Truly Special</h2>
           <p class="text-[#8B7A99] text-base leading-relaxed">
-            Unlike machine knitting, <strong>crochet stitches cannot be replicated by any machine in the world</strong>. Every single loop, petal, and leaf in our studio is hand-manipulated loop by loop by Prisha using a single hook and 100% premium combed milk cotton yarn.
+            Unlike machine knitting, <strong>crochet stitches cannot be replicated by any machine in the world</strong>. Every single loop, petal, and leaf in our studio is hand-manipulated loop by loop by Prisha using a single hook and 100% soft, breathable cotton yarn.
           </p>
         </div>
 
@@ -218,9 +283,9 @@
           </div>
 
           <div class="bg-white p-8 rounded-3xl border border-[#EEDBF5] space-y-4 shadow-sm">
-            <div class="w-14 h-14 rounded-full bg-[#E8D7FF] text-[#3D2C3D] flex items-center justify-center text-2xl font-bold">✨</div>
-            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">Milk Cotton Yarn</h3>
-            <p class="text-xs text-[#8B7A99] leading-relaxed">We use hypoallergenic 5-ply combed milk cotton yarn that is ultra-soft, fade-resistant, pill-free, and super gentle on hair and skin.</p>
+            <div class="w-14 h-14 rounded-full bg-[#E8D7FF] text-[#3D2C3D] flex items-center justify-center text-2xl font-bold">🧶</div>
+            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">Cotton Yarn</h3>
+            <p class="text-xs text-[#8B7A99] leading-relaxed">The cotton yarn is a soft, breathable, natural-fibre yarn with a smooth texture, ideal for creating detailed crochet flowers, accessories, keychains, and other handmade pieces.</p>
           </div>
 
           <div class="bg-white p-8 rounded-3xl border border-[#EEDBF5] space-y-4 shadow-sm">
@@ -359,7 +424,7 @@
             <div class="space-y-3">
               <label class="block text-xs font-bold text-[#3D2C3D] uppercase tracking-wider">Select Primary 3D Yarn Color:</label>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                <button type="button" onclick="updateCustom3DColor('#FF85A1', 'Pastel Pink')" class="p-2.5 rounded-xl border border-[#FF85A1] bg-[#FFF0F6] text-xs font-bold text-[#3D2C3D] flex items-center gap-2 hover:scale-105 transition-all">
+                <button type="button" onclick="updateCustom3DColor('#FF85A1', 'Soft Pink')" class="p-2.5 rounded-xl border border-[#FF85A1] bg-[#FFF0F6] text-xs font-bold text-[#3D2C3D] flex items-center gap-2 hover:scale-105 transition-all">
                   <span class="w-4 h-4 rounded-full bg-[#FF85A1] border border-white"></span> Pink
                 </button>
                 <button type="button" onclick="updateCustom3DColor('#C8B6FF', 'Lavender Purple')" class="p-2.5 rounded-xl border border-[#C8B6FF] bg-[#F7EEFA] text-xs font-bold text-[#3D2C3D] flex items-center gap-2 hover:scale-105 transition-all">
@@ -417,7 +482,7 @@
 
           <div>
             <label class="block text-xs font-bold text-[#3D2C3D] uppercase tracking-wider mb-2">Detailed Instructions &amp; Colors *</label>
-            <textarea id="custom-desc" rows="4" required placeholder="Describe stem counts, flower types, gift wrap ribbon colors, personalized gift card notes..." class="form-input"></textarea>
+            <textarea id="custom-desc" rows="4" required placeholder="Describe stem counts, flower types, colors, personalized gift card notes..." class="form-input"></textarea>
           </div>
 
           <button type="submit" class="w-full btn-terracotta justify-center py-4 text-base">
@@ -565,7 +630,7 @@
 
           <div class="pt-4 border-t border-[#EEDBF5]">
             <div class="flex gap-2">
-              <input type="text" id="checkout-promo-input" placeholder="Promo code (LOVE10)" class="form-input text-xs">
+              <input type="text" id="checkout-promo-input" placeholder="Promo code" class="form-input text-xs">
               <button onclick="handleApplyPromoCode()" class="btn-outline-terracotta !py-2 !px-4 text-xs">Apply</button>
             </div>
             <small id="checkout-promo-msg" class="block mt-1 font-bold text-xs"></small>
@@ -999,7 +1064,7 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-[#8B7A99] mb-1">Yarn Material</label>
-          <input type="text" id="adm-prod-yarn" placeholder="100% Combed Milk Cotton" class="form-input text-sm">
+          <input type="text" id="adm-prod-yarn" placeholder="100% Soft Cotton Yarn" class="form-input text-sm">
         </div>
         <div>
           <label class="block text-xs font-bold text-[#8B7A99] mb-1">Description</label>
@@ -1024,23 +1089,31 @@
   <!-- Footer -->
   <footer class="bg-[#3D2C3D] text-[#FFF7FA] pt-16 pb-12 border-t border-[#4E394E]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-      <div class="space-y-3">
+      <div class="space-y-4">
         <a href="#" onclick="navigate('home')" class="flex items-center gap-2">
           <span class="text-3xl">🌸</span>
           <span class="font-display text-2xl font-bold tracking-tight text-white">Crochet by Prisha</span>
         </a>
         <p class="font-display italic text-[#FFC6FF] text-sm">made with love, kept forever ♡</p>
         <p class="text-xs text-[#C8B6FF] leading-relaxed">
-          Handcrafted pastel flowers, keychains, hair clips &amp; hampers stitched with 100% milk cotton yarn.
+          Handcrafted collection &amp; flowers, keychains, hair accessories &amp; hampers stitched with 100% natural cotton yarn.
         </p>
+        <div class="pt-2 flex flex-col gap-2 text-xs">
+          <a href="https://instagram.com/crochetbyprisha" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-[#FF85A1] hover:text-white transition-colors font-semibold">
+            <i class="fa-brands fa-instagram text-base"></i> @crochetbyprisha
+          </a>
+          <a href="mailto:crochetbyprisha@gmail.com" class="inline-flex items-center gap-2 text-[#FFC6FF] hover:text-white transition-colors font-semibold">
+            <i class="fa-solid fa-envelope text-sm"></i> crochetbyprisha@gmail.com
+          </a>
+        </div>
       </div>
 
       <div>
         <h4 class="font-display font-bold text-lg text-white mb-4">Categories</h4>
         <ul class="space-y-2 text-xs text-[#E8D7FF]">
-          <li><a href="#shop" onclick="filterShopByCategory('cat-flowers')" class="hover:text-white">💐 Flowers (With Gift Wrap)</a></li>
-          <li><a href="#shop" onclick="filterShopByCategory('cat-keychains')" class="hover:text-white">🔑 Keychains</a></li>
-          <li><a href="#shop" onclick="filterShopByCategory('cat-hair')" class="hover:text-white">🎀 Hair Accessories</a></li>
+          <li><a href="#shop" onclick="filterShopByCategory('cat-flowers')" class="hover:text-white">💐 Flowers (Gift wrapping optional)</a></li>
+          <li><a href="#shop" onclick="filterShopByCategory('cat-hair')" class="hover:text-white">✨ Hair Accessories</a></li>
+          <li><a href="#shop" onclick="filterShopByCategory('cat-keychains')" class="hover:text-white">🎀 Keychains</a></li>
           <li><a href="#shop" onclick="filterShopByCategory('cat-hampers')" class="hover:text-white">🎁 Gift Hampers</a></li>
         </ul>
       </div>
@@ -1056,19 +1129,40 @@
       </div>
 
       <div>
-        <h4 class="font-display font-bold text-lg text-white mb-4">Accepted Payments</h4>
-        <div class="flex flex-wrap gap-2 text-2xl text-[#E8D7FF] mb-4">
+        <h4 class="font-display font-bold text-lg text-white mb-4">Connect &amp; Pay</h4>
+        <div class="space-y-3 text-xs text-[#E8D7FF] mb-4">
+          <div>
+            <span class="text-[11px] text-[#C8B6FF] block mb-1">Follow On Instagram:</span>
+            <a href="https://instagram.com/crochetbyprisha" target="_blank" rel="noopener noreferrer" class="font-bold text-[#FF85A1] hover:underline flex items-center gap-1.5">
+              <i class="fa-brands fa-instagram text-base"></i> @crochetbyprisha
+            </a>
+          </div>
+          <div>
+            <span class="text-[11px] text-[#C8B6FF] block mb-1">Email Orders / Queries:</span>
+            <a href="mailto:crochetbyprisha@gmail.com" class="font-bold text-white hover:underline flex items-center gap-1.5">
+              <i class="fa-solid fa-envelope text-sm"></i> crochetbyprisha@gmail.com
+            </a>
+          </div>
+        </div>
+
+        <h5 class="text-xs font-bold text-[#C8B6FF] mb-2 uppercase tracking-wider">Accepted Online Payments</h5>
+        <div class="flex flex-wrap gap-2 text-2xl text-[#E8D7FF] mb-2">
+          <i class="fa-brands fa-google-pay"></i>
+          <i class="fa-solid fa-qrcode"></i>
           <i class="fa-brands fa-cc-visa"></i>
           <i class="fa-brands fa-cc-mastercard"></i>
-          <i class="fa-solid fa-qrcode"></i>
-          <i class="fa-brands fa-google-pay"></i>
         </div>
-        <p class="text-[11px] text-[#C8B6FF]">100% Verified Online Payments (UPI / GPay / Cards)</p>
+        <p class="text-[11px] text-[#C8B6FF]">Direct UPI / GPay / PhonePe / Paytm / BHIM</p>
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 border-t border-[#4E394E] pt-6 flex flex-col sm:flex-row justify-between text-xs text-[#C8B6FF]">
+    <div class="max-w-7xl mx-auto px-4 border-t border-[#4E394E] pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-[#C8B6FF]">
       <div>© 2026 Crochet by Prisha. All rights reserved. <i>made with love, kept forever ♡</i></div>
+      <div class="flex items-center gap-4">
+        <a href="mailto:crochetbyprisha@gmail.com" class="hover:text-white transition"><i class="fa-solid fa-envelope mr-1"></i>crochetbyprisha@gmail.com</a>
+        <span>•</span>
+        <a href="https://instagram.com/crochetbyprisha" target="_blank" rel="noopener noreferrer" class="hover:text-[#FF85A1] transition"><i class="fa-brands fa-instagram mr-1"></i>@crochetbyprisha</a>
+      </div>
     </div>
   </footer>
 
