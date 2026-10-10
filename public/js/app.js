@@ -136,12 +136,12 @@ let activeAccountTab = 'orders';
 let activeAdminTab = 'overview';
 let pendingOrderData = null;
 
-const BACKEND_URL = 'https://lat-additions-modelling-rendered.trycloudflare.com';
+const BACKEND_URL = 'https://crochet-boutique-akah.onrender.com';
 
 function getApiUrl(endpoint) {
   if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) return endpoint;
-  const isStaticHosting = window.location.hostname.includes('pages.dev') || window.location.hostname.includes('trycloudflare.com') || window.location.protocol === 'file:';
-  const base = isStaticHosting ? BACKEND_URL : '';
+  const isLocalServer = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '3000' || window.location.port === '5000');
+  const base = isLocalServer ? '' : BACKEND_URL;
   return base + (endpoint.startsWith('/') ? '' : '/') + endpoint;
 }
 
