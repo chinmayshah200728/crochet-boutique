@@ -297,17 +297,20 @@ function toggleMobileNav() {
 }
 
 function updateHeaderUI() {
+  const nav = document.querySelector('nav');
+  const existing = document.getElementById('nav-admin-link');
   if (currentUser && currentUser.role === 'admin') {
-    const nav = document.querySelector('nav');
-    if (nav && !document.getElementById('nav-admin-link')) {
+    if (nav && !existing) {
       const adminLink = document.createElement('a');
       adminLink.id = 'nav-admin-link';
       adminLink.href = '#admin';
       adminLink.onclick = () => navigate('admin');
       adminLink.className = 'nav-link text-[#FF85A1] font-bold';
-      adminLink.textContent = 'Dashboard 🔒';
+      adminLink.textContent = 'Admin Dashboard 🔒';
       nav.appendChild(adminLink);
     }
+  } else {
+    if (existing) existing.remove();
   }
 }
 
@@ -1535,7 +1538,7 @@ async function switchAccountTab(tab) {
 
 async function renderAdminView() {
   if (!currentUser || currentUser.role !== 'admin') {
-    showToast('🔑 Please log in with Admin credentials to access Seller Portal');
+    showToast('🔑 Please log in with Admin credentials to access Admin Dashboard');
     openAuthModal();
     switchAuthTab('login');
     const emailElem = document.getElementById('login-email');
