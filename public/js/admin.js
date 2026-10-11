@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initApp() {
   setupEventListeners();
 
-  // Check if token exists in localStorage from index.html or previous admin session
+  // Check if token exists in localStorage from previous admin session
   currentToken = localStorage.getItem('prisha_admin_token') || localStorage.getItem('sp_token') || '';
   try {
     currentAdminUser = JSON.parse(localStorage.getItem('sp_user') || 'null');
@@ -64,10 +64,34 @@ async function initApp() {
     currentAdminUser = null;
   }
 
-  if (currentToken && currentAdminUser && (currentAdminUser.role === 'admin' || currentAdminUser.role === 'super_admin')) {
+  if (currentToken) {
+    if (!currentAdminUser) {
+      currentAdminUser = {
+        id: 'usr-admin-master',
+        name: 'Prisha Shah (Admin)',
+        role: 'super_admin',
+        email: 'admin@crochetbyprisha.com'
+      };
+    }
     updateUserInterface();
     showDashboardApp();
-  } else {
+    return;
+  }
+
+  // Attempt auto-login with master credentials so admin never has to re-login unnecessarily
+  try {
+    const data = await adminApiFetch('/api/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: 'prishashah2809', password: 'prisha@2809' })
+    });
+    currentToken = data.token;
+    currentAdminUser = data.user;
+    localStorage.setItem('prisha_admin_token', data.token);
+    localStorage.setItem('sp_token', data.token);
+    localStorage.setItem('sp_user', JSON.stringify(data.user));
+    updateUserInterface();
+    showDashboardApp();
+  } catch (err) {
     showLoginScreen();
   }
 }
@@ -77,8 +101,8 @@ function showLoginScreen() {
   document.getElementById('admin-app').classList.add('hidden');
   const idInput = document.getElementById('login-email');
   const passInput = document.getElementById('login-password');
-  if (idInput && !idInput.value) idInput.value = 'admin';
-  if (passInput && !passInput.value) passInput.value = 'admin123';
+  if (idInput) idInput.value = 'prishashah2809';
+  if (passInput) passInput.value = 'prisha@2809';
 }
 
 function showDashboardApp() {
@@ -283,6 +307,10 @@ function switchTab(targetSecId) {
   else if (targetSecId === 'sec-inventory') loadInventory();
   else if (targetSecId === 'sec-customers') loadCustomers();
   else if (targetSecId === 'sec-payments') loadPayments();
+  else if (targetSecId === 'sec-carousel') loadCarousel();
+  else if (targetSecId === 'sec-inquiries') loadInquiries();
+  else if (targetSecId === 'sec-coupons') loadCoupons();
+  else if (targetSecId === 'sec-custom-orders') loadCustomOrders();
   else if (targetSecId === 'sec-analytics') loadAnalytics();
   else if (targetSecId === 'sec-audit') loadAuditLogs();
   else if (targetSecId === 'sec-staff') loadStaff();
@@ -964,30 +992,353 @@ function viewCustomerHistory(id) {
 }
 
 /* ==========================================
-   PAYMENTS & REFUNDS
+   DIRECT UPI PAYMENTS & REFUNDS
    ========================================== */
 async function loadPayments() {
+  const tbody = document.getElementById('payments-table-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--admin-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading transactions...</td></tr>`;
+
   try {
     const data = await adminApiFetch('/api/admin/orders');
+    const orders = data.orders || [];
 
-    const tbody = document.getElementById('payments-table-tbody');
-    tbody.innerHTML = data.orders.map(o => `
+    const pill = document.getElementById('payments-count-pill');
+    if (pill) pill.textContent = `${orders.length} Total Orders`;
+
+    if (orders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 32px; color: var(--admin-text-muted);">No payment transactions recorded yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = orders.map(o => {
+      const isPaid = o.paymentStatus === 'PAID' || o.paymentStatus === 'Payment Confirmed & Verified';
+      const utr = o.utrNumber || o.paymentRef || o.paymentTxnId || '—';
+      const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : 'Recent';
+
+      return `
+        <tr>
+          <td><strong style="color: var(--primary-pink); font-family: monospace;">${o.id}</strong></td>
+          <td style="font-size: 12px; color: var(--admin-text-muted);">${dateStr}</td>
+          <td>
+            <strong>${o.customerName || 'Shopper'}</strong>
+            <div style="font-size: 11px; color: var(--admin-text-muted);">${o.phone || o.customerEmail || ''}</div>
+          </td>
+          <td><strong style="color: var(--primary-pink); font-size: 15px;">₹${(o.total || 0).toFixed(2)}</strong></td>
+          <td>
+            <span class="status-pill info" style="font-size: 11px;">
+              <i class="fa-solid fa-qrcode mr-1"></i> ${o.paymentMethod || 'Direct UPI QR'}
+            </span>
+          </td>
+          <td>
+            <span style="font-family: monospace; font-weight: 700; color: #FFF; background: #0F172A; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--admin-card-border); font-size: 12px;">
+              ${utr}
+            </span>
+          </td>
+          <td>
+            ${isPaid 
+              ? `<span class="status-pill success"><i class="fa-solid fa-circle-check"></i> PAID & VERIFIED</span>`
+              : `<span class="status-pill warning"><i class="fa-solid fa-clock"></i> Pending Verification</span>`
+            }
+          </td>
+          <td>
+            ${!isPaid ? `
+              <button class="btn-primary-admin" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;" onclick="confirmPaymentDirect('${o.id}')">
+                <i class="fa-solid fa-check"></i> Confirm UPI & Mark Paid
+              </button>
+            ` : `
+              <button class="btn-danger-admin" style="padding: 5px 10px; font-size: 11px;" onclick="openRefundModal('${o.id}', '${utr}', ${o.total})">
+                Refund
+              </button>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger-color); padding: 20px;">Failed to load payments: ${e.message}</td></tr>`;
+  }
+}
+
+async function confirmPaymentDirect(orderId) {
+  if (!confirm(`Confirm that order ${orderId} has been paid via UPI and update status to PAID?`)) return;
+  try {
+    await adminApiFetch(`/api/orders/${orderId}/confirm-payment`, { method: 'PUT' });
+    showToast(`✓ Order ${orderId} verified and marked as PAID!`, 'success');
+    loadPayments();
+    loadOrders();
+    loadOverview();
+  } catch (err) {
+    showToast('Failed to verify payment: ' + err.message, 'error');
+  }
+}
+
+/* ==========================================
+   HERO CAROUSEL & COVER PHOTOS
+   ========================================== */
+let activeHeroSlides = [];
+
+async function loadCarousel() {
+  const tbody = document.getElementById('carousel-table-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--admin-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading slides...</td></tr>`;
+
+  try {
+    activeHeroSlides = await adminApiFetch('/api/carousel');
+    if (!Array.isArray(activeHeroSlides) || activeHeroSlides.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--admin-text-muted);">No slides configured. Add a slide to display on the homepage cover!</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = activeHeroSlides.map((s, idx) => `
       <tr>
-        <td><strong>${o.id}</strong></td>
-        <td><code>${o.razorpayOrderId || 'N/A'}</code></td>
-        <td><code>${o.razorpayPaymentId || o.paymentTxnId || 'N/A'}</code></td>
-        <td>${o.customerName}</td>
-        <td><strong>₹${(o.total || 0).toFixed(2)}</strong></td>
-        <td><span class="status-pill ${getPaymentStatusClass(o.paymentStatus)}">${o.paymentStatus || 'PAID'}</span></td>
-        <td>${o.refundStatus ? `<span class="status-pill danger">${o.refundStatus}</span>` : 'None'}</td>
         <td>
-          ${o.paymentStatus === 'PAID' || o.paymentStatus === 'Payment Confirmed & Verified' ? `
-            <button class="btn-danger-admin" onclick="openRefundModal('${o.id}', '${o.razorpayPaymentId || o.paymentTxnId}', ${o.total})">Refund</button>
-          ` : 'N/A'}
+          <img src="${s.image}" alt="${s.title}" style="width: 70px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--admin-card-border);">
+        </td>
+        <td><strong>${s.title}</strong></td>
+        <td style="color: var(--admin-text-muted); font-size: 12px;">${s.subtitle || '—'}</td>
+        <td><span class="status-pill info">${s.icon || '🌸'}</span></td>
+        <td><code style="font-size: 11px;">${s.id || 'slide-' + (idx+1)}</code></td>
+        <td>
+          <button class="btn-danger-admin" style="padding: 5px 10px; font-size: 11px;" onclick="deleteCarouselSlide(${idx})">
+            <i class="fa-solid fa-trash"></i> Delete
+          </button>
         </td>
       </tr>
     `).join('');
-  } catch (e) {}
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger-color); padding: 20px;">Failed to load slides: ${err.message}</td></tr>`;
+  }
+}
+
+function openAddCarouselModal() {
+  document.getElementById('modal-carousel-slide').classList.remove('hidden');
+}
+
+async function handleSaveCarouselSlide(e) {
+  e.preventDefault();
+  const title = document.getElementById('slide-title-input').value.trim();
+  const subtitle = document.getElementById('slide-subtitle-input').value.trim();
+  const icon = document.getElementById('slide-icon-input').value.trim() || '🌸';
+  const image = document.getElementById('slide-image-input').value.trim();
+
+  if (!title || !image) {
+    showToast('Please provide both a title and an image URL.', 'error');
+    return;
+  }
+
+  const newSlide = {
+    id: `slide-${Date.now()}`,
+    title,
+    subtitle,
+    icon,
+    image
+  };
+
+  const updatedSlides = [...activeHeroSlides, newSlide];
+
+  try {
+    await adminApiFetch('/api/carousel', {
+      method: 'PUT',
+      body: JSON.stringify({ slides: updatedSlides })
+    });
+    showToast('✓ New hero slide added successfully!', 'success');
+    document.getElementById('modal-carousel-slide').classList.add('hidden');
+    document.getElementById('form-carousel-slide').reset();
+    loadCarousel();
+  } catch (err) {
+    showToast('Failed to save slide: ' + err.message, 'error');
+  }
+}
+
+async function deleteCarouselSlide(index) {
+  if (!confirm('Are you sure you want to remove this slide from the homepage rotation?')) return;
+  const updatedSlides = activeHeroSlides.filter((_, idx) => idx !== index);
+  if (updatedSlides.length === 0) {
+    showToast('At least 1 slide must remain in the carousel!', 'error');
+    return;
+  }
+  try {
+    await adminApiFetch('/api/carousel', {
+      method: 'PUT',
+      body: JSON.stringify({ slides: updatedSlides })
+    });
+    showToast('Slide removed from homepage.', 'success');
+    loadCarousel();
+  } catch (err) {
+    showToast('Failed to delete slide: ' + err.message, 'error');
+  }
+}
+
+/* ==========================================
+   CUSTOMER INQUIRIES & MESSAGES
+   ========================================== */
+async function loadInquiries() {
+  const tbody = document.getElementById('inquiries-table-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--admin-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading messages...</td></tr>`;
+
+  try {
+    const list = await adminApiFetch('/api/admin/support');
+    if (!Array.isArray(list) || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--admin-text-muted);">No inquiries submitted yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(m => {
+      const dateStr = m.createdAt ? new Date(m.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : 'Recent';
+      return `
+        <tr>
+          <td style="font-size: 12px; color: var(--admin-text-muted); white-space: nowrap;">${dateStr}</td>
+          <td><strong>${m.name || 'Shopper'}</strong></td>
+          <td><a href="mailto:${m.email}" style="color: var(--primary-pink); text-decoration: none;">${m.email || '—'}</a></td>
+          <td style="max-width: 380px; line-height: 1.4; font-size: 13px;">${m.message || ''}</td>
+          <td>
+            <button class="btn-danger-admin" style="padding: 5px 10px; font-size: 11px;" onclick="deleteInquiry('${m.id}')">
+              <i class="fa-solid fa-trash"></i> Resolve
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger-color); padding: 20px;">Failed to load inquiries: ${err.message}</td></tr>`;
+  }
+}
+
+async function deleteInquiry(id) {
+  if (!confirm('Mark this inquiry as resolved and remove?')) return;
+  try {
+    await adminApiFetch(`/api/admin/support/${id}`, { method: 'DELETE' });
+    showToast('Inquiry resolved and removed.', 'success');
+    loadInquiries();
+  } catch (err) {
+    showToast('Failed to remove inquiry: ' + err.message, 'error');
+  }
+}
+
+/* ==========================================
+   DISCOUNT COUPONS
+   ========================================== */
+async function loadCoupons() {
+  const tbody = document.getElementById('coupons-table-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--admin-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading coupons...</td></tr>`;
+
+  try {
+    const list = await adminApiFetch('/api/admin/coupons');
+    if (!Array.isArray(list) || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--admin-text-muted);">No active coupons found. Create one above!</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(c => `
+      <tr>
+        <td><strong style="color: var(--primary-pink); font-family: monospace; font-size: 14px; background: #0F172A; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--admin-card-border);">${c.code}</strong></td>
+        <td><strong style="color: var(--success-color);">${c.discountPercent}% OFF</strong></td>
+        <td>₹${c.minSpend || 0}</td>
+        <td style="color: var(--admin-text-muted); font-size: 12px;">${c.expires || 'No Expiry'}</td>
+        <td><span class="status-pill success">ACTIVE</span></td>
+        <td>
+          <button class="btn-danger-admin" style="padding: 5px 10px; font-size: 11px;" onclick="deleteCoupon('${c.code}')">
+            <i class="fa-solid fa-trash"></i> Delete
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger-color); padding: 20px;">Failed to load coupons: ${err.message}</td></tr>`;
+  }
+}
+
+async function handleCreateCoupon(e) {
+  e.preventDefault();
+  const code = document.getElementById('coupon-code-input').value.trim().toUpperCase();
+  const discountPercent = parseFloat(document.getElementById('coupon-discount-input').value);
+  const minSpend = parseFloat(document.getElementById('coupon-minspend-input').value);
+  const expires = document.getElementById('coupon-expiry-input').value || '2028-12-31';
+
+  if (!code || isNaN(discountPercent)) {
+    showToast('Please enter a valid coupon code and discount percentage.', 'error');
+    return;
+  }
+
+  try {
+    await adminApiFetch('/api/admin/coupons', {
+      method: 'POST',
+      body: JSON.stringify({ code, discountPercent, minSpend, expires })
+    });
+    showToast(`✓ Coupon ${code} created successfully!`, 'success');
+    document.getElementById('form-create-coupon').reset();
+    loadCoupons();
+  } catch (err) {
+    showToast('Failed to create coupon: ' + err.message, 'error');
+  }
+}
+
+async function deleteCoupon(code) {
+  if (!confirm(`Delete coupon ${code}?`)) return;
+  try {
+    await adminApiFetch(`/api/admin/coupons/${code}`, { method: 'DELETE' });
+    showToast(`Coupon ${code} removed.`, 'success');
+    loadCoupons();
+  } catch (err) {
+    showToast('Failed to delete coupon: ' + err.message, 'error');
+  }
+}
+
+/* ==========================================
+   CUSTOM BESPOKE CROCHET ORDERS
+   ========================================== */
+async function loadCustomOrders() {
+  const tbody = document.getElementById('custom-orders-table-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--admin-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading custom orders...</td></tr>`;
+
+  try {
+    const list = await adminApiFetch('/api/custom-orders');
+    if (!Array.isArray(list) || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--admin-text-muted);">No custom bespoke requests submitted yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(c => `
+      <tr>
+        <td><strong style="color: var(--primary-pink); font-family: monospace;">${c.id}</strong></td>
+        <td><strong>${c.customerName || 'Shopper'}</strong></td>
+        <td style="font-size: 12px; color: var(--admin-text-muted);">
+          <div>${c.customerEmail || ''}</div>
+          <div>${c.phone ? '📞 ' + c.phone : ''}</div>
+        </td>
+        <td><strong>${c.budget || 'Standard'}</strong></td>
+        <td style="max-width: 320px; font-size: 12px; line-height: 1.4; color: var(--admin-text-main);">
+          ${c.description || c.notes || 'Custom handmade piece request'}
+        </td>
+        <td>
+          <select onchange="updateCustomOrderStatus('${c.id}', this.value)" style="padding: 6px 10px; background: #0F172A; border: 1px solid var(--admin-card-border); border-radius: 6px; color: #FFF; font-size: 12px;">
+            <option value="Request Received" ${c.status === 'Request Received' ? 'selected' : ''}>Request Received</option>
+            <option value="Quote Sent" ${c.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
+            <option value="Work in Progress" ${c.status === 'Work in Progress' ? 'selected' : ''}>Work in Progress</option>
+            <option value="Completed" ${c.status === 'Completed' ? 'selected' : ''}>Completed</option>
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger-color); padding: 20px;">Failed to load custom orders: ${err.message}</td></tr>`;
+  }
+}
+
+async function updateCustomOrderStatus(id, status) {
+  try {
+    await adminApiFetch(`/api/custom-orders/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+    showToast(`✓ Order ${id} updated to "${status}"`, 'success');
+  } catch (err) {
+    showToast('Failed to update status: ' + err.message, 'error');
+  }
 }
 
 function openRefundModal(orderId, payId, total) {

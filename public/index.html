@@ -101,9 +101,6 @@
         <a href="#" onclick="handleAccountClick(); toggleMobileNav();" class="block font-semibold py-1.5 text-xs text-[#3D2C3D]">
           <i class="fa-regular fa-user mr-2 text-[#FF85A1]"></i>My Account &amp; Past Orders
         </a>
-        <a href="#admin" onclick="navigate('admin'); toggleMobileNav();" class="block font-semibold py-1.5 text-[#FF85A1] text-xs">
-          <i class="fa-solid fa-lock mr-2"></i>Admin Dashboard
-        </a>
       </div>
     </div>
   </header>
@@ -852,42 +849,14 @@
     </section>
 
     <!-- ==========================================
-         VIEW 9: ADMIN DASHBOARD VIEW
+         VIEW 9: ADMIN DASHBOARD (Redirects to /admin)
          ========================================== -->
-    <section id="view-admin" class="view-panel hidden py-10 max-w-7xl mx-auto px-4">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-          <span class="text-xs font-bold text-[#FF85A1] uppercase tracking-wider flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Store Administration
-          </span>
-          <h1 class="font-display text-2xl sm:text-3xl font-bold text-[#3D2C3D]">Admin Dashboard</h1>
-        </div>
-        <div class="flex flex-wrap items-center gap-2" id="admin-header-actions">
-          <a href="/admin.html" target="_blank" class="btn-outline-terracotta text-xs !py-2 !px-3" title="Open Full Studio Suite">
-            <i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[#FF85A1]"></i> Studio Suite ↗
-          </a>
-          <button onclick="handleAdminLogout()" class="btn-outline-terracotta text-xs !py-2 !px-3 text-red-500 border-red-200 hover:border-red-400" id="btn-admin-view-logout" style="display: none;">
-            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
-          </button>
-          <button onclick="navigate('home')" class="btn-outline-terracotta text-xs !py-2 !px-3">Back to Store</button>
-        </div>
-      </div>
-
-      <!-- All Admin Management Navigation Tabs -->
-      <div id="admin-top-tabs" class="flex flex-wrap gap-2 mb-8 border-b border-[#EEDBF5] pb-4 overflow-x-auto" style="display: none;">
-        <button onclick="switchAdminTab('overview')" class="btn-terracotta text-xs whitespace-nowrap" id="adm-tab-overview"><i class="fa-solid fa-chart-pie mr-1"></i> Overview &amp; Sales</button>
-        <button onclick="switchAdminTab('products')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-products"><i class="fa-solid fa-tags mr-1"></i> Products &amp; Catalog</button>
-        <button onclick="switchAdminTab('orders')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-orders"><i class="fa-solid fa-box mr-1"></i> Orders &amp; Fulfillment</button>
-        <button onclick="switchAdminTab('payments')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-payments"><i class="fa-solid fa-credit-card mr-1"></i> 💳 UPI &amp; Payments</button>
-        <button onclick="switchAdminTab('carousel')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-carousel"><i class="fa-solid fa-images mr-1"></i> 🎨 Hero Carousel</button>
-        <button onclick="switchAdminTab('messages')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-messages"><i class="fa-solid fa-envelope mr-1"></i> 💌 Inquiries</button>
-        <button onclick="switchAdminTab('coupons')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-coupons"><i class="fa-solid fa-ticket mr-1"></i> 🏷️ Coupons</button>
-        <button onclick="switchAdminTab('custom-orders')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-custom-orders"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 🎨 Custom Orders</button>
-        <button onclick="switchAdminTab('customers')" class="btn-outline-terracotta text-xs whitespace-nowrap" id="adm-tab-customers"><i class="fa-solid fa-users mr-1"></i> 👥 Customers</button>
-      </div>
-
-      <div id="admin-panel-content">
-        <!-- Rendered dynamically by JS -->
+    <section id="view-admin" class="view-panel hidden py-24 text-center">
+      <div class="max-w-md mx-auto p-8 bg-white rounded-3xl border border-[#EEDBF5] space-y-4 shadow-sm">
+        <span class="text-3xl">🧶</span>
+        <h2 class="font-display font-bold text-2xl text-[#3D2C3D]">Store Administration</h2>
+        <p class="text-xs text-[#8B7A99]">Admin controls are located in the private management portal.</p>
+        <a href="/admin" class="btn-terracotta text-xs inline-block">Open Admin Dashboard ↗</a>
       </div>
     </section>
 
@@ -1204,7 +1173,6 @@
           <li><a href="#return-policy" onclick="scrollToSection('return-policy-section')" class="hover:text-[#FFC6FF]">🎥 Unboxing Video Required for Returns</a></li>
           <li><a href="#checkout" onclick="navigate('checkout')" class="hover:text-white">📲 Online Payments Only (No COD)</a></li>
           <li><a href="#track-order" onclick="navigate('track-order')" class="hover:text-white">Track Shipping Status</a></li>
-          <li><a href="#admin" onclick="navigate('admin')" class="hover:text-[#FF85A1]">Admin Dashboard 🔒</a></li>
         </ul>
       </div>
 

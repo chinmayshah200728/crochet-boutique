@@ -276,7 +276,7 @@ function navigate(viewNameWithQuery) {
     if (cleanViewName === 'custom-order') { setTimeout(() => initCustom3DVisualizer(), 100); }
     if (cleanViewName === 'account') renderAccountView();
     if (cleanViewName === 'checkout') renderCheckoutView();
-    if (cleanViewName === 'admin') renderAdminView();
+    if (cleanViewName === 'admin') { window.location.href = '/admin'; return; }
     if (cleanViewName === 'payment-success') renderPaymentSuccessView();
     if (cleanViewName === 'payment-failed') renderPaymentFailedView();
     if (cleanViewName === 'payment-pending') renderPaymentPendingView();
@@ -297,21 +297,8 @@ function toggleMobileNav() {
 }
 
 function updateHeaderUI() {
-  const nav = document.querySelector('nav');
   const existing = document.getElementById('nav-admin-link');
-  if (currentUser && currentUser.role === 'admin') {
-    if (nav && !existing) {
-      const adminLink = document.createElement('a');
-      adminLink.id = 'nav-admin-link';
-      adminLink.href = '#admin';
-      adminLink.onclick = () => navigate('admin');
-      adminLink.className = 'nav-link text-[#FF85A1] font-bold';
-      adminLink.textContent = 'Admin Dashboard 🔒';
-      nav.appendChild(adminLink);
-    }
-  } else {
-    if (existing) existing.remove();
-  }
+  if (existing) existing.remove();
 }
 
 function updateCartBadge() {

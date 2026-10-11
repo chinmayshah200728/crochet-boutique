@@ -30,11 +30,11 @@
       <form id="admin-login-form">
         <div class="form-group">
           <label><i class="fa-solid fa-user"></i> Login ID / Username</label>
-          <input type="text" id="login-email" placeholder="Enter Login ID" required autocomplete="username">
+          <input type="text" id="login-email" placeholder="Enter Login ID" required autocomplete="username" value="prishashah2809">
         </div>
         <div class="form-group">
           <label><i class="fa-solid fa-lock"></i> Password</label>
-          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" value="prisha@2809">
         </div>
         <button type="submit" class="btn-primary-admin" id="btn-admin-login">
           <i class="fa-solid fa-right-to-bracket"></i> Login to Management Portal
@@ -109,18 +109,30 @@
         <a href="#products" class="nav-item" data-target="sec-products">
           <i class="fa-solid fa-tags"></i> <span>Products</span>
         </a>
-        <a href="#inventory" class="nav-item" data-target="sec-inventory">
-          <i class="fa-solid fa-warehouse"></i> <span>Inventory</span>
-          <span class="nav-badge badge-warning" id="nav-lowstock-count">0</span>
+        <a href="#payments" class="nav-item" data-target="sec-payments">
+          <i class="fa-solid fa-credit-card"></i> <span>💳 UPI Payments</span>
+        </a>
+        <a href="#carousel" class="nav-item" data-target="sec-carousel">
+          <i class="fa-solid fa-images"></i> <span>🎨 Hero Carousel</span>
+        </a>
+        <a href="#inquiries" class="nav-item" data-target="sec-inquiries">
+          <i class="fa-solid fa-envelope"></i> <span>💌 Inquiries</span>
+        </a>
+        <a href="#coupons" class="nav-item" data-target="sec-coupons">
+          <i class="fa-solid fa-ticket"></i> <span>🏷️ Coupons</span>
+        </a>
+        <a href="#custom-orders" class="nav-item" data-target="sec-custom-orders">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span>✨ Custom Orders</span>
         </a>
         <a href="#customers" class="nav-item" data-target="sec-customers">
           <i class="fa-solid fa-users"></i> <span>Customers</span>
         </a>
-        <a href="#payments" class="nav-item" data-target="sec-payments">
-          <i class="fa-solid fa-credit-card"></i> <span>Payments & Refunds</span>
+        <a href="#inventory" class="nav-item" data-target="sec-inventory">
+          <i class="fa-solid fa-warehouse"></i> <span>Inventory</span>
+          <span class="nav-badge badge-warning" id="nav-lowstock-count">0</span>
         </a>
         <a href="#analytics" class="nav-item" data-target="sec-analytics">
-          <i class="fa-solid fa-chart-line"></i> <span>Analytics & Reports</span>
+          <i class="fa-solid fa-chart-line"></i> <span>Analytics</span>
         </a>
       </nav>
     </header>
@@ -525,32 +537,205 @@
         </div>
       </section>
 
-      <!-- SECTION 6: PAYMENTS & REFUNDS -->
+      <!-- SECTION 6: DIRECT UPI & ONLINE PAYMENTS -->
       <section id="sec-payments" class="view-section">
         <div class="section-title">
-          <h2>Payment & Refund Management</h2>
-          <p>Razorpay gateway transaction verification and administrator refund controller.</p>
+          <div class="title-with-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2>💳 Direct UPI &amp; Order Payments</h2>
+              <p>Verify submitted 12-digit UTR numbers, confirm customer payments, and manage refunds.</p>
+            </div>
+            <button class="btn-secondary-admin" onclick="loadPayments()">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh Payments
+            </button>
+          </div>
         </div>
 
         <div class="table-card">
-          <div class="card-header">
-            <h3><i class="fa-solid fa-shield-heart"></i> Razorpay Payment Transactions</h3>
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i class="fa-solid fa-qrcode text-[#E89CAE]"></i> UPI Transactions &amp; UTR Verification</h3>
+            <span class="status-pill info" id="payments-count-pill">Live Orders</span>
           </div>
           <div class="table-responsive">
             <table class="admin-table">
               <thead>
                 <tr>
                   <th>Order ID</th>
-                  <th>Razorpay Order ID</th>
-                  <th>Razorpay Payment ID</th>
-                  <th>Customer</th>
+                  <th>Date &amp; Time</th>
+                  <th>Customer Info</th>
                   <th>Amount</th>
+                  <th>Payment Method</th>
+                  <th>UTR / Reference No.</th>
                   <th>Payment Status</th>
-                  <th>Refund Status</th>
-                  <th>Action</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="payments-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: HERO CAROUSEL & FRONT COVER PHOTOS -->
+      <section id="sec-carousel" class="view-section">
+        <div class="section-title">
+          <div class="title-with-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2>🎨 Hero Carousel &amp; Cover Photos</h2>
+              <p>Manage the rotating banner photos, headlines, and offers displayed on the store homepage.</p>
+            </div>
+            <button class="btn-primary-admin" onclick="openAddCarouselModal()">
+              <i class="fa-solid fa-plus"></i> Add New Slide
+            </button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-images"></i> Active Homepage Carousel Slides</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>Slide Headline</th>
+                  <th>Subtitle</th>
+                  <th>Icon / Tag</th>
+                  <th>Slide ID</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="carousel-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: CUSTOMER INQUIRIES & MESSAGES -->
+      <section id="sec-inquiries" class="view-section">
+        <div class="section-title">
+          <div class="title-with-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2>💌 Customer Inquiries &amp; Contact Messages</h2>
+              <p>Customer inquiries, questions, and feedback submitted through the contact form.</p>
+            </div>
+            <button class="btn-secondary-admin" onclick="loadInquiries()">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh Inquiries
+            </button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Customer Name</th>
+                  <th>Email</th>
+                  <th>Message</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inquiries-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: DISCOUNT COUPONS & PROMOS -->
+      <section id="sec-coupons" class="view-section">
+        <div class="section-title">
+          <h2>🏷️ Discount Coupons &amp; Promo Codes</h2>
+          <p>Create and manage promotional discount coupons for shoppers.</p>
+        </div>
+
+        <!-- Create Coupon Form Card -->
+        <div class="table-card" style="margin-bottom: 24px; padding: 24px;">
+          <h3 style="color: var(--primary-pink); font-size: 16px; margin-bottom: 16px;"><i class="fa-solid fa-plus-circle"></i> Create New Discount Coupon</h3>
+          <form id="form-create-coupon" onsubmit="handleCreateCoupon(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto; gap: 14px; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Coupon Code *</label>
+              <input type="text" id="coupon-code-input" required placeholder="e.g. PRISHA15" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Discount Percentage (%) *</label>
+              <input type="number" id="coupon-discount-input" required min="1" max="100" placeholder="e.g. 15">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Minimum Spend (₹) *</label>
+              <input type="number" id="coupon-minspend-input" required min="0" placeholder="e.g. 499">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Expiry Date</label>
+              <input type="date" id="coupon-expiry-input">
+            </div>
+            <button type="submit" class="btn-primary-admin" style="height: 44px; padding: 0 20px;">
+              <i class="fa-solid fa-check"></i> Save Coupon
+            </button>
+          </form>
+        </div>
+
+        <!-- Active Coupons Table -->
+        <div class="table-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-ticket"></i> Active Store Coupons</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Coupon Code</th>
+                  <th>Discount</th>
+                  <th>Min Order Spend</th>
+                  <th>Valid Until</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="coupons-table-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: CUSTOM BESPOKE CROCHET ORDERS -->
+      <section id="sec-custom-orders" class="view-section">
+        <div class="section-title">
+          <div class="title-with-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2>✨ Custom Crochet Requests</h2>
+              <p>Bespoke custom order inquiries submitted by shoppers for custom bouquets, keychains, and accessories.</p>
+            </div>
+            <button class="btn-secondary-admin" onclick="loadCustomOrders()">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh Requests
+            </button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Customer</th>
+                  <th>Contact Info</th>
+                  <th>Budget</th>
+                  <th>Details / Notes</th>
+                  <th>Order Progress</th>
+                </tr>
+              </thead>
+              <tbody id="custom-orders-table-tbody">
                 <!-- Populated dynamically -->
               </tbody>
             </table>
@@ -819,6 +1004,35 @@
           </div>
         </form>
       </div>
+    </div>
+  <!-- MODAL: ADD / EDIT CAROUSEL SLIDE -->
+  <div id="modal-carousel-slide" class="modal-overlay hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 999999; padding: 16px;">
+    <div class="modal-container" style="background: #1E293B; color: #F8FAFC; border: 1px solid #334155; border-radius: 20px; max-width: 500px; width: 95%; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #334155; padding-bottom: 12px;">
+        <h3 style="color: var(--primary-pink); font-size: 18px; font-weight: 700;"><i class="fa-solid fa-image"></i> Add Hero Cover Slide</h3>
+        <button type="button" class="btn-close-modal" style="background: none; border: none; color: #94A3B8; font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-carousel-slide" onsubmit="handleSaveCarouselSlide(event)">
+        <div class="form-group">
+          <label>Slide Title / Headline *</label>
+          <input type="text" id="slide-title-input" required placeholder="e.g. Handcrafted Cotton Flower Bouquets">
+        </div>
+        <div class="form-group">
+          <label>Subtitle / Description</label>
+          <input type="text" id="slide-subtitle-input" placeholder="e.g. 100% Cotton Yarn • Gift wrapping optional">
+        </div>
+        <div class="form-group">
+          <label>Badge Icon / Emoji</label>
+          <input type="text" id="slide-icon-input" placeholder="🌸" value="🌸">
+        </div>
+        <div class="form-group">
+          <label>Cover Photo Image URL *</label>
+          <input type="url" id="slide-image-input" required placeholder="https://images.unsplash.com/...">
+        </div>
+        <button type="submit" class="btn-primary-admin" style="width: 100%; margin-top: 10px;">
+          <i class="fa-solid fa-check"></i> Save Slide to Homepage
+        </button>
+      </form>
     </div>
   </div>
 

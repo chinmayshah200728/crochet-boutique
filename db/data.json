@@ -383,6 +383,18 @@
   "webhookEvents": [],
   "auditLogs": [
     {
+      "id": "audit-1791708826415-1",
+      "adminId": "usr-prisha-master",
+      "adminName": "Prisha Shah",
+      "adminEmail": "prishashah2809@crochetbyprisha.com",
+      "role": "super_admin",
+      "action": "Admin Login",
+      "entity": "Authentication",
+      "details": "Logged into admin dashboard from IP 127.0.0.1",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-11T08:53:46.415Z"
+    },
+    {
       "id": "audit-1791707046400-285",
       "adminId": "usr-admin-master",
       "adminName": "Prisha Shah (Admin)",
