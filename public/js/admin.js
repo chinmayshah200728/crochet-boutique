@@ -56,42 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initApp() {
   setupEventListeners();
 
-  // Check if token exists in localStorage from previous admin session
-  currentToken = localStorage.getItem('prisha_admin_token') || localStorage.getItem('sp_token') || '';
+  // Check if an existing authenticated admin session exists
+  currentToken = localStorage.getItem('prisha_admin_token') || sessionStorage.getItem('prisha_admin_token') || '';
   try {
-    currentAdminUser = JSON.parse(localStorage.getItem('sp_user') || 'null');
+    currentAdminUser = JSON.parse(localStorage.getItem('prisha_admin_user') || sessionStorage.getItem('prisha_admin_user') || 'null');
   } catch (e) {
     currentAdminUser = null;
   }
 
-  if (currentToken) {
-    if (!currentAdminUser) {
-      currentAdminUser = {
-        id: 'usr-admin-master',
-        name: 'Prisha Shah (Admin)',
-        role: 'super_admin',
-        email: 'admin@crochetbyprisha.com'
-      };
-    }
+  // Only display dashboard if properly authenticated as admin; otherwise show the secure login screen
+  if (currentToken && currentAdminUser && (currentAdminUser.role === 'admin' || currentAdminUser.role === 'super_admin')) {
     updateUserInterface();
     showDashboardApp();
-    return;
-  }
-
-  // Attempt auto-login with master credentials so admin never has to re-login unnecessarily
-  try {
-    const data = await adminApiFetch('/api/admin/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'prishashah2809', password: 'prisha@2809' })
-    });
-    currentToken = data.token;
-    currentAdminUser = data.user;
-    localStorage.setItem('prisha_admin_token', data.token);
-    localStorage.setItem('sp_token', data.token);
-    localStorage.setItem('sp_user', JSON.stringify(data.user));
-    updateUserInterface();
-    showDashboardApp();
-  } catch (err) {
+  } else {
     showLoginScreen();
   }
 }
@@ -101,8 +78,9 @@ function showLoginScreen() {
   document.getElementById('admin-app').classList.add('hidden');
   const idInput = document.getElementById('login-email');
   const passInput = document.getElementById('login-password');
-  if (idInput) idInput.value = 'prishashah2809';
-  if (passInput) passInput.value = 'prisha@2809';
+  if (idInput) idInput.value = '';
+  if (passInput) passInput.value = '';
+  setTimeout(() => idInput?.focus(), 150);
 }
 
 function showDashboardApp() {
@@ -264,6 +242,7 @@ async function handleLogin(e) {
     currentToken = data.token;
     currentAdminUser = data.user;
     localStorage.setItem('prisha_admin_token', data.token);
+    localStorage.setItem('prisha_admin_user', JSON.stringify(data.user));
     localStorage.setItem('sp_token', data.token);
     localStorage.setItem('sp_user', JSON.stringify(data.user));
 
@@ -281,8 +260,10 @@ async function handleLogout() {
     await adminApiFetch('/api/admin/logout', { method: 'POST' });
   } catch (e) {}
   localStorage.removeItem('prisha_admin_token');
+  localStorage.removeItem('prisha_admin_user');
   localStorage.removeItem('sp_token');
   localStorage.removeItem('sp_user');
+  sessionStorage.clear();
   currentToken = '';
   currentAdminUser = null;
   if (sseEventSource) sseEventSource.close();
