@@ -162,6 +162,8 @@ app.post(['/api/auth/login', '/api/admin/login'], authLimiter, (req, res) => {
   const isAdminAttempt = (
     loginId === 'admin' || 
     loginId === 'admin@crochetbyprisha.com' || 
+    loginId === 'crochetbyprsiha@gmail.com' || 
+    loginId === 'crochetbyprisha@gmail.com' || 
     loginId === 'prishashah2809' || 
     loginId === 'prishashah2809@crochetbyprisha.com' || 
     loginId === 'prisha'

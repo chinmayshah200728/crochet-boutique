@@ -821,6 +821,18 @@
             <textarea id="supp-msg" rows="3" required placeholder="Message details..." class="form-input text-sm"></textarea>
             <button type="submit" class="btn-terracotta text-xs w-full justify-center">Send Message</button>
           </form>
+
+          <div class="pt-3 border-t border-[#F0E6F5] text-xs text-[#8B7A99] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span>Direct contact:</span>
+            <div class="flex flex-wrap items-center gap-3">
+              <a href="https://instagram.com/crochetby_prisha" target="_blank" rel="noopener noreferrer" class="font-bold text-[#FF85A1] hover:underline flex items-center gap-1">
+                <i class="fa-brands fa-instagram"></i> @crochetby_prisha
+              </a>
+              <a href="mailto:crochetbyprsiha@gmail.com" class="font-bold text-[#3D2C3D] hover:underline flex items-center gap-1">
+                <i class="fa-solid fa-envelope"></i> crochetbyprsiha@gmail.com
+              </a>
+            </div>
+          </div>
         </div>
 
         <div class="space-y-4">
@@ -922,10 +934,47 @@
           </div>
         </div>
 
-        <!-- Mobile Quick Pay Link -->
-        <a id="pay-upi-intent-link" href="upi://pay?pa=prishashah1206@okicici&pn=Prisha%20Shah&cu=INR" class="block bg-gradient-to-r from-[#FF85A1] to-[#C8B6FF] text-white font-bold text-xs py-2.5 px-4 rounded-full shadow hover:opacity-95 transition-all">
-          📲 Tap to Open in Google Pay / PhonePe
-        </a>
+        <!-- Dedicated App Payment Options (Prevents iOS WhatsApp redirection) -->
+        <div class="space-y-2 pt-1 text-left">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-[#3D2C3D] uppercase tracking-wider">Tap to Pay via App:</span>
+            <span class="text-[10px] text-[#8B7A99]">Opens installed payment app</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <!-- Google Pay -->
+            <button type="button" onclick="triggerUpiPayment('gpay')" class="bg-white border-2 border-[#EEDBF5] hover:border-[#4285F4] p-2.5 rounded-2xl text-center shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-all">
+              <i class="fa-brands fa-google text-[#4285F4] text-lg"></i>
+              <span class="text-[11px] font-bold text-[#3D2C3D]">Google Pay</span>
+            </button>
+
+            <!-- PhonePe -->
+            <button type="button" onclick="triggerUpiPayment('phonepe')" class="bg-white border-2 border-[#EEDBF5] hover:border-[#6739B7] p-2.5 rounded-2xl text-center shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-all">
+              <span class="w-6 h-6 rounded-full bg-[#6739B7] text-white text-xs font-black flex items-center justify-center font-mono">Pe</span>
+              <span class="text-[11px] font-bold text-[#3D2C3D]">PhonePe</span>
+            </button>
+
+            <!-- Paytm -->
+            <button type="button" onclick="triggerUpiPayment('paytm')" class="bg-white border-2 border-[#EEDBF5] hover:border-[#00BAF2] p-2.5 rounded-2xl text-center shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition-all">
+              <span class="w-6 h-6 rounded-full bg-[#00BAF2] text-white text-xs font-black flex items-center justify-center"><i class="fa-solid fa-wallet text-[10px]"></i></span>
+              <span class="text-[11px] font-bold text-[#3D2C3D]">Paytm</span>
+            </button>
+          </div>
+
+          <!-- One-Tap Copy UPI ID -->
+          <button type="button" onclick="copyUPIId()" class="w-full bg-white border border-[#EEDBF5] hover:border-[#FF85A1] py-2 px-3 rounded-2xl text-xs font-bold text-[#3D2C3D] flex items-center justify-center gap-2 shadow-sm hover:bg-[#FFF0F6] active:scale-95 transition-all">
+            <i class="fa-regular fa-copy text-[#FF85A1]"></i>
+            <span>Copy UPI ID (prishashah1206@okicici) &amp; Pay</span>
+          </button>
+        </div>
+
+        <!-- iPhone / iOS WhatsApp Bypass Notice -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-2.5 text-[11px] text-amber-900 text-left flex items-start gap-2 leading-relaxed">
+          <i class="fa-brands fa-apple text-amber-700 mt-0.5 text-sm flex-shrink-0"></i>
+          <div>
+            <strong>iPhone / iOS Notice:</strong> Tap <b>Google Pay</b>, <b>PhonePe</b>, or <b>Paytm</b> directly above, or tap <b>Copy UPI ID</b>. <i>(Generic links on iPhone are mistakenly routed by iOS to WhatsApp).</i>
+          </div>
+        </div>
       </div>
 
       <!-- Instructions & UTR Input Form -->
@@ -1130,11 +1179,11 @@
           Handcrafted collection &amp; flowers, keychains, hair accessories &amp; hampers stitched with 100% natural cotton yarn.
         </p>
         <div class="pt-2 flex flex-col gap-2 text-xs">
-          <a href="https://instagram.com/crochetbyprisha" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-[#FF85A1] hover:text-white transition-colors font-semibold">
-            <i class="fa-brands fa-instagram text-base"></i> @crochetbyprisha
+          <a href="https://instagram.com/crochetby_prisha" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-[#FF85A1] hover:text-white transition-colors font-semibold">
+            <i class="fa-brands fa-instagram text-base"></i> @crochetby_prisha
           </a>
-          <a href="mailto:crochetbyprisha@gmail.com" class="inline-flex items-center gap-2 text-[#FFC6FF] hover:text-white transition-colors font-semibold">
-            <i class="fa-solid fa-envelope text-sm"></i> crochetbyprisha@gmail.com
+          <a href="mailto:crochetbyprsiha@gmail.com" class="inline-flex items-center gap-2 text-[#FFC6FF] hover:text-white transition-colors font-semibold">
+            <i class="fa-solid fa-envelope text-sm"></i> crochetbyprsiha@gmail.com
           </a>
         </div>
       </div>
@@ -1164,14 +1213,14 @@
         <div class="space-y-3 text-xs text-[#E8D7FF] mb-4">
           <div>
             <span class="text-[11px] text-[#C8B6FF] block mb-1">Follow On Instagram:</span>
-            <a href="https://instagram.com/crochetbyprisha" target="_blank" rel="noopener noreferrer" class="font-bold text-[#FF85A1] hover:underline flex items-center gap-1.5">
-              <i class="fa-brands fa-instagram text-base"></i> @crochetbyprisha
+            <a href="https://instagram.com/crochetby_prisha" target="_blank" rel="noopener noreferrer" class="font-bold text-[#FF85A1] hover:underline flex items-center gap-1.5">
+              <i class="fa-brands fa-instagram text-base"></i> @crochetby_prisha
             </a>
           </div>
           <div>
             <span class="text-[11px] text-[#C8B6FF] block mb-1">Email Orders / Queries:</span>
-            <a href="mailto:crochetbyprisha@gmail.com" class="font-bold text-white hover:underline flex items-center gap-1.5">
-              <i class="fa-solid fa-envelope text-sm"></i> crochetbyprisha@gmail.com
+            <a href="mailto:crochetbyprsiha@gmail.com" class="font-bold text-white hover:underline flex items-center gap-1.5">
+              <i class="fa-solid fa-envelope text-sm"></i> crochetbyprsiha@gmail.com
             </a>
           </div>
         </div>
@@ -1190,9 +1239,9 @@
     <div class="max-w-7xl mx-auto px-4 border-t border-[#4E394E] pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-[#C8B6FF]">
       <div>© 2026 Crochet by Prisha. All rights reserved. <i>made with love, kept forever ♡</i></div>
       <div class="flex items-center gap-4">
-        <a href="mailto:crochetbyprisha@gmail.com" class="hover:text-white transition"><i class="fa-solid fa-envelope mr-1"></i>crochetbyprisha@gmail.com</a>
+        <a href="mailto:crochetbyprsiha@gmail.com" class="hover:text-white transition"><i class="fa-solid fa-envelope mr-1"></i>crochetbyprsiha@gmail.com</a>
         <span>•</span>
-        <a href="https://instagram.com/crochetbyprisha" target="_blank" rel="noopener noreferrer" class="hover:text-[#FF85A1] transition"><i class="fa-brands fa-instagram mr-1"></i>@crochetbyprisha</a>
+        <a href="https://instagram.com/crochetby_prisha" target="_blank" rel="noopener noreferrer" class="hover:text-[#FF85A1] transition"><i class="fa-brands fa-instagram mr-1"></i>@crochetby_prisha</a>
       </div>
     </div>
   </footer>

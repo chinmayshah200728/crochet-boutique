@@ -914,11 +914,101 @@ let pendingPollInterval = null;
 
 function copyUPIId() {
   const text = 'prishashah1206@okicici';
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('✓ UPI ID copied: ' + text);
-  }).catch(() => {
-    showToast('UPI ID: ' + text);
-  });
+  const showSuccess = () => {
+    showToast('🌸 UPI ID copied: ' + text + ' — Paste into Google Pay / PhonePe / Paytm to pay!');
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showSuccess).catch(() => {
+      fallbackCopyText(text, showSuccess);
+    });
+  } else {
+    fallbackCopyText(text, showSuccess);
+  }
+}
+
+function fallbackCopyText(text, cb) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (cb) cb();
+    else showToast('🌸 UPI ID copied: ' + text);
+  } catch (err) {
+    prompt('Copy this UPI ID to pay:', text);
+  }
+}
+
+function triggerUpiPayment(targetApp) {
+  const orderId = pendingPaymentOrderId || (pendingOrderData ? pendingOrderData.orderId : '');
+  const amount = (pendingOrderData && pendingOrderData.amountINR) ? pendingOrderData.amountINR.toFixed(2) : '';
+  const pa = 'prishashah1206@okicici';
+  const pn = encodeURIComponent('Prisha Shah');
+  const tn = encodeURIComponent(`Order ${orderId}`);
+  let params = `pa=${pa}&pn=${pn}&cu=INR&tn=${tn}`;
+  if (amount && parseFloat(amount) > 0) {
+    params += `&am=${amount}`;
+  }
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (targetApp === 'copy') {
+    copyUPIId();
+    return;
+  }
+
+  if (targetApp === 'gpay') {
+    if (isIOS) {
+      // Direct Google Pay deep link on iOS (prevents WhatsApp hijack)
+      window.location.href = `gpay://upi/pay?${params}`;
+      setTimeout(() => {
+        window.location.href = `tez://upi/pay?${params}`;
+      }, 700);
+    } else {
+      window.location.href = `upi://pay?${params}&package=com.google.android.apps.nbu.paisa.user`;
+    }
+    return;
+  }
+
+  if (targetApp === 'phonepe') {
+    if (isIOS) {
+      // Direct PhonePe deep link on iOS (prevents WhatsApp hijack)
+      window.location.href = `phonepe://pay?${params}`;
+    } else {
+      window.location.href = `upi://pay?${params}&package=com.phonepe.app`;
+    }
+    return;
+  }
+
+  if (targetApp === 'paytm') {
+    if (isIOS) {
+      // Direct Paytm deep link on iOS (prevents WhatsApp hijack)
+      window.location.href = `paytmmp://pay?${params}`;
+    } else {
+      window.location.href = `upi://pay?${params}&package=net.one97.paytm`;
+    }
+    return;
+  }
+
+  if (targetApp === 'generic') {
+    if (isIOS) {
+      // On iOS, generic upi:// launches WhatsApp! Prevent that entirely:
+      copyUPIId();
+      showToast('⚠️ On iPhone, generic UPI links redirect to WhatsApp. UPI ID copied! Paste into Google Pay, PhonePe, or Paytm.');
+    } else {
+      window.location.href = `upi://pay?${params}`;
+    }
+  }
 }
 
 // END-TO-END DIRECT UPI PAYMENT LIFECYCLE
