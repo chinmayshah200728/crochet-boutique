@@ -54,22 +54,31 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initApp() {
-  // Clear any existing stored tokens so auto-login never happens
-  localStorage.removeItem('prisha_admin_token');
-  localStorage.removeItem('sp_token');
-  localStorage.removeItem('sp_user');
-  sessionStorage.clear();
-  currentToken = '';
-  currentAdminUser = null;
-
   setupEventListeners();
-  showLoginScreen();
+
+  // Check if token exists in localStorage from index.html or previous admin session
+  currentToken = localStorage.getItem('prisha_admin_token') || localStorage.getItem('sp_token') || '';
+  try {
+    currentAdminUser = JSON.parse(localStorage.getItem('sp_user') || 'null');
+  } catch (e) {
+    currentAdminUser = null;
+  }
+
+  if (currentToken && currentAdminUser && (currentAdminUser.role === 'admin' || currentAdminUser.role === 'super_admin')) {
+    updateUserInterface();
+    showDashboardApp();
+  } else {
+    showLoginScreen();
+  }
 }
 
 function showLoginScreen() {
   document.getElementById('admin-login-screen').classList.remove('hidden');
   document.getElementById('admin-app').classList.add('hidden');
-  document.getElementById('login-password').value = '';
+  const idInput = document.getElementById('login-email');
+  const passInput = document.getElementById('login-password');
+  if (idInput && !idInput.value) idInput.value = 'admin';
+  if (passInput && !passInput.value) passInput.value = 'admin123';
 }
 
 function showDashboardApp() {
@@ -230,9 +239,9 @@ async function handleLogin(e) {
 
     currentToken = data.token;
     currentAdminUser = data.user;
-    // Do not save token to localStorage so every page load forces login
-    localStorage.clear();
-    sessionStorage.clear();
+    localStorage.setItem('prisha_admin_token', data.token);
+    localStorage.setItem('sp_token', data.token);
+    localStorage.setItem('sp_user', JSON.stringify(data.user));
 
     updateUserInterface();
     showDashboardApp();

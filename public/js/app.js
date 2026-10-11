@@ -1537,17 +1537,101 @@ async function switchAccountTab(tab) {
    ========================================== */
 
 async function renderAdminView() {
-  if (!currentUser || currentUser.role !== 'admin') {
-    showToast('🔑 Please log in with Admin credentials to access Admin Dashboard');
-    openAuthModal();
-    switchAuthTab('login');
-    const emailElem = document.getElementById('login-email');
-    const passElem = document.getElementById('login-pass');
-    if (emailElem) emailElem.value = 'admin@crochetbyprisha.com';
-    if (passElem) passElem.value = 'admin123';
+  const topTabs = document.getElementById('admin-top-tabs');
+  const logoutBtn = document.getElementById('btn-admin-view-logout');
+  const container = document.getElementById('admin-panel-content');
+
+  const isAdminUser = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin');
+
+  if (!isAdminUser) {
+    if (topTabs) topTabs.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    if (container) {
+      container.innerHTML = `
+        <div class="max-w-md mx-auto my-6 bg-white p-6 sm:p-8 rounded-3xl border-2 border-[#FFC6FF] shadow-2xl space-y-6 text-center">
+          <div class="w-16 h-16 rounded-full bg-[#FFF0F6] text-3xl flex items-center justify-center mx-auto shadow-sm">
+            🔐
+          </div>
+          <div>
+            <span class="badge-pill bg-[#FFE5EC] text-[#FF85A1] text-xs font-bold">Store Administration</span>
+            <h2 class="font-display font-bold text-2xl text-[#3D2C3D] mt-2">Admin Dashboard Login</h2>
+            <p class="text-xs text-[#8B7A99] mt-1">Single ID &amp; password for store management</p>
+          </div>
+          <form onsubmit="handleDirectAdminLogin(event)" class="space-y-4 text-left">
+            <div>
+              <label class="block text-xs font-bold text-[#8B7A99] mb-1">Admin ID / Email</label>
+              <input type="text" id="admin-gate-login-id" value="admin" required class="form-input text-sm" placeholder="Enter admin">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#8B7A99] mb-1">Admin Password</label>
+              <input type="password" id="admin-gate-login-pass" value="admin123" required class="form-input text-sm" placeholder="Enter admin123">
+            </div>
+            <button type="submit" id="btn-admin-gate-submit" class="w-full btn-terracotta py-3.5 text-sm font-bold justify-center shadow-md">
+              <i class="fa-solid fa-lock-open mr-1"></i> Unlock Admin Dashboard
+            </button>
+          </form>
+          <div class="p-3 bg-[#FFF7FA] rounded-2xl border border-[#EEDBF5] text-xs text-[#8B7A99]">
+            <span class="font-bold text-[#3D2C3D]">Single Admin Credentials:</span><br>
+            ID: <code class="text-[#FF85A1] font-bold">admin</code> &bull; Password: <code class="text-[#FF85A1] font-bold">admin123</code>
+          </div>
+        </div>
+      `;
+    }
     return;
   }
-  switchAdminTab('overview');
+
+  // User is authenticated as admin
+  if (topTabs) topTabs.style.display = 'flex';
+  if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+  switchAdminTab(activeAdminTab || 'overview');
+}
+
+async function handleDirectAdminLogin(e) {
+  e.preventDefault();
+  const idInput = document.getElementById('admin-gate-login-id');
+  const passInput = document.getElementById('admin-gate-login-pass');
+  const btn = document.getElementById('btn-admin-gate-submit');
+
+  const loginId = (idInput ? idInput.value : 'admin').trim();
+  const password = (passInput ? passInput.value : 'admin123').trim();
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Verifying...`;
+  }
+
+  try {
+    const res = await apiFetch('/api/auth/login', 'POST', { loginId, password });
+    if (!res || !res.token) throw new Error('Invalid login response from server');
+
+    authToken = res.token;
+    currentUser = res.user;
+
+    localStorage.setItem('sp_token', res.token);
+    localStorage.setItem('prisha_admin_token', res.token);
+    localStorage.setItem('sp_user', JSON.stringify(res.user));
+
+    updateHeaderUI();
+    showToast(`🌸 Welcome to Admin Dashboard, ${res.user.name || 'Prisha'}!`);
+    renderAdminView();
+  } catch (err) {
+    showToast(err.message || 'Login failed. Check Admin ID and password.');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-lock-open mr-1"></i> Unlock Admin Dashboard`;
+    }
+  }
+}
+
+function handleAdminLogout() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem('sp_token');
+  localStorage.removeItem('prisha_admin_token');
+  localStorage.removeItem('sp_user');
+  updateHeaderUI();
+  showToast('Logged out of Admin Dashboard.');
+  renderAdminView();
 }
 
 async function switchAdminTab(tab) {
@@ -1555,13 +1639,14 @@ async function switchAdminTab(tab) {
   const container = document.getElementById('admin-panel-content');
   if (!container) return;
 
-  ['overview', 'products', 'orders', 'payments', 'carousel'].forEach(t => {
+  const allTabs = ['overview', 'products', 'orders', 'payments', 'carousel', 'messages', 'coupons', 'custom-orders', 'customers'];
+  allTabs.forEach(t => {
     const btn = document.getElementById(`adm-tab-${t}`);
     if (btn) {
       if (t === tab) {
-        btn.className = 'btn-terracotta text-xs';
+        btn.className = 'btn-terracotta text-xs whitespace-nowrap';
       } else {
-        btn.className = 'btn-outline-terracotta text-xs';
+        btn.className = 'btn-outline-terracotta text-xs whitespace-nowrap';
       }
     }
   });
@@ -1587,12 +1672,23 @@ async function switchAdminTab(tab) {
           <div class="font-display text-3xl font-bold text-[#FF85A1] mt-1">${analytics.lowStockCount}</div>
         </div>
       </div>
+      <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-3">
+        <h4 class="font-display font-bold text-lg text-[#3D2C3D]">⚡ Quick Management Shortcuts</h4>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="switchAdminTab('products')" class="btn-outline-terracotta text-xs"><i class="fa-solid fa-plus mr-1"></i> Add / Edit Products</button>
+          <button onclick="switchAdminTab('orders')" class="btn-outline-terracotta text-xs"><i class="fa-solid fa-box mr-1"></i> Track &amp; Ship Orders</button>
+          <button onclick="switchAdminTab('payments')" class="btn-outline-terracotta text-xs"><i class="fa-solid fa-qrcode mr-1"></i> Verify Direct UPI Payments</button>
+          <button onclick="switchAdminTab('carousel')" class="btn-outline-terracotta text-xs"><i class="fa-solid fa-images mr-1"></i> Change Front Cover Photos</button>
+          <button onclick="switchAdminTab('coupons')" class="btn-outline-terracotta text-xs"><i class="fa-solid fa-ticket mr-1"></i> Create Discount Coupon</button>
+          <a href="/admin.html" target="_blank" class="btn-terracotta text-xs"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open Studio Suite ↗</a>
+        </div>
+      </div>
     `;
   } else if (tab === 'products') {
     container.innerHTML = `
       <div class="flex justify-between items-center mb-4">
-        <h3 class="font-display font-bold text-xl text-[#3D2C3D]">Product Inventory &amp; Editing</h3>
-        <button onclick="openAdminProductModal()" class="btn-terracotta text-xs"><i class="fa-solid fa-plus"></i> Add Product</button>
+        <h3 class="font-display font-bold text-xl text-[#3D2C3D]">Product Inventory &amp; Catalog</h3>
+        <button onclick="openAdminProductModal()" class="btn-terracotta text-xs"><i class="fa-solid fa-plus mr-1"></i> Add Product</button>
       </div>
       <div class="bg-white rounded-3xl border border-[#EEDBF5] overflow-x-auto">
         <table class="w-full text-left text-xs">
@@ -1608,7 +1704,7 @@ async function switchAdminTab(tab) {
                 </td>
                 <td class="p-3">${p.category}</td>
                 <td class="p-3 font-bold text-[#FF85A1]">₹${(p.salePrice||p.price).toFixed(2)}</td>
-                <td class="p-3">${p.stock}</td>
+                <td class="p-3 font-mono">${p.stock}</td>
                 <td class="p-3 space-x-2">
                   <button onclick="editAdminProduct('${p.id}')" class="text-[#FF85A1] font-bold"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                   <button onclick="deleteAdminProduct('${p.id}')" class="text-red-400 font-bold"><i class="fa-solid fa-trash-can"></i> Delete</button>
@@ -1627,15 +1723,16 @@ async function switchAdminTab(tab) {
         <span class="text-xs font-bold text-[#8B7A99]">Total Active Orders: ${allOrders.length}</span>
       </div>
       <div class="space-y-4">
-        ${allOrders.length === 0 ? '<p class="text-xs text-[#8B7A99]">No orders currently placed.</p>' : allOrders.map(o => `
+        ${allOrders.length === 0 ? '<p class="text-xs text-[#8B7A99] p-6 text-center bg-white rounded-3xl border border-[#EEDBF5]">No orders placed yet. Orders will appear here as customers buy!</p>' : allOrders.map(o => `
           <div class="bg-white p-5 rounded-3xl border border-[#EEDBF5] flex flex-col md:flex-row justify-between md:items-center gap-4 text-xs">
-            <div>
+            <div class="space-y-1">
               <div class="font-bold text-sm text-[#3D2C3D]">Order #${o.id} - ${o.customerName} (${o.customerEmail})</div>
-              <div class="text-[#8B7A99]">${o.date || o.createdAt} • ${o.items.map(i => `${i.qty}x ${i.name} [${i.giftWrap||'Std'}]`).join(', ')}</div>
-              <div class="font-bold text-[#FF85A1] mt-1">Total: ₹${o.total.toFixed(2)} (${o.paymentStatus || 'PAID'})</div>
-              <div class="text-[11px] text-[#7A9A8B] font-bold">Rzp Payment ID: ${o.razorpayPaymentId || 'VERIFIED'}</div>
+              <div class="text-[#8B7A99]">${o.date || o.createdAt} • ${o.shippingAddress ? `${o.shippingAddress.address}, ${o.shippingAddress.city}` : ''}</div>
+              <div class="text-[#8B7A99]">Items: ${o.items.map(i => `${i.qty}x ${i.name} [${i.giftWrap||'Std'}]`).join(', ')}</div>
+              <div class="font-bold text-[#FF85A1]">Total: ₹${o.total.toFixed(2)} (${o.paymentStatus || 'PAID'})</div>
+              <div class="text-[11px] text-[#7A9A8B] font-bold">Payment Method: ${o.paymentMethod || 'Online UPI'} • Ref: ${o.razorpayPaymentId || o.paymentTxnId || 'Direct UPI'}</div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
               <select onchange="updateOrderStatus('${o.id}', this.value)" class="form-input text-xs py-1 px-2">
                 <option value="Payment Confirmed &amp; Verified" ${(o.status||'').includes('Confirmed')?'selected':''}>Payment Confirmed &amp; Verified</option>
                 <option value="Preparing Your Order" ${o.status==='Preparing Your Order'?'selected':''}>Preparing Your Order</option>
@@ -1655,6 +1752,14 @@ async function switchAdminTab(tab) {
     renderAdminPaymentsTab();
   } else if (tab === 'carousel') {
     renderAdminCarouselTab();
+  } else if (tab === 'messages') {
+    renderAdminMessagesTab();
+  } else if (tab === 'coupons') {
+    renderAdminCouponsTab();
+  } else if (tab === 'custom-orders') {
+    renderAdminCustomOrdersTab();
+  } else if (tab === 'customers') {
+    renderAdminCustomersTab();
   }
 }
 
@@ -1663,19 +1768,21 @@ async function renderAdminPaymentsTab() {
   if (!container) return;
 
   try {
-    container.innerHTML = `<div class="text-center py-12 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><p class="text-xs">Loading transaction records &amp; payment gateway logs...</p></div>`;
+    container.innerHTML = `<div class="text-center py-12 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><p class="text-xs">Loading transaction records &amp; UPI verification logs...</p></div>`;
 
     const orders = await apiFetch('/api/orders');
 
     container.innerHTML = `
       <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-6">
-        <div class="flex justify-between items-center pb-4 border-b border-[#EEDBF5]">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-[#EEDBF5]">
           <div>
-            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">💳 Payment Transactions &amp; Refund Control</h3>
-            <p class="text-xs text-[#8B7A99]">Authorize refunds, review gateway logs, and audit payment security statuses</p>
+            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">💳 UPI QR &amp; Online Payment Verification</h3>
+            <p class="text-xs text-[#8B7A99]">Verify customer 12-digit UTR IDs, confirm received UPI payments, and manage refunds</p>
           </div>
-          <div class="text-xs font-bold text-[#FF85A1] bg-[#FFF0F6] px-3 py-1.5 rounded-full border border-[#FFC6FF]">
-            Razorpay Gateway Connected
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-[#FF85A1] bg-[#FFF0F6] px-3 py-1.5 rounded-full border border-[#FFC6FF]">
+              Direct UPI QR + Razorpay
+            </span>
           </div>
         </div>
 
@@ -1686,22 +1793,27 @@ async function renderAdminPaymentsTab() {
                 <th class="p-3">Order ID</th>
                 <th class="p-3">Customer</th>
                 <th class="p-3">Amount</th>
-                <th class="p-3">Razorpay Payment ID</th>
+                <th class="p-3">Payment Method &amp; Ref / UTR</th>
                 <th class="p-3">Payment Status</th>
                 <th class="p-3">Refund Status</th>
                 <th class="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[#EEDBF5]">
-              ${orders.map(o => `
+              ${orders.length === 0 ? `
+                <tr><td colspan="7" class="p-6 text-center text-[#8B7A99]">No transactions recorded yet. Payments will show here automatically.</td></tr>
+              ` : orders.map(o => `
                 <tr class="hover:bg-[#FFF9FB] transition-colors">
                   <td class="p-3 font-mono font-bold text-[#3D2C3D]">${o.id}</td>
                   <td class="p-3">
                     <div class="font-bold text-[#3D2C3D]">${o.customerName}</div>
-                    <div class="text-[10px] text-[#8B7A99]">${o.customerEmail}</div>
+                    <div class="text-[10px] text-[#8B7A99]">${o.customerEmail} ${o.customerPhone ? '• ' + o.customerPhone : ''}</div>
                   </td>
-                  <td class="p-3 font-display font-bold text-[#FF85A1]">₹${o.total.toFixed(2)}</td>
-                  <td class="p-3 font-mono text-[11px] text-[#8B7A99]">${o.razorpayPaymentId || 'N/A'}</td>
+                  <td class="p-3 font-display font-bold text-[#FF85A1] text-sm">₹${o.total.toFixed(2)}</td>
+                  <td class="p-3">
+                    <div class="font-bold text-[#3D2C3D]">${o.paymentMethod || 'Direct UPI QR'}</div>
+                    <div class="font-mono text-[11px] text-[#FF85A1]">UTR: ${o.paymentTxnId || o.razorpayPaymentId || 'Direct UPI'}</div>
+                  </td>
                   <td class="p-3">
                     <span class="px-2.5 py-1 rounded-full font-bold text-[10px] ${o.paymentStatus === 'PAID' ? 'bg-emerald-100 text-emerald-700' : (o.paymentStatus === 'REFUNDED' ? 'bg-purple-100 text-purple-700' : (o.paymentStatus === 'FAILED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'))}">
                       ${o.paymentStatus || 'PAID'}
@@ -1712,10 +1824,15 @@ async function renderAdminPaymentsTab() {
                       ${o.refundStatus || 'NONE'} ${o.refundAmount > 0 ? `(₹${o.refundAmount})` : ''}
                     </span>
                   </td>
-                  <td class="p-3 text-right">
+                  <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                    ${o.paymentStatus !== 'PAID' ? `
+                      <button onclick="confirmAdminPayment('${o.id}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold py-1 px-2.5 rounded-full transition-all">
+                        ✓ Confirm Payment
+                      </button>
+                    ` : ''}
                     ${(o.paymentStatus === 'PAID' || o.paymentStatus === 'PARTIALLY_REFUNDED' || !o.paymentStatus) ? `
-                      <button onclick="promptAdminRefund('${o.id}', ${o.total}, ${o.refundAmount || 0})" class="bg-purple-100 hover:bg-purple-200 text-purple-800 text-[11px] font-bold py-1 px-3 rounded-full transition-all">
-                        Initiate Refund 💸
+                      <button onclick="promptAdminRefund('${o.id}', ${o.total}, ${o.refundAmount || 0})" class="bg-purple-100 hover:bg-purple-200 text-purple-800 text-[11px] font-bold py-1 px-2.5 rounded-full transition-all">
+                        Refund 💸
                       </button>
                     ` : `<span class="text-[10px] text-[#8B7A99] italic">N/A</span>`}
                   </td>
@@ -1728,6 +1845,291 @@ async function renderAdminPaymentsTab() {
     `;
   } catch (err) {
     container.innerHTML = `<div class="p-6 text-center text-red-500 font-bold">Failed to load payment transactions: ${err.message}</div>`;
+  }
+}
+
+async function confirmAdminPayment(orderId) {
+  if (!confirm(`Confirm received UPI payment for order #${orderId}?`)) return;
+  try {
+    await apiFetch(`/api/orders/${orderId}/confirm-payment`, 'PUT');
+    showToast(`✓ Order #${orderId} verified and marked as PAID!`);
+    trigger3DConfetti();
+    renderAdminPaymentsTab();
+  } catch (err) {
+    showToast('Failed to confirm payment: ' + err.message);
+  }
+}
+
+async function renderAdminMessagesTab() {
+  const container = document.getElementById('admin-panel-content');
+  if (!container) return;
+  container.innerHTML = `<div class="text-center py-12 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><p class="text-xs">Loading customer inquiries...</p></div>`;
+
+  try {
+    const messages = await apiFetch('/api/admin/support');
+    container.innerHTML = `
+      <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-6">
+        <div class="flex justify-between items-center pb-4 border-b border-[#EEDBF5]">
+          <div>
+            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">💌 Customer Inquiries &amp; Support Messages</h3>
+            <p class="text-xs text-[#8B7A99]">Messages submitted by shoppers through the website contact form</p>
+          </div>
+          <span class="badge-pill bg-[#FFE5EC] text-[#FF85A1] font-bold text-xs">Total: ${messages.length}</span>
+        </div>
+
+        <div class="space-y-4">
+          ${messages.length === 0 ? '<p class="text-xs text-[#8B7A99] py-8 text-center bg-[#FFF7FA] rounded-2xl">No inquiries right now. All caught up! 🌸</p>' : messages.map(m => `
+            <div class="bg-[#FFF7FA] p-5 rounded-2xl border border-[#EEDBF5] space-y-2 text-xs">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-bold text-sm text-[#3D2C3D]">${m.customerName}</div>
+                  <a href="mailto:${m.customerEmail}" class="text-[#FF85A1] hover:underline font-mono">${m.customerEmail}</a>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[#8B7A99] text-[11px]">${m.createdAt || 'Recent'}</span>
+                  <button onclick="deleteAdminMessage('${m.id}')" class="text-red-400 hover:text-red-600 font-bold ml-2" title="Delete Inquiry">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="bg-white p-3 rounded-xl border border-[#EEDBF5] text-[#3D2C3D] leading-relaxed">
+                "${m.message}"
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="p-6 text-center text-red-500 font-bold">Failed to load inquiries: ${err.message}</div>`;
+  }
+}
+
+async function deleteAdminMessage(id) {
+  if (!confirm('Remove this customer inquiry?')) return;
+  try {
+    await apiFetch(`/api/admin/support/${id}`, 'DELETE');
+    showToast('Inquiry removed');
+    renderAdminMessagesTab();
+  } catch (err) {
+    showToast('Failed to remove: ' + err.message);
+  }
+}
+
+async function renderAdminCouponsTab() {
+  const container = document.getElementById('admin-panel-content');
+  if (!container) return;
+  container.innerHTML = `<div class="text-center py-12 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><p class="text-xs">Loading coupons...</p></div>`;
+
+  try {
+    const coupons = await apiFetch('/api/admin/coupons');
+    container.innerHTML = `
+      <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-[#EEDBF5]">
+          <div>
+            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">🏷️ Promo Discount Coupons</h3>
+            <p class="text-xs text-[#8B7A99]">Create discount codes for customer checkouts</p>
+          </div>
+        </div>
+
+        <div class="bg-[#FFF7FA] p-5 rounded-2xl border border-[#EEDBF5] space-y-3">
+          <h4 class="font-bold text-xs text-[#3D2C3D] uppercase">Create New Coupon Code</h4>
+          <form onsubmit="handleCreateAdminCoupon(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <label class="block font-bold text-[#8B7A99] mb-1">Coupon Code *</label>
+              <input type="text" id="adm-new-coupon-code" required placeholder="e.g. PRISHA15" class="form-input text-xs !py-1.5 uppercase font-mono">
+            </div>
+            <div>
+              <label class="block font-bold text-[#8B7A99] mb-1">Discount % *</label>
+              <input type="number" id="adm-new-coupon-discount" min="1" max="90" required placeholder="15" class="form-input text-xs !py-1.5 font-mono">
+            </div>
+            <div>
+              <label class="block font-bold text-[#8B7A99] mb-1">Min Spend (₹)</label>
+              <input type="number" id="adm-new-coupon-min" min="0" placeholder="499" class="form-input text-xs !py-1.5 font-mono">
+            </div>
+            <div class="flex items-end">
+              <button type="submit" class="w-full btn-terracotta text-xs !py-2 justify-center">
+                <i class="fa-solid fa-plus mr-1"></i> Add Coupon
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-[#FFF7FA] border-b border-[#EEDBF5] text-[#3D2C3D]">
+                <th class="p-3">Coupon Code</th>
+                <th class="p-3">Discount</th>
+                <th class="p-3">Min Spend</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#EEDBF5]">
+              ${coupons.map(c => `
+                <tr>
+                  <td class="p-3 font-mono font-bold text-[#FF85A1] text-sm">${c.code}</td>
+                  <td class="p-3 font-bold">${c.discount}% OFF</td>
+                  <td class="p-3">₹${c.minSpend || 0}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${c.active !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">
+                      ${c.active !== false ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td class="p-3 text-right">
+                    <button onclick="deleteAdminCoupon('${c.code}')" class="text-red-400 hover:text-red-600 font-bold" title="Delete Coupon">
+                      <i class="fa-solid fa-trash-can"></i> Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="p-6 text-center text-red-500 font-bold">Failed to load coupons: ${err.message}</div>`;
+  }
+}
+
+async function handleCreateAdminCoupon(e) {
+  e.preventDefault();
+  const code = document.getElementById('adm-new-coupon-code').value.trim();
+  const discount = document.getElementById('adm-new-coupon-discount').value;
+  const minSpend = document.getElementById('adm-new-coupon-min').value || 0;
+
+  try {
+    await apiFetch('/api/admin/coupons', 'POST', { code, discount, minSpend });
+    showToast(`✓ Coupon ${code.toUpperCase()} created successfully!`);
+    renderAdminCouponsTab();
+  } catch (err) {
+    showToast('Failed to create coupon: ' + err.message);
+  }
+}
+
+async function deleteAdminCoupon(code) {
+  if (!confirm(`Delete coupon ${code}?`)) return;
+  try {
+    await apiFetch(`/api/admin/coupons/${code}`, 'DELETE');
+    showToast('Coupon removed');
+    renderAdminCouponsTab();
+  } catch (err) {
+    showToast('Failed to delete: ' + err.message);
+  }
+}
+
+async function renderAdminCustomOrdersTab() {
+  const container = document.getElementById('admin-panel-content');
+  if (!container) return;
+  container.innerHTML = `<div class="text-center py-12 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><p class="text-xs">Loading custom requests...</p></div>`;
+
+  try {
+    const list = await apiFetch('/api/custom-orders');
+    container.innerHTML = `
+      <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-6">
+        <div class="flex justify-between items-center pb-4 border-b border-[#EEDBF5]">
+          <div>
+            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">🎨 Custom Crochet Requests</h3>
+            <p class="text-xs text-[#8B7A99]">Requests submitted by shoppers for bespoke flowers, hair accessories, and hampers</p>
+          </div>
+          <span class="badge-pill bg-[#E8D7FF] text-[#3D2C3D] font-bold text-xs">Total: ${list.length}</span>
+        </div>
+
+        <div class="space-y-4">
+          ${list.length === 0 ? '<p class="text-xs text-[#8B7A99] py-8 text-center bg-[#FFF7FA] rounded-2xl">No custom orders submitted yet.</p>' : list.map(c => `
+            <div class="bg-[#FFF7FA] p-5 rounded-2xl border border-[#EEDBF5] space-y-3 text-xs">
+              <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div>
+                  <span class="font-mono font-bold text-[#FF85A1] text-xs">${c.id}</span>
+                  <div class="font-bold text-sm text-[#3D2C3D]">${c.customerName} (${c.customerEmail} ${c.phone ? '• ' + c.phone : ''})</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[#8B7A99]">Budget: <strong>${c.budget || 'Standard'}</strong></span>
+                  <select onchange="updateCustomOrderStatus('${c.id}', this.value)" class="form-input text-xs py-1 px-2">
+                    <option value="Request Received" ${c.status === 'Request Received' ? 'selected' : ''}>Request Received</option>
+                    <option value="Quote Sent" ${c.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
+                    <option value="Work in Progress" ${c.status === 'Work in Progress' ? 'selected' : ''}>Work in Progress</option>
+                    <option value="Completed" ${c.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                  </select>
+                </div>
+              </div>
+              <div class="bg-white p-3 rounded-xl border border-[#EEDBF5]">
+                <div class="font-bold text-[#3D2C3D] mb-1">Item: ${c.productType}</div>
+                <p class="text-[#8B7A99] leading-relaxed">"${c.description}"</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="p-6 text-center text-red-500 font-bold">Failed to load custom orders: ${err.message}</div>`;
+  }
+}
+
+async function updateCustomOrderStatus(id, status) {
+  try {
+    await apiFetch(`/api/custom-orders/${id}/status`, 'PUT', { status });
+    showToast(`Custom order status updated to ${status}`);
+  } catch (err) {
+    showToast('Failed to update: ' + err.message);
+  }
+}
+
+async function renderAdminCustomersTab() {
+  const container = document.getElementById('admin-panel-content');
+  if (!container) return;
+  container.innerHTML = `<div class="text-center py-12 text-[#8B7A99]"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><p class="text-xs">Loading customer accounts...</p></div>`;
+
+  try {
+    const users = await apiFetch('/api/admin/users');
+    container.innerHTML = `
+      <div class="bg-white p-6 rounded-3xl border border-[#EEDBF5] space-y-6">
+        <div class="flex justify-between items-center pb-4 border-b border-[#EEDBF5]">
+          <div>
+            <h3 class="font-display font-bold text-xl text-[#3D2C3D]">👥 Registered Customers &amp; Accounts</h3>
+            <p class="text-xs text-[#8B7A99]">All customer accounts created in your store</p>
+          </div>
+          <span class="badge-pill bg-[#FFF0F6] text-[#FF85A1] font-bold text-xs">Total: ${users.length}</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-[#FFF7FA] border-b border-[#EEDBF5] text-[#3D2C3D]">
+                <th class="p-3">Customer Name</th>
+                <th class="p-3">Email</th>
+                <th class="p-3">Role</th>
+                <th class="p-3">Phone</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#EEDBF5]">
+              ${users.map(u => `
+                <tr>
+                  <td class="p-3 font-bold text-[#3D2C3D] flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-full bg-[#FFE5EC] text-xs font-bold text-[#FF85A1] flex items-center justify-center">
+                      ${(u.name || 'U').charAt(0).toUpperCase()}
+                    </span>
+                    ${u.name}
+                  </td>
+                  <td class="p-3 font-mono text-[#FF85A1]">${u.email}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' || u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'}">
+                      ${u.role ? u.role.toUpperCase() : 'CUSTOMER'}
+                    </span>
+                  </td>
+                  <td class="p-3">${u.phone || '—'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="p-6 text-center text-red-500 font-bold">Failed to load customer accounts: ${err.message}</div>`;
   }
 }
 

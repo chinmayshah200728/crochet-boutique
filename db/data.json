@@ -1,11 +1,34 @@
 {
   "users": [
     {
+      "id": "usr-admin-master",
+      "name": "Prisha Shah (Admin)",
+      "username": "admin",
+      "email": "admin@crochetbyprisha.com",
+      "passwordHash": "$2b$10$ZRZWeMkGcnaTpKufpnLlk.WZEP5o6H3aP7ionawXTjRxFBXdcN6BO",
+      "role": "admin",
+      "phone": "+91 98765 43210",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      "addresses": [
+        {
+          "id": "addr-hq-admin",
+          "title": "Studio HQ",
+          "name": "Crochet by Prisha Studio",
+          "address": "742 Blossom Way",
+          "city": "Mumbai",
+          "state": "Maharashtra",
+          "zip": "400001",
+          "country": "India",
+          "default": true
+        }
+      ]
+    },
+    {
       "id": "usr-prisha-master",
       "name": "Prisha Shah",
       "username": "prishashah2809",
       "email": "prishashah2809@crochetbyprisha.com",
-      "passwordHash": "$2b$10$r6B8/75oevKGBCbdsXpJJetWeCk8d9OXecRolw1QWD130joD3E0EC",
+      "passwordHash": "$2b$10$ZRZWeMkGcnaTpKufpnLlk.WZEP5o6H3aP7ionawXTjRxFBXdcN6BO",
       "role": "super_admin",
       "phone": "+91 98765 43210",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
@@ -359,6 +382,18 @@
   "payments": [],
   "webhookEvents": [],
   "auditLogs": [
+    {
+      "id": "audit-1791707046400-285",
+      "adminId": "usr-admin-master",
+      "adminName": "Prisha Shah (Admin)",
+      "adminEmail": "admin@crochetbyprisha.com",
+      "role": "admin",
+      "action": "Admin Login",
+      "entity": "Authentication",
+      "details": "Logged into admin dashboard from IP 127.0.0.1",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-11T08:24:06.400Z"
+    },
     {
       "id": "audit-1791659549956-339",
       "adminId": "usr-prisha-master",
