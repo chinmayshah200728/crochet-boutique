@@ -149,8 +149,11 @@
       "dimensions": "14 Height x 8 Width",
       "colors": [
         "Soft Pink & Lavender",
-        "Soft Yellow & White",
-        "Peach & Sage Green"
+        "Pastel Yellow & White",
+        "Peach & Sage Green",
+        "Crimson Red & Cream",
+        "Lilac & Sky Blue",
+        "Pure Snow White"
       ],
       "description": "The cotton yarn is a soft, breathable, natural-fibre yarn with a smooth texture, ideal for creating detailed crochet flowers, accessories, keychains, and other handmade pieces. Gift wrapping optional.",
       "images": [
@@ -186,8 +189,11 @@
       "yarnType": "100% Natural Cotton Yarn",
       "dimensions": "Gift Box: 12\" x 10\" x 5\"",
       "colors": [
-        "Floral Dream Box",
-        "Lavender Blush Box"
+        "Blush Pink Edition",
+        "Lavender Dream Edition",
+        "Sage & Cream Edition",
+        "Sunset Coral Edition",
+        "Midnight Rose Edition"
       ],
       "description": "The ultimate gift hamper! Includes 1 Tulip Bouquet, 1 Mini Bunny Keychain, 1 Daisy Hair Scrunchie, and a personalized handwritten gift card inside an aesthetic box.",
       "images": [
@@ -222,8 +228,11 @@
       "yarnType": "100% Natural Cotton Yarn",
       "dimensions": "Set of 3 (4\" diameter)",
       "colors": [
-        "Blush Pink, Lavender & Blue",
-        "Cream, Peach & Sage"
+        "Pastel Trio (Pink, Lavender, Sky Blue)",
+        "Earthy Trio (Cream, Peach, Sage)",
+        "Sunny Trio (Butter Yellow, White, Honey)",
+        "Monochrome Trio (Black, Grey, White)",
+        "Berry Trio (Wine, Rose, Mauve)"
       ],
       "description": "Super cute set of 3 hand-stitched floral scrunchies. Soft on hair, no pulling or creasing. Features cute 3D daisy flower accents.",
       "images": [
@@ -255,9 +264,13 @@
       "yarnType": "100% Natural Cotton Yarn",
       "dimensions": "3\" x 2\" each",
       "colors": [
-        "Baby Pink Bunny",
-        "Lavender Purple Bunny",
-        "Sky Blue Bunny"
+        "Baby Pink",
+        "Lavender Purple",
+        "Sky Blue",
+        "Matcha Green",
+        "Buttercream Yellow",
+        "Caramel Brown",
+        "Classic White"
       ],
       "description": "Pocket-sized crochet joy! Set of 3 adorable mini bunny keychains with shiny pearl beads and silver keyrings attached.",
       "images": [
@@ -291,8 +304,11 @@
       "yarnType": "100% Natural Cotton Yarn",
       "dimensions": "13\" Stem Height",
       "colors": [
-        "Golden Sunflower",
-        "Soft Yellow Sunflower"
+        "Golden Sunshine",
+        "Pastel Lemon Yellow",
+        "Warm Autumn Amber",
+        "Sunset Orange",
+        "Honey Glow"
       ],
       "description": "A single bright sunflower crafted with golden petals and textured center. Option to order as stem only or gift wrapped in clear aesthetic craft paper. Gift wrapping optional.",
       "images": [
@@ -327,8 +343,11 @@
       "yarnType": "100% Natural Cotton Yarn",
       "dimensions": "Set of 4 Hair Clips",
       "colors": [
-        "Pink & Sky Blue Floral",
-        "Lavender & Peach Floral"
+        "Pink & Sky Blue",
+        "Lavender & Peach",
+        "Daisy White & Butter Yellow",
+        "Strawberry Red & Cream",
+        "Matcha & Mint"
       ],
       "description": "Hand-stitched mini flower clips with sturdy alligator clip backings. Ideal for adding a touch of floral magic to any hairstyle!",
       "images": [
@@ -1207,7 +1226,7 @@
     {
       "id": "slide-4",
       "title": "Deluxe Handcrafted Gift Hamper",
-      "subtitle": "Bouquet, Clips & Keychain • Gift wrapping optional",
+      "subtitle": "Bouquet, Clips & Keychain • Curated Aesthetic Box",
       "icon": "🎁",
       "image": "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"
     }

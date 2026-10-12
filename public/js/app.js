@@ -77,7 +77,7 @@ let products = [
     reviewsCount: 48,
     stock: 15,
     yarnType: "100% Natural Cotton Yarn",
-    colors: ["Soft Pink & Lavender", "Soft Yellow & White", "Peach & Sage Green"],
+    colors: ["Soft Pink & Lavender", "Pastel Yellow & White", "Peach & Sage Green", "Crimson Red & Cream", "Lilac & Sky Blue", "Pure Snow White"],
     description: "The cotton yarn is a soft, breathable, natural-fibre yarn with a smooth texture, ideal for creating detailed crochet flowers, accessories, keychains, and other handmade pieces. Gift wrapping optional.",
     images: ["https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: true, giftWrapPrice: 99, allowColorPicker: true, allowCustomText: true }
@@ -96,7 +96,7 @@ let products = [
     reviewsCount: 32,
     stock: 10,
     yarnType: "100% Natural Cotton Yarn",
-    colors: ["Floral Dream Box", "Lavender Blush Box"],
+    colors: ["Blush Pink Edition", "Lavender Dream Edition", "Sage & Cream Edition", "Sunset Coral Edition", "Midnight Rose Edition"],
     description: "The ultimate gift hamper! Includes 1 Tulip Bouquet, 1 Mini Bunny Keychain, 1 Daisy Hair Scrunchie, and personalized handwritten card inside an aesthetic box.",
     images: ["https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: true }
@@ -115,7 +115,7 @@ let products = [
     reviewsCount: 28,
     stock: 17,
     yarnType: "100% Natural Cotton Yarn",
-    colors: ["Blush Pink, Lavender & Blue", "Cream, Peach & Sage"],
+    colors: ["Pastel Trio (Pink, Lavender, Sky Blue)", "Earthy Trio (Cream, Peach, Sage)", "Sunny Trio (Butter Yellow, White, Honey)", "Monochrome Trio (Black, Grey, White)", "Berry Trio (Wine, Rose, Mauve)"],
     description: "Super cute set of 3 hand-stitched floral scrunchies. Soft on hair, no pulling or creasing. Features cute 3D daisy flower accents.",
     images: ["https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: false }
@@ -134,7 +134,7 @@ let products = [
     reviewsCount: 41,
     stock: 30,
     yarnType: "100% Natural Cotton Yarn",
-    colors: ["Baby Pink Bunny", "Lavender Purple Bunny", "Sky Blue Bunny"],
+    colors: ["Baby Pink", "Lavender Purple", "Sky Blue", "Matcha Green", "Buttercream Yellow", "Caramel Brown", "Classic White"],
     description: "Pocket-sized crochet joy! Set of 3 adorable mini bunny keychains with shiny pearl beads and silver keyrings attached.",
     images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: true }
@@ -153,7 +153,7 @@ let products = [
     reviewsCount: 35,
     stock: 20,
     yarnType: "100% Natural Cotton Yarn",
-    colors: ["Golden Sunflower", "Soft Yellow Sunflower"],
+    colors: ["Golden Sunshine", "Pastel Lemon Yellow", "Warm Autumn Amber", "Sunset Orange", "Honey Glow"],
     description: "A single radiant sunflower crafted with golden petals and textured center seeds, complete with wired stem and green leaves. Gift wrapping optional.",
     images: ["https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: true, giftWrapPrice: 49, allowColorPicker: true, allowCustomText: true }
@@ -172,7 +172,7 @@ let products = [
     reviewsCount: 19,
     stock: 22,
     yarnType: "100% Natural Cotton Yarn",
-    colors: ["Blush Pink & Sky Blue Floral", "Lavender & Peach Floral"],
+    colors: ["Pink & Sky Blue", "Lavender & Peach", "Daisy White & Butter Yellow", "Strawberry Red & Cream", "Matcha & Mint"],
     description: "Hand-stitched mini flower clips with sturdy alligator clip backings. Ideal for adding a touch of floral magic to any hairstyle!",
     images: ["https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: false }
@@ -540,6 +540,8 @@ function resetShopFilters() {
 
 function isFlowerProduct(p) {
   if (!p) return false;
+  if (p.category && p.category !== 'cat-flowers') return false;
+  if (p.customization && p.customization.allowGiftWrap === false) return false;
   return p.category === 'cat-flowers' || /(flower|bouquet|tulip|rose|sunflower)/i.test(p.name);
 }
 
@@ -664,10 +666,24 @@ function closeProductModal() {
   document.getElementById('modal-product-detail')?.classList.remove('active');
 }
 
+let selectedQuickFlowerColor = null;
+
+function selectQuickFlowerColor(btn, color) {
+  document.querySelectorAll('.quick-flower-color-btn').forEach(b => {
+    b.classList.remove('bg-[#FF85A1]', 'text-white', 'border-[#FF85A1]');
+    b.classList.add('bg-white', 'text-[#3D2C3D]');
+  });
+  btn.classList.remove('bg-white', 'text-[#3D2C3D]');
+  btn.classList.add('bg-[#FF85A1]', 'text-white', 'border-[#FF85A1]');
+  selectedQuickFlowerColor = color;
+}
+
 function openFlowerQuickWrapModal(p) {
   const modal = document.getElementById('modal-flower-quick-wrap');
   const content = document.getElementById('flower-quick-wrap-content');
   if (!modal || !content) return;
+
+  selectedQuickFlowerColor = (p.colors && p.colors.length) ? p.colors[0] : 'Standard';
 
   const basePrice = p.salePrice || p.price;
   const wrapCost = p.customization?.giftWrapPrice || 99.00;
@@ -680,9 +696,22 @@ function openFlowerQuickWrapModal(p) {
         <div>
           <span class="text-[10px] font-bold uppercase text-[#FF85A1] tracking-wider">💐 Flower Gift Wrapping</span>
           <h3 class="font-display font-bold text-base text-[#3D2C3D] line-clamp-1">${p.name}</h3>
-          <p class="text-xs text-[#8B7A99]">Choose how you'd like your flower delivered:</p>
+          <p class="text-xs text-[#8B7A99]">Choose your shade & wrapping style:</p>
         </div>
       </div>
+
+      ${p.colors && p.colors.length > 1 ? `
+        <div class="space-y-1.5 pt-0.5">
+          <label class="block text-xs font-bold text-[#3D2C3D]">🎨 Select Flower Color Combo:</label>
+          <div class="flex flex-wrap gap-1.5" id="quick-flower-colors">
+            ${p.colors.map((c, idx) => `
+              <button type="button" onclick="selectQuickFlowerColor(this, '${c}')" class="quick-flower-color-btn text-[11px] font-bold px-3 py-1.5 rounded-full border border-[#EEDBF5] ${idx === 0 ? 'bg-[#FF85A1] text-white border-[#FF85A1]' : 'bg-white text-[#3D2C3D]'} transition-all cursor-pointer">
+                ${c}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
 
       <div class="space-y-3 pt-1">
         <!-- Option 1: Stem Only (No Wrap) -->
@@ -732,7 +761,7 @@ function closeFlowerQuickWrapModal() {
 function confirmFlowerQuickWrap(productId, withWrap) {
   const p = products.find(prod => prod.id === productId);
   if (!p) return;
-  const color = p.colors ? p.colors[0] : 'Standard';
+  const color = selectedQuickFlowerColor || (p.colors ? p.colors[0] : 'Standard');
   const wrapOption = withWrap ? 'With Gift Wrap (Optional)' : 'Without Gift Wrap';
   addToCart(p, color, wrapOption, '', 1);
   closeFlowerQuickWrapModal();
@@ -2579,7 +2608,7 @@ async function resetAdminCarouselSlides() {
     {
       id: "slide-4",
       title: "Deluxe Handcrafted Gift Hamper",
-      subtitle: "Bouquet, Clips & Keychain • Gift wrapping optional",
+      subtitle: "Bouquet, Clips & Keychain • Curated Aesthetic Box",
       icon: "🎁",
       image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"
     }

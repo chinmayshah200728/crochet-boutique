@@ -347,14 +347,33 @@ app.put('/api/products/:id', authenticateToken, (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'Product not found' });
 
   const existing = db.products[idx];
+  const targetCategory = req.body.category || existing.category;
+  const isFlower = targetCategory === 'cat-flowers';
+
+  let colorsList = existing.colors || ['Standard Handcrafted'];
+  if (req.body.colors) {
+    if (Array.isArray(req.body.colors)) {
+      colorsList = req.body.colors.map(c => sanitizeInput(String(c).trim())).filter(Boolean);
+    } else if (typeof req.body.colors === 'string') {
+      colorsList = req.body.colors.split(',').map(c => sanitizeInput(c.trim())).filter(Boolean);
+    }
+  }
+
   const updated = {
     ...existing,
     ...req.body,
+    colors: colorsList,
     name: req.body.name ? sanitizeInput(req.body.name) : existing.name,
     description: req.body.description ? sanitizeInput(req.body.description) : existing.description,
     price: req.body.price !== undefined ? Math.max(1, parseFloat(req.body.price)) : existing.price,
     salePrice: req.body.salePrice ? Math.max(1, parseFloat(req.body.salePrice)) : null,
-    stock: req.body.stock !== undefined ? Math.max(0, parseInt(req.body.stock, 10)) : existing.stock
+    stock: req.body.stock !== undefined ? Math.max(0, parseInt(req.body.stock, 10)) : existing.stock,
+    customization: {
+      ...(existing.customization || {}),
+      allowGiftWrap: isFlower,
+      giftWrapPrice: isFlower ? (existing.customization?.giftWrapPrice || 99.00) : 0,
+      allowColorPicker: true
+    }
   };
 
   db.products[idx] = updated;

@@ -730,6 +730,9 @@ function openAddProductModal() {
   document.getElementById('prod-photo-preview').src = defaultPhoto;
   document.getElementById('prod-stock').value = 10;
   document.getElementById('prod-yarntype').value = '100% Combed Milk Cotton';
+  if (document.getElementById('prod-colors')) {
+    document.getElementById('prod-colors').value = 'Pastel Blend, Soft Pink, Cream White';
+  }
   document.getElementById('modal-product').classList.remove('hidden');
 }
 
@@ -759,6 +762,10 @@ async function openEditProductModal(prodId) {
     document.getElementById('prod-stock').value = product.stock !== undefined ? product.stock : 10;
     document.getElementById('prod-in-stock').checked = product.stock > 0 && product.status !== 'archived';
     document.getElementById('prod-yarntype').value = product.yarnType || '100% Combed Milk Cotton';
+    if (document.getElementById('prod-colors')) {
+      const colorsList = Array.isArray(product.colors) ? product.colors : [];
+      document.getElementById('prod-colors').value = colorsList.join(', ');
+    }
     document.getElementById('prod-description').value = product.description || '';
     
     const photoUrl = (product.images && product.images.length) ? product.images[0] : 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=300&q=80';
@@ -792,6 +799,11 @@ async function handleProductSubmit(e) {
   }
 
   const imageInput = document.getElementById('prod-image').value.trim() || 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=800&q=80';
+  const colorsRaw = document.getElementById('prod-colors')?.value || '';
+  const parsedColors = colorsRaw
+    .split(',')
+    .map(c => c.trim())
+    .filter(Boolean);
 
   const payload = {
     name,
@@ -804,6 +816,7 @@ async function handleProductSubmit(e) {
     costPrice: Math.round(salePriceVal * 0.4),
     yarnType: document.getElementById('prod-yarntype').value.trim() || '100% Combed Milk Cotton',
     dimensions: 'Standard Craft',
+    colors: parsedColors.length ? parsedColors : ['Standard Handcrafted'],
     description: document.getElementById('prod-description').value.trim(),
     images: [imageInput]
   };

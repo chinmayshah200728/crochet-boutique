@@ -826,9 +826,22 @@ router.put('/products/:id', authenticateAdmin, requirePermission('super_admin', 
   const existing = db.products[idx];
   const oldStock = existing.stock;
 
+  const targetCategory = req.body.category || existing.category;
+  const isFlower = targetCategory === 'cat-flowers';
+
+  let colorsList = existing.colors || ['Standard Handcrafted'];
+  if (req.body.colors) {
+    if (Array.isArray(req.body.colors)) {
+      colorsList = req.body.colors.map(c => sanitize(String(c).trim())).filter(Boolean);
+    } else if (typeof req.body.colors === 'string') {
+      colorsList = req.body.colors.split(',').map(c => sanitize(c.trim())).filter(Boolean);
+    }
+  }
+
   const updated = {
     ...existing,
     ...req.body,
+    colors: colorsList,
     name: req.body.name ? sanitize(req.body.name) : existing.name,
     sku: req.body.sku ? sanitize(req.body.sku) : existing.sku,
     description: req.body.description ? sanitize(req.body.description) : existing.description,
@@ -836,7 +849,13 @@ router.put('/products/:id', authenticateAdmin, requirePermission('super_admin', 
     salePrice: req.body.salePrice ? parseFloat(req.body.salePrice) : null,
     costPrice: req.body.costPrice ? parseFloat(req.body.costPrice) : existing.costPrice,
     stock: req.body.stock !== undefined ? parseInt(req.body.stock, 10) : existing.stock,
-    lowStockThreshold: req.body.lowStockThreshold !== undefined ? parseInt(req.body.lowStockThreshold, 10) : existing.lowStockThreshold
+    lowStockThreshold: req.body.lowStockThreshold !== undefined ? parseInt(req.body.lowStockThreshold, 10) : existing.lowStockThreshold,
+    customization: {
+      ...(existing.customization || {}),
+      allowGiftWrap: isFlower,
+      giftWrapPrice: isFlower ? (existing.customization?.giftWrapPrice || 99.00) : 0,
+      allowColorPicker: true
+    }
   };
 
   db.products[idx] = updated;
