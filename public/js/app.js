@@ -8,7 +8,7 @@ let categories = [
   { id: "cat-flowers", name: "Flowers", slug: "flowers", icon: "💐", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=600&q=80", description: "Everlasting handcrafted crochet floral arrangements. Gift wrapping optional." },
   { id: "cat-hair", name: "Hair Accessories", slug: "hair-accessories", icon: "✨", image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80", description: "Hand-stitched floral scrunchies, aesthetic clips, and tulip headbands." },
   { id: "cat-keychains", name: "Keychains", slug: "keychains", icon: "🎀", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80", description: "Pocket-sized crochet cuteness for your bags, keys, and backpacks." },
-  { id: "cat-hampers", name: "Gift Hampers", slug: "gift-hampers", icon: "🎁", image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=600&q=80", description: "Curated gift hampers with flowers, keychains, clips, and gift boxes. Gift wrapping optional." }
+  { id: "cat-hampers", name: "Gift Hampers", slug: "gift-hampers", icon: "🎁", image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=600&q=80", description: "Curated gift hampers with flowers, keychains, clips, and gift boxes." }
 ];
 
 let heroSlides = [
@@ -36,13 +36,33 @@ let heroSlides = [
   {
     id: "slide-4",
     title: "Deluxe Handcrafted Gift Hamper",
-    subtitle: "Bouquet, Clips & Keychain • Gift wrapping optional",
+    subtitle: "Bouquet, Clips & Keychain",
     icon: "🎁",
     image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"
   }
 ];
 
 let products = [
+  {
+    id: "prod-plush-1",
+    name: "Bow keychain",
+    slug: "mochi-strawberry-bunny-plushie",
+    category: "cat-keychains",
+    price: 85,
+    salePrice: null,
+    costPrice: 34,
+    isSale: true,
+    isBestseller: true,
+    isNew: true,
+    rating: 5,
+    reviewsCount: 36,
+    stock: 17,
+    yarnType: "100% Natural Cotton Yarn",
+    colors: ["Red", "Light Blue", "Pink", "Purple", "Black", "White", "Butter Yellow"],
+    description: "A charming handcrafted bow keychain made with soft cotton yarn in a variety of vibrant shades.",
+    images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80"],
+    customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: false }
+  },
   {
     id: "prod-1",
     name: "Tulip & Rose Handmade Crochet Bouquet",
@@ -77,7 +97,7 @@ let products = [
     stock: 10,
     yarnType: "100% Natural Cotton Yarn",
     colors: ["Floral Dream Box", "Lavender Blush Box"],
-    description: "The ultimate gift hamper! Includes 1 Tulip Bouquet, 1 Mini Bunny Keychain, 1 Daisy Hair Scrunchie, and personalized handwritten card inside an aesthetic box. Gift wrapping optional.",
+    description: "The ultimate gift hamper! Includes 1 Tulip Bouquet, 1 Mini Bunny Keychain, 1 Daisy Hair Scrunchie, and personalized handwritten card inside an aesthetic box.",
     images: ["https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: true }
   },
@@ -96,7 +116,7 @@ let products = [
     stock: 17,
     yarnType: "100% Natural Cotton Yarn",
     colors: ["Blush Pink, Lavender & Blue", "Cream, Peach & Sage"],
-    description: "Super cute set of 3 hand-stitched floral scrunchies. Soft on hair, no pulling or creasing. Features cute 3D daisy flower accents. Gift wrapping optional.",
+    description: "Super cute set of 3 hand-stitched floral scrunchies. Soft on hair, no pulling or creasing. Features cute 3D daisy flower accents.",
     images: ["https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: false }
   },
@@ -115,7 +135,7 @@ let products = [
     stock: 30,
     yarnType: "100% Natural Cotton Yarn",
     colors: ["Baby Pink Bunny", "Lavender Purple Bunny", "Sky Blue Bunny"],
-    description: "Pocket-sized crochet joy! Set of 3 adorable mini bunny keychains with shiny pearl beads and silver keyrings attached. Gift wrapping optional.",
+    description: "Pocket-sized crochet joy! Set of 3 adorable mini bunny keychains with shiny pearl beads and silver keyrings attached.",
     images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: true }
   },
@@ -153,7 +173,7 @@ let products = [
     stock: 22,
     yarnType: "100% Natural Cotton Yarn",
     colors: ["Blush Pink & Sky Blue Floral", "Lavender & Peach Floral"],
-    description: "Hand-stitched mini flower clips with sturdy alligator clip backings. Ideal for adding a touch of floral magic to any hairstyle! Gift wrapping optional.",
+    description: "Hand-stitched mini flower clips with sturdy alligator clip backings. Ideal for adding a touch of floral magic to any hairstyle!",
     images: ["https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"],
     customization: { allowGiftWrap: false, allowColorPicker: true, allowCustomText: false }
   }
@@ -518,20 +538,25 @@ function resetShopFilters() {
    PRODUCT DETAIL MODAL & GIFT WRAP OPTIONS
    ========================================== */
 
+function isFlowerProduct(p) {
+  if (!p) return false;
+  return p.category === 'cat-flowers' || /(flower|bouquet|tulip|rose|sunflower)/i.test(p.name);
+}
+
 function openProductModal(productId) {
   const p = products.find(prod => prod.id === productId);
   if (!p) return;
 
   currentDetailProduct = p;
   selectedModalColor = p.colors ? p.colors[0] : 'Standard';
-  selectedGiftWrap = 'Without Gift Wrap';
+  const isFlowerItem = isFlowerProduct(p);
+  selectedGiftWrap = isFlowerItem ? 'Without Gift Wrap' : 'No Gift Wrap';
 
   const modal = document.getElementById('modal-product-detail');
   const content = document.getElementById('modal-product-content');
   if (!modal || !content) return;
 
   const displayPrice = p.salePrice || p.price;
-  const isFlowerItem = p.category === 'cat-flowers' || (p.customization && p.customization.allowGiftWrap);
   const wrapCost = p.customization?.giftWrapPrice || 99.00;
 
   content.innerHTML = `
@@ -561,7 +586,7 @@ function openProductModal(productId) {
 
       <p class="text-sm text-[#8B7A99] leading-relaxed">${p.description}</p>
 
-      <!-- GIFT WRAP OPTION (Specially for Flowers) -->
+      <!-- GIFT WRAP OPTION (Specially & Exclusively for Flowers) -->
       ${isFlowerItem ? `
         <div class="bg-[#FFF0F6] p-4 rounded-2xl border-2 border-[#FFC6FF] space-y-3">
           <label class="block font-display font-bold text-sm text-[#3D2C3D]">
@@ -639,11 +664,91 @@ function closeProductModal() {
   document.getElementById('modal-product-detail')?.classList.remove('active');
 }
 
-function quickAddToCart(productId) {
+function openFlowerQuickWrapModal(p) {
+  const modal = document.getElementById('modal-flower-quick-wrap');
+  const content = document.getElementById('flower-quick-wrap-content');
+  if (!modal || !content) return;
+
+  const basePrice = p.salePrice || p.price;
+  const wrapCost = p.customization?.giftWrapPrice || 99.00;
+  const totalWithWrap = basePrice + wrapCost;
+
+  content.innerHTML = `
+    <div class="space-y-4">
+      <div class="flex items-center gap-3 pb-3 border-b border-[#EEDBF5]">
+        <img src="${p.images[0]}" alt="${p.name}" class="w-16 h-16 rounded-2xl object-cover border border-[#EEDBF5] shadow-sm">
+        <div>
+          <span class="text-[10px] font-bold uppercase text-[#FF85A1] tracking-wider">💐 Flower Gift Wrapping</span>
+          <h3 class="font-display font-bold text-base text-[#3D2C3D] line-clamp-1">${p.name}</h3>
+          <p class="text-xs text-[#8B7A99]">Choose how you'd like your flower delivered:</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 pt-1">
+        <!-- Option 1: Stem Only (No Wrap) -->
+        <button onclick="confirmFlowerQuickWrap('${p.id}', false)" class="w-full text-left p-4 rounded-2xl border-2 border-[#EEDBF5] hover:border-[#FF85A1] bg-[#FFF7FA] hover:bg-white transition-all flex items-center justify-between group cursor-pointer">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl mt-0.5">🌿</span>
+            <div>
+              <div class="font-bold text-sm text-[#3D2C3D] group-hover:text-[#FF85A1]">Without Gift Wrap (Stem Only)</div>
+              <div class="text-xs text-[#8B7A99]">Natural cotton flowers & stem, ready for your vase</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="font-display font-bold text-base text-[#3D2C3D]">₹${basePrice.toFixed(2)}</span>
+            <div class="text-[10px] text-[#8B7A99] font-medium">Standard</div>
+          </div>
+        </button>
+
+        <!-- Option 2: With Gift Wrapping -->
+        <button onclick="confirmFlowerQuickWrap('${p.id}', true)" class="w-full text-left p-4 rounded-2xl border-2 border-[#FF85A1] bg-[#FFF0F6] hover:bg-[#FFE5F0] transition-all flex items-center justify-between group cursor-pointer shadow-sm">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl mt-0.5">🎁</span>
+            <div>
+              <div class="font-bold text-sm text-[#FF85A1]">With Gift Wrapping (Optional)</div>
+              <div class="text-xs text-[#8B7A99]">Aesthetic craft paper, ribbon bow & gift tag</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="font-display font-bold text-base text-[#FF85A1]">₹${totalWithWrap.toFixed(2)}</span>
+            <div class="text-[10px] text-[#FF85A1] font-bold">+₹${wrapCost.toFixed(2)} wrap</div>
+          </div>
+        </button>
+      </div>
+
+      <p class="text-[11px] text-[#8B7A99] text-center pt-1 italic">
+        Handcrafted with 100% natural cotton yarn by Prisha ♡
+      </p>
+    </div>
+  `;
+
+  modal.classList.add('active');
+}
+
+function closeFlowerQuickWrapModal() {
+  document.getElementById('modal-flower-quick-wrap')?.classList.remove('active');
+}
+
+function confirmFlowerQuickWrap(productId, withWrap) {
   const p = products.find(prod => prod.id === productId);
   if (!p) return;
   const color = p.colors ? p.colors[0] : 'Standard';
-  addToCart(p, color, 'Without Gift Wrap', '', 1);
+  const wrapOption = withWrap ? 'With Gift Wrap (Optional)' : 'Without Gift Wrap';
+  addToCart(p, color, wrapOption, '', 1);
+  closeFlowerQuickWrapModal();
+  toggleCartDrawer();
+}
+
+function quickAddToCart(productId) {
+  const p = products.find(prod => prod.id === productId);
+  if (!p) return;
+  if (isFlowerProduct(p)) {
+    openFlowerQuickWrapModal(p);
+  } else {
+    const color = p.colors ? p.colors[0] : 'Standard';
+    addToCart(p, color, 'No Gift Wrap', '', 1);
+    toggleCartDrawer();
+  }
 }
 
 function addCurrentModalToCart() {
@@ -660,7 +765,7 @@ function addCurrentModalToCart() {
 
 function addToCart(product, color, giftWrap, customText, qty) {
   let unitPrice = product.salePrice || product.price;
-  if (giftWrap.includes('With Gift Wrap')) {
+  if (isFlowerProduct(product) && giftWrap && giftWrap.includes('With Gift Wrap')) {
     unitPrice += (product.customization?.giftWrapPrice || 99.00);
   }
 
@@ -723,7 +828,7 @@ function renderCartDrawerItems() {
       <div class="flex-1 space-y-1">
         <h4 class="font-display font-bold text-sm text-[#3D2C3D] line-clamp-1">${item.name}</h4>
         <div class="text-xs text-[#8B7A99]">Color: ${item.color}</div>
-        <div class="text-[11px] font-bold text-[#FF85A1]">Wrap: ${item.giftWrap}</div>
+        ${item.giftWrap && item.giftWrap.includes('With Gift Wrap') ? `<div class="text-[11px] font-bold text-[#FF85A1]"><i class="fa-solid fa-gift mr-1"></i>Gift Wrapped</div>` : (item.giftWrap === 'Without Gift Wrap' ? `<div class="text-[11px] font-medium text-[#8B7A99]">🌿 Stem Only (No Wrap)</div>` : '')}
         ${item.customText ? `<div class="text-[11px] text-[#8B7A99]">Note: "${item.customText}"</div>` : ''}
         <div class="flex items-center justify-between pt-1">
           <div class="flex items-center gap-2 border border-[#EEDBF5] rounded-full px-2 py-0.5">
@@ -795,7 +900,8 @@ function renderCheckoutView() {
       <div class="py-2.5 flex justify-between items-center text-xs">
         <div>
           <div class="font-bold text-[#3D2C3D]">${i.qty}x ${i.name}</div>
-          <div class="text-[#FF85A1] font-semibold text-[11px]">${i.giftWrap}</div>
+          <div class="text-xs text-[#8B7A99]">Color: ${i.color}</div>
+          ${i.giftWrap && i.giftWrap.includes('With Gift Wrap') ? `<div class="text-[#FF85A1] font-semibold text-[11px]"><i class="fa-solid fa-gift mr-1"></i>Gift Wrapped</div>` : (i.giftWrap === 'Without Gift Wrap' ? `<div class="text-[#8B7A99] font-medium text-[11px]">🌿 Stem Only</div>` : '')}
         </div>
         <div class="font-bold text-[#3D2C3D]">₹${(i.price * i.qty).toFixed(2)}</div>
       </div>
