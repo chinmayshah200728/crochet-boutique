@@ -799,6 +799,11 @@ router.post('/products', authenticateAdmin, requirePermission('super_admin', 'ad
     reviewsCount: 0,
     stock: parseInt(stock, 10) || 10,
     lowStockThreshold: parseInt(lowStockThreshold, 10) || 5,
+    leadTime: req.body.leadTime ? sanitize(req.body.leadTime) : 'Handmade in 2–4 business days',
+    has3DModel: Boolean(req.body.has3DModel),
+    modelType: req.body.modelType ? sanitize(req.body.modelType) : 'none',
+    customParts: req.body.customParts || null,
+    model3dUrl: req.body.model3dUrl ? sanitize(req.body.model3dUrl) : null,
     status: 'active',
     yarnType: sanitize(yarnType || '100% Combed Milk Cotton'),
     dimensions: sanitize(dimensions || 'Standard Craft'),
@@ -842,6 +847,11 @@ router.put('/products/:id', authenticateAdmin, requirePermission('super_admin', 
     ...existing,
     ...req.body,
     colors: colorsList,
+    leadTime: req.body.leadTime !== undefined ? sanitize(req.body.leadTime) : (existing.leadTime || 'Handmade in 2–4 business days'),
+    has3DModel: req.body.has3DModel !== undefined ? Boolean(req.body.has3DModel) : existing.has3DModel,
+    modelType: req.body.modelType !== undefined ? sanitize(req.body.modelType) : existing.modelType,
+    customParts: req.body.customParts !== undefined ? req.body.customParts : existing.customParts,
+    model3dUrl: req.body.model3dUrl !== undefined ? sanitize(req.body.model3dUrl) : existing.model3dUrl,
     name: req.body.name ? sanitize(req.body.name) : existing.name,
     sku: req.body.sku ? sanitize(req.body.sku) : existing.sku,
     description: req.body.description ? sanitize(req.body.description) : existing.description,
@@ -1200,6 +1210,130 @@ router.get('/events', authenticateAdmin, (req, res) => {
 
   req.on('close', () => {
     sseClients = sseClients.filter(c => c.id !== clientId);
+  });
+});
+
+/* ==========================================
+   11. 3D MODEL & IMAGE-TO-3D INTEGRATION
+   ========================================== */
+
+// In-memory / persistent job tracker for 3D generation jobs
+let image3DJobs = {};
+
+// POST /api/admin/image3d/generate
+router.post('/image3d/generate', authenticateAdmin, requirePermission('super_admin', 'admin', 'product_manager'), (req, res) => {
+  const { productId, promptHint } = req.body;
+  let photos = req.body.referenceImages;
+  if (!photos || !photos.length) {
+    if (req.body.referencePhotoUrl) {
+      photos = [req.body.referencePhotoUrl];
+    } else if (productId) {
+      const db = readDb();
+      const p = db.products.find(item => item.id === productId);
+      if (p && p.images && p.images.length) {
+        photos = p.images;
+      }
+    }
+  }
+  if (!photos || !photos.length) {
+    photos = ['https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=600&q=80'];
+  }
+
+  const jobId = `job-3d-${Date.now()}`;
+  const job = {
+    id: jobId,
+    productId: productId || null,
+    status: 'processing', // queued, processing, completed, failed
+    progress: 15,
+    stage: 'Analyzing 2D stitch silhouette and contour boundaries...',
+    referenceImages: photos,
+    promptHint: promptHint || 'Handmade crochet cotton item with purl stitches',
+    modelUrl: null,
+    modelType: 'bouquet',
+    createdAt: new Date().toISOString(),
+    completedAt: null
+  };
+
+  image3DJobs[jobId] = job;
+
+  // Simulate external generation pipeline progression (Meshy / CSM / Tripo workflow)
+  setTimeout(() => {
+    if (image3DJobs[jobId]) {
+      image3DJobs[jobId].progress = 45;
+      image3DJobs[jobId].stage = 'Generating multi-angle voxel mesh & purl loop topology...';
+    }
+  }, 1200);
+
+  setTimeout(() => {
+    if (image3DJobs[jobId]) {
+      image3DJobs[jobId].progress = 85;
+      image3DJobs[jobId].stage = 'Baking diffuse yarn texture & tactile normal stitch maps...';
+    }
+  }, 2400);
+
+  setTimeout(() => {
+    if (image3DJobs[jobId]) {
+      image3DJobs[jobId].progress = 100;
+      image3DJobs[jobId].status = 'completed';
+      image3DJobs[jobId].stage = '3D Crochet Model generated & ready for inspection.';
+      image3DJobs[jobId].modelUrl = `/models/generated-${jobId}.glb`;
+      image3DJobs[jobId].completedAt = new Date().toISOString();
+    }
+  }, 3800);
+
+  logAudit(req.user, '3D Model Generation Job Started', '3D Studio', `Started generation job ${jobId} for product ${productId || 'unassigned'}`);
+
+  res.json({
+    message: '3D Generation job started successfully',
+    jobId,
+    job
+  });
+});
+
+// GET /api/admin/image3d/status/:jobId
+router.get('/image3d/status/:jobId', authenticateAdmin, (req, res) => {
+  const job = image3DJobs[req.params.jobId];
+  if (!job) {
+    return res.status(404).json({ error: '3D generation job not found.' });
+  }
+  res.json(job);
+});
+
+// POST /api/admin/image3d/approve/:jobId
+router.post('/image3d/approve/:jobId', authenticateAdmin, requirePermission('super_admin', 'admin', 'product_manager'), (req, res) => {
+  const job = image3DJobs[req.params.jobId];
+  if (!job || job.status !== 'completed') {
+    return res.status(400).json({ error: 'Job is not completed yet.' });
+  }
+
+  const { targetProductId } = req.body;
+  const prodId = targetProductId || job.productId;
+
+  if (!prodId) {
+    return res.status(400).json({ error: 'Target product ID is required to attach the 3D model.' });
+  }
+
+  const db = readDb();
+  const prod = db.products.find(p => p.id === prodId);
+  if (!prod) {
+    return res.status(404).json({ error: 'Target product not found.' });
+  }
+
+  prod.has3DModel = true;
+  prod.model3dUrl = job.modelUrl || `https://crochetbyprisha.pages.dev/models/${prodId}.glb`;
+  if (!prod.customParts) {
+    prod.customParts = {
+      petals: { label: "Main Body", defaultColor: "#E89CAE" },
+      center: { label: "Accent / Core", defaultColor: "#F9E79F" }
+    };
+  }
+
+  writeDb(db);
+  logAudit(req.user, '3D Model Approved & Published', '3D Studio', `Attached generated 3D model to "${prod.name}" (${prod.id})`);
+
+  res.json({
+    message: `3D model successfully published to product "${prod.name}"!`,
+    product: prod
   });
 });
 

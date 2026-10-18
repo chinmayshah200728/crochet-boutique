@@ -295,6 +295,8 @@ function switchTab(targetSecId) {
   else if (targetSecId === 'sec-analytics') loadAnalytics();
   else if (targetSecId === 'sec-audit') loadAuditLogs();
   else if (targetSecId === 'sec-staff') loadStaff();
+  else if (targetSecId === 'sec-models3d') load3DModelsTab();
+  else if (targetSecId === 'sec-image3d') loadImageTo3DTab();
 }
 
 /* ==========================================
@@ -733,6 +735,15 @@ function openAddProductModal() {
   if (document.getElementById('prod-colors')) {
     document.getElementById('prod-colors').value = 'Pastel Blend, Soft Pink, Cream White';
   }
+  if (document.getElementById('prod-leadtime')) {
+    document.getElementById('prod-leadtime').value = 'Handmade in 2–4 business days';
+  }
+  if (document.getElementById('prod-model-type')) {
+    document.getElementById('prod-model-type').value = 'none';
+  }
+  if (document.getElementById('prod-model-url')) {
+    document.getElementById('prod-model-url').value = '';
+  }
   document.getElementById('modal-product').classList.remove('hidden');
 }
 
@@ -765,6 +776,15 @@ async function openEditProductModal(prodId) {
     if (document.getElementById('prod-colors')) {
       const colorsList = Array.isArray(product.colors) ? product.colors : [];
       document.getElementById('prod-colors').value = colorsList.join(', ');
+    }
+    if (document.getElementById('prod-leadtime')) {
+      document.getElementById('prod-leadtime').value = product.leadTime || 'Handmade in 2–4 business days';
+    }
+    if (document.getElementById('prod-model-type')) {
+      document.getElementById('prod-model-type').value = product.modelType || (product.has3DModel ? 'bouquet' : 'none');
+    }
+    if (document.getElementById('prod-model-url')) {
+      document.getElementById('prod-model-url').value = product.model3dUrl || '';
     }
     document.getElementById('prod-description').value = product.description || '';
     
@@ -805,12 +825,20 @@ async function handleProductSubmit(e) {
     .map(c => c.trim())
     .filter(Boolean);
 
+  const leadTimeVal = document.getElementById('prod-leadtime')?.value.trim() || 'Handmade in 2–4 business days';
+  const modelTypeVal = document.getElementById('prod-model-type')?.value || 'none';
+  const model3dUrlVal = document.getElementById('prod-model-url')?.value.trim() || null;
+
   const payload = {
     name,
     sku: document.getElementById('prod-sku').value.trim() || `SKU-PRISHA-${Math.floor(1000 + Math.random() * 9000)}`,
     category: document.getElementById('prod-category').value,
     stock: stockVal,
     lowStockThreshold: 5,
+    leadTime: leadTimeVal,
+    has3DModel: modelTypeVal !== 'none',
+    modelType: modelTypeVal,
+    model3dUrl: model3dUrlVal,
     price: mrpVal,
     salePrice: salePriceVal < mrpVal ? salePriceVal : null,
     costPrice: Math.round(salePriceVal * 0.4),
@@ -1557,3 +1585,538 @@ function debounce(func, wait) {
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
 }
+
+/* ==========================================
+   3D MODELS & YARN COLOR MAPPING STUDIO
+   ========================================== */
+let cachedProductsList = [];
+let admin3DRenderer = null;
+let admin3DScene = null;
+let admin3DCamera = null;
+let admin3DControls = null;
+let admin3DAnimId = null;
+
+let preview3DRenderer = null;
+let preview3DScene = null;
+let preview3DCamera = null;
+let preview3DControls = null;
+let preview3DAnimId = null;
+let current3DJobId = null;
+let current3DTargetProductId = null;
+let adminCrochetBumpTex = null;
+
+function getAdminCrochetBumpTexture() {
+  if (adminCrochetBumpTex) return adminCrochetBumpTex;
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, 256, 256);
+
+  ctx.lineWidth = 4;
+  for (let y = 0; y < 256; y += 16) {
+    for (let x = 0; x < 256; x += 16) {
+      const offset = (Math.floor(y / 16) % 2 === 0) ? 0 : 8;
+      const px = (x + offset) % 256;
+
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(px + 4, y + 8, 5, Math.PI * 0.2, Math.PI * 0.8, false);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#303030';
+      ctx.beginPath();
+      ctx.arc(px + 12, y + 8, 5, Math.PI * 1.2, Math.PI * 1.8, false);
+      ctx.stroke();
+    }
+  }
+
+  if (window.THREE) {
+    adminCrochetBumpTex = new THREE.CanvasTexture(canvas);
+    adminCrochetBumpTex.wrapS = THREE.RepeatWrapping;
+    adminCrochetBumpTex.wrapT = THREE.RepeatWrapping;
+    adminCrochetBumpTex.repeat.set(6, 6);
+  }
+  return adminCrochetBumpTex;
+}
+
+async function load3DModelsTab() {
+  try {
+    const products = await adminApiFetch('/api/admin/products');
+    cachedProductsList = products || [];
+
+    const tbody = document.getElementById('models3d-table-tbody');
+    if (!tbody) return;
+
+    if (cachedProductsList.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 24px; color: #94A3B8;">No products found. Add products to configure 3D models.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = cachedProductsList.map(p => {
+      const has3D = Boolean(p.has3DModel);
+      const mType = p.modelType || (has3D ? 'sunflower' : 'none');
+      const photo = (p.images && p.images[0]) || 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=100';
+      
+      let partsStr = 'N/A (2D Image)';
+      if (has3D) {
+        if (p.customParts) {
+          partsStr = Object.values(p.customParts).map(part => part.label || 'Part').join(', ');
+        } else if (mType === 'bouquet') {
+          partsStr = 'Petals, Bouquet Core, Ribbon';
+        } else if (mType === 'sunflower') {
+          partsStr = 'Sun Petals, Seed Disk, Leaf Stem';
+        } else if (mType === 'bow') {
+          partsStr = 'Ribbon Loops, Knot, Ribbon Tails';
+        } else if (mType === 'bunny') {
+          partsStr = 'Amigurumi Body, Ears, Cheeks';
+        } else {
+          partsStr = 'Main Yarn Body, Accent Trim';
+        }
+      }
+
+      return `
+        <tr>
+          <td>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="${photo}" style="width:42px; height:42px; border-radius:8px; object-fit:cover; border:1px solid #334155;">
+              <div>
+                <strong style="color: #F8FAFC;">${p.name}</strong><br>
+                <code style="font-size:11.5px; color:#94A3B8;">${p.sku || 'SKU-N/A'}</code>
+              </div>
+            </div>
+          </td>
+          <td><span style="color: #CBD5E1;">${p.category || 'General'}</span></td>
+          <td>
+            <span class="status-pill ${has3D ? 'success' : 'warning'}">
+              <i class="fa-solid ${has3D ? 'fa-cube' : 'fa-image'}"></i> ${has3D ? '3D Interactive' : 'Photo Only'}
+            </span>
+          </td>
+          <td>
+            <code style="background: #0F172A; padding: 4px 8px; border-radius: 6px; color: #E89CAE;">${mType}</code>
+          </td>
+          <td style="font-size: 12.5px; color: #CBD5E1;">${partsStr}</td>
+          <td>
+            <button class="btn-primary-admin" style="padding: 6px 14px; font-size: 12px; border-radius: 20px;" onclick="inspect3DModel('${p.id}')">
+              <i class="fa-solid fa-eye"></i> Inspect 3D
+            </button>
+            <button class="btn-secondary-admin" style="padding: 6px 12px; font-size: 12px; border-radius: 20px; margin-left: 6px;" onclick="openEditProductModal('${p.id}')">
+              <i class="fa-solid fa-pen-to-square"></i> Configure
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    showToast(`Failed to load 3D catalog: ${err.message}`, 'error');
+  }
+}
+
+function buildAdminProceduralModel(modelType, primaryColor = '#E89CAE') {
+  if (!window.THREE) return null;
+  const group = new THREE.Group();
+  const bump = getAdminCrochetBumpTexture();
+
+  const createYarnMat = (hex, roughness = 0.88) => {
+    return new THREE.MeshStandardMaterial({
+      color: new THREE.Color(hex),
+      roughness: roughness,
+      metalness: 0.05,
+      bumpMap: bump,
+      bumpScale: 0.06
+    });
+  };
+
+  const matPrimary = createYarnMat(primaryColor);
+  const matCore = createYarnMat('#F9E79F');
+  const matStem = createYarnMat('#8A9A86');
+  const matRibbon = createYarnMat('#F4D03F');
+
+  if (modelType === 'sunflower') {
+    // Seed disk center
+    const diskGeo = new THREE.CylinderGeometry(0.85, 0.85, 0.35, 24);
+    const diskMat = createYarnMat('#5D4037');
+    const disk = new THREE.Mesh(diskGeo, diskMat);
+    disk.rotation.x = Math.PI / 2;
+    group.add(disk);
+
+    // 14 Ray Petals
+    const petalGeo = new THREE.ConeGeometry(0.3, 1.2, 12);
+    petalGeo.translate(0, 0.6, 0);
+    const petalCount = 14;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2;
+      const petal = new THREE.Mesh(petalGeo, createYarnMat('#F9E79F'));
+      petal.rotation.z = angle - Math.PI / 2;
+      petal.position.x = Math.cos(angle) * 0.85;
+      petal.position.y = Math.sin(angle) * 0.85;
+      petal.rotation.x = 0.1;
+      group.add(petal);
+    }
+
+    // Stem
+    const stemGeo = new THREE.CylinderGeometry(0.12, 0.12, 2.6, 12);
+    const stem = new THREE.Mesh(stemGeo, matStem);
+    stem.position.y = -1.5;
+    group.add(stem);
+
+  } else if (modelType === 'bow') {
+    // Bow knot
+    const knotGeo = new THREE.TorusGeometry(0.32, 0.18, 16, 24);
+    const knot = new THREE.Mesh(knotGeo, matPrimary);
+    group.add(knot);
+
+    // Left and right loops
+    const loopGeo = new THREE.TorusGeometry(0.9, 0.3, 16, 32, Math.PI);
+    const loopL = new THREE.Mesh(loopGeo, matPrimary);
+    loopL.position.x = -0.9;
+    loopL.rotation.z = Math.PI / 2;
+    group.add(loopL);
+
+    const loopR = new THREE.Mesh(loopGeo, matPrimary);
+    loopR.position.x = 0.9;
+    loopR.rotation.z = -Math.PI / 2;
+    group.add(loopR);
+
+    // Ribbon tails
+    const tailGeo = new THREE.CylinderGeometry(0.2, 0.26, 1.8, 12);
+    const tailL = new THREE.Mesh(tailGeo, matPrimary);
+    tailL.position.set(-0.55, -1.0, 0.1);
+    tailL.rotation.z = 0.28;
+    group.add(tailL);
+
+    const tailR = new THREE.Mesh(tailGeo, matPrimary);
+    tailR.position.set(0.55, -1.0, 0.1);
+    tailR.rotation.z = -0.28;
+    group.add(tailR);
+
+  } else if (modelType === 'bunny') {
+    // Head & Body
+    const headGeo = new THREE.SphereGeometry(1.0, 24, 24);
+    const head = new THREE.Mesh(headGeo, matPrimary);
+    group.add(head);
+
+    const earGeo = new THREE.CylinderGeometry(0.22, 0.35, 1.6, 16);
+    const earL = new THREE.Mesh(earGeo, matPrimary);
+    earL.position.set(-0.55, 1.4, 0);
+    earL.rotation.z = 0.2;
+    group.add(earL);
+
+    const earR = new THREE.Mesh(earGeo, matPrimary);
+    earR.position.set(0.55, 1.4, 0);
+    earR.rotation.z = -0.2;
+    group.add(earR);
+
+    // Cheeks
+    const cheekGeo = new THREE.SphereGeometry(0.18, 12, 12);
+    const cheekMat = createYarnMat('#FFB6C1');
+    const chL = new THREE.Mesh(cheekGeo, cheekMat);
+    chL.position.set(-0.45, -0.15, 0.9);
+    group.add(chL);
+    const chR = new THREE.Mesh(cheekGeo, cheekMat);
+    chR.position.set(0.45, -0.15, 0.9);
+    group.add(chR);
+
+  } else {
+    // Bouquet / Rose Rosette Default
+    const flowerGroup = new THREE.Group();
+    const coreGeo = new THREE.SphereGeometry(0.5, 16, 16);
+    const core = new THREE.Mesh(coreGeo, matCore);
+    flowerGroup.add(core);
+
+    const petalCount = 8;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2;
+      const petalGeo = new THREE.SphereGeometry(0.42, 12, 12);
+      petalGeo.scale(1.2, 0.5, 0.8);
+      const petal = new THREE.Mesh(petalGeo, matPrimary);
+      petal.position.set(Math.cos(angle) * 0.7, Math.sin(angle) * 0.7, 0);
+      petal.rotation.z = angle;
+      flowerGroup.add(petal);
+    }
+    flowerGroup.position.y = 0.5;
+    group.add(flowerGroup);
+
+    // Bouquet Kraft Wrap
+    const coneGeo = new THREE.ConeGeometry(1.3, 2.5, 18, 1, true);
+    coneGeo.rotateX(Math.PI);
+    const wrapMat = createYarnMat('#E6D7C3');
+    const wrapMesh = new THREE.Mesh(coneGeo, wrapMat);
+    wrapMesh.position.y = -1.0;
+    group.add(wrapMesh);
+
+    // Bow tie on wrap
+    const tieGeo = new THREE.TorusGeometry(0.3, 0.1, 12, 18);
+    const tie = new THREE.Mesh(tieGeo, matRibbon);
+    tie.position.set(0, -0.6, 0.7);
+    group.add(tie);
+  }
+
+  return group;
+}
+
+function inspect3DModel(prodId) {
+  const product = cachedProductsList.find(p => p.id === prodId);
+  if (!product) {
+    showToast('Product not found in current catalog list.', 'error');
+    return;
+  }
+
+  const canvas = document.getElementById('admin-3d-canvas');
+  const emptyMsg = document.getElementById('admin-3d-empty-msg');
+  if (!canvas) return;
+
+  if (emptyMsg) emptyMsg.style.display = 'none';
+
+  if (!window.THREE) {
+    showToast('3D engine is loading, please try again in a moment.', 'info');
+    return;
+  }
+
+  // Cancel prior animation frame
+  if (admin3DAnimId) cancelAnimationFrame(admin3DAnimId);
+
+  const container = document.getElementById('admin-3d-viewport');
+  const width = container.clientWidth || 600;
+  const height = container.clientHeight || 320;
+
+  if (!admin3DRenderer) {
+    admin3DRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    admin3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }
+  admin3DRenderer.setSize(width, height);
+
+  admin3DScene = new THREE.Scene();
+
+  admin3DCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+  admin3DCamera.position.set(0, 1.2, 5.2);
+
+  if (window.THREE.OrbitControls) {
+    admin3DControls = new THREE.OrbitControls(admin3DCamera, admin3DRenderer.domElement);
+    admin3DControls.enableDamping = true;
+    admin3DControls.dampingFactor = 0.05;
+    admin3DControls.autoRotate = true;
+    admin3DControls.autoRotateSpeed = 2.0;
+  }
+
+  // Studio lighting
+  const ambLight = new THREE.AmbientLight(0xFFF7ED, 0.85);
+  admin3DScene.add(ambLight);
+
+  const dirLight1 = new THREE.DirectionalLight(0xFFE4D6, 1.1);
+  dirLight1.position.set(4, 7, 5);
+  admin3DScene.add(dirLight1);
+
+  const dirLight2 = new THREE.DirectionalLight(0xCCE7E8, 0.5);
+  dirLight2.position.set(-4, -2, -3);
+  admin3DScene.add(dirLight2);
+
+  // Model creation
+  const mType = product.modelType || (product.has3DModel ? 'bouquet' : 'bouquet');
+  const model = buildAdminProceduralModel(mType, '#E89CAE');
+  if (model) {
+    admin3DScene.add(model);
+  }
+
+  function renderLoop() {
+    admin3DAnimId = requestAnimationFrame(renderLoop);
+    if (admin3DControls) admin3DControls.update();
+    admin3DRenderer.render(admin3DScene, admin3DCamera);
+  }
+  renderLoop();
+
+  showToast(`Previewing 3D Model: "${product.name}" (${mType})`, 'info');
+
+  // Smooth scroll into view
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ==========================================
+   IMAGE-TO-3D RECONSTRUCTION WORKFLOW
+   ========================================== */
+async function loadImageTo3DTab() {
+  try {
+    const products = await adminApiFetch('/api/admin/products');
+    cachedProductsList = products || [];
+
+    const select = document.getElementById('img3d-target-product');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Choose Product to Attach 3D Model --</option>' +
+      cachedProductsList.map(p => `
+        <option value="${p.id}">${p.name} [${p.category}] - ${p.has3DModel ? 'Reconstruct 3D' : 'No 3D Model'}</option>
+      `).join('');
+  } catch (err) {
+    console.error('Failed to populate products for Image-to-3D:', err);
+  }
+}
+
+async function handleImageTo3DSubmit(e) {
+  e.preventDefault();
+  const select = document.getElementById('img3d-target-product');
+  const productId = select?.value;
+  const promptHint = document.getElementById('img3d-prompt-hint')?.value.trim() || '';
+  const frontFileInput = document.getElementById('img3d-file-front');
+
+  if (!productId) {
+    showToast('Please select a target product.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-start-3d-job');
+  const progressWrap = document.getElementById('img3d-progress-wrap');
+  const progressBar = document.getElementById('img3d-progress-bar');
+  const stageText = document.getElementById('img3d-stage-text');
+  const percentText = document.getElementById('img3d-percent-text');
+  const actionControls = document.getElementById('img3d-action-controls');
+  const previewEmpty = document.getElementById('img3d-preview-empty');
+  const previewCanvas = document.getElementById('img3d-preview-canvas');
+
+  current3DTargetProductId = productId;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting Reconstruction Job...';
+  progressWrap.style.display = 'block';
+  actionControls.style.display = 'none';
+
+  try {
+    const res = await adminApiFetch('/api/admin/image3d/generate', {
+      method: 'POST',
+      body: JSON.stringify({
+        productId,
+        promptHint,
+        referencePhotoUrl: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=600&q=80'
+      })
+    });
+
+    const jobId = res.jobId;
+    current3DJobId = jobId;
+    showToast('Reconstruction job started! Processing photos...', 'info');
+
+    // Poll status every 800ms
+    const pollInterval = setInterval(async () => {
+      try {
+        const job = await adminApiFetch(`/api/admin/image3d/status/${jobId}`);
+        const pct = job.progress || 0;
+        progressBar.style.width = `${pct}%`;
+        percentText.textContent = `${pct}%`;
+        stageText.textContent = job.stage || 'Reconstructing 3D mesh...';
+
+        if (job.status === 'completed' || pct >= 100) {
+          clearInterval(pollInterval);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Submit 3D Reconstruction Job';
+
+          // Show action controls
+          actionControls.style.display = 'flex';
+          showToast('3D Reconstruction completed! Inspect the preview model.', 'success');
+
+          // Render live preview canvas
+          if (previewEmpty) previewEmpty.style.display = 'none';
+          if (previewCanvas) {
+            previewCanvas.style.display = 'block';
+            init3DReconstructionPreview(productId);
+          }
+        }
+      } catch (pollErr) {
+        clearInterval(pollInterval);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Submit 3D Reconstruction Job';
+        showToast(`Polling error: ${pollErr.message}`, 'error');
+      }
+    }, 800);
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Submit 3D Reconstruction Job';
+    showToast(`Failed to start 3D job: ${err.message}`, 'error');
+  }
+}
+
+function init3DReconstructionPreview(productId) {
+  const canvas = document.getElementById('img3d-preview-canvas');
+  const container = document.getElementById('img3d-preview-viewport');
+  if (!canvas || !container || !window.THREE) return;
+
+  if (preview3DAnimId) cancelAnimationFrame(preview3DAnimId);
+
+  const w = container.clientWidth || 300;
+  const h = container.clientHeight || 220;
+
+  if (!preview3DRenderer) {
+    preview3DRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    preview3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }
+  preview3DRenderer.setSize(w, h);
+
+  preview3DScene = new THREE.Scene();
+  preview3DCamera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+  preview3DCamera.position.set(0, 1.2, 4.8);
+
+  if (window.THREE.OrbitControls) {
+    preview3DControls = new THREE.OrbitControls(preview3DCamera, preview3DRenderer.domElement);
+    preview3DControls.enableDamping = true;
+    preview3DControls.autoRotate = true;
+    preview3DControls.autoRotateSpeed = 3.0;
+  }
+
+  const amb = new THREE.AmbientLight(0xFFF8ED, 0.9);
+  preview3DScene.add(amb);
+  const dir = new THREE.DirectionalLight(0xFFE5D9, 1.2);
+  dir.position.set(3, 5, 4);
+  preview3DScene.add(dir);
+
+  const prod = cachedProductsList.find(p => p.id === productId);
+  const mType = (prod && prod.modelType && prod.modelType !== 'none') ? prod.modelType : 'sunflower';
+  const model = buildAdminProceduralModel(mType, '#E89CAE');
+  if (model) preview3DScene.add(model);
+
+  function loop() {
+    preview3DAnimId = requestAnimationFrame(loop);
+    if (preview3DControls) preview3DControls.update();
+    preview3DRenderer.render(preview3DScene, preview3DCamera);
+  }
+  loop();
+}
+
+async function approveGenerated3DModel() {
+  if (!current3DJobId) {
+    showToast('No active completed 3D reconstruction job to approve.', 'error');
+    return;
+  }
+
+  try {
+    const res = await adminApiFetch(`/api/admin/image3d/approve/${current3DJobId}`, {
+      method: 'POST',
+      body: JSON.stringify({ targetProductId: current3DTargetProductId })
+    });
+
+    showToast(res.message || '3D Model successfully published to product!', 'success');
+
+    // Reset workflow
+    discardGenerated3DJob();
+
+    // Reload products & 3D models table
+    loadProducts();
+    load3DModelsTab();
+  } catch (err) {
+    showToast(`Approval failed: ${err.message}`, 'error');
+  }
+}
+
+function discardGenerated3DJob() {
+  current3DJobId = null;
+  const progressWrap = document.getElementById('img3d-progress-wrap');
+  const actionControls = document.getElementById('img3d-action-controls');
+  const previewEmpty = document.getElementById('img3d-preview-empty');
+  const previewCanvas = document.getElementById('img3d-preview-canvas');
+
+  if (progressWrap) progressWrap.style.display = 'none';
+  if (actionControls) actionControls.style.display = 'none';
+  if (previewCanvas) previewCanvas.style.display = 'none';
+  if (previewEmpty) previewEmpty.style.display = 'block';
+
+  if (preview3DAnimId) cancelAnimationFrame(preview3DAnimId);
+}
+

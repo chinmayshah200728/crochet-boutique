@@ -1,0 +1,150 @@
+// Prisma schema for Crochet by Prisha
+// Supports PostgreSQL for persistent commerce data with Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  username     String?   @unique
+  email        String    @unique
+  passwordHash String
+  role         String    @default("customer") // super_admin, admin, customer
+  phone        String?
+  avatar       String?
+  addresses    Json?     @default("[]")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  orders       Order[]
+}
+
+model Category {
+  id          String    @id
+  name        String
+  slug        String    @unique
+  icon        String
+  image       String
+  description String
+  products    Product[]
+}
+
+model Product {
+  id                String    @id
+  sku               String    @unique
+  name              String
+  slug              String    @unique
+  categoryId        String
+  category          Category  @relation(fields: [categoryId], references: [id])
+  price             Float
+  salePrice         Float?
+  costPrice         Float?
+  stock             Int       @default(10)
+  leadTime          String    @default("Handcrafted in 2-4 business days")
+  lowStockThreshold Int       @default(5)
+  status            String    @default("active") // active, archived, draft
+  yarnType          String    @default("100% Combed Milk Cotton")
+  dimensions        String    @default("Standard Handcrafted")
+  colors            Json      @default("[\"Standard\"]")
+  model3dUrl        String?
+  customParts       Json?     @default("[]") // Customizable 3D parts: petals, center, ribbon, body
+  images            Json      @default("[]")
+  description       String
+  rating            Float     @default(5.0)
+  reviewsCount      Int       @default(0)
+  isSale            Boolean   @default(false)
+  isBestseller      Boolean   @default(false)
+  isNew             Boolean   @default(true)
+  allowGiftWrap     Boolean   @default(false)
+  giftWrapPrice     Float     @default(99.0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Order {
+  id                String    @id
+  userId            String?
+  user              User?     @relation(fields: [userId], references: [id])
+  customerName      String
+  customerEmail     String
+  customerPhone     String?
+  shippingAddress   Json
+  items             Json      // Product ID, name, price, qty, color, customParts, giftWrap
+  subtotal          Float
+  deliveryFee       Float     @default(0.0)
+  discount          Float     @default(0.0)
+  totalAmount       Float
+  paymentMethod     String    @default("UPI_ONLINE")
+  paymentStatus     String    @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  fulfillmentStatus String    @default("PROCESSING") // PROCESSING, HANDCRAFTING, SHIPPED, DELIVERED, CANCELLED
+  trackingNumber    String?
+  courierName       String?
+  giftWrapRequired  Boolean   @default(false)
+  giftMessage       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model CustomOrder {
+  id              String    @id
+  customerName    String
+  customerEmail   String
+  phone           String?
+  productType     String
+  selectedColors  Json      @default("[]")
+  customHexColors Json?     @default("[]")
+  specialNotes    String?
+  referenceImage  String?
+  status          String    @default("PENDING_REVIEW") // PENDING_REVIEW, QUOTED, ACCEPTED, COMPLETED
+  createdAt       DateTime  @default(now())
+}
+
+model Coupon {
+  id             String    @id @default(uuid())
+  code           String    @unique
+  discountPercent Float
+  maxDiscount    Float?
+  minOrderAmount Float     @default(0.0)
+  validUntil     DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+}
+
+model InventoryLog {
+  id          String   @id @default(uuid())
+  productId   String
+  productName String
+  sku         String
+  changeQty   Int
+  newStock    Int
+  reason      String
+  adminEmail  String
+  timestamp   DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminEmail String
+  action     String
+  module     String
+  details    String
+  timestamp  DateTime @default(now())
+}
+
+model GardenSlide {
+  id         String   @id
+  title      String
+  subtitle   String
+  icon       String
+  image      String
+  zone       String   @default("meadow")
+  sortOrder  Int      @default(0)
+}

@@ -109,6 +109,12 @@
         <a href="#products" class="nav-item" data-target="sec-products">
           <i class="fa-solid fa-tags"></i> <span>Products</span>
         </a>
+        <a href="#models3d" class="nav-item" data-target="sec-models3d">
+          <i class="fa-solid fa-cube"></i> <span>3D Models &amp; Colors</span>
+        </a>
+        <a href="#image3d" class="nav-item" data-target="sec-image3d">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Image-to-3D Studio</span>
+        </a>
         <a href="#payments" class="nav-item" data-target="sec-payments">
           <i class="fa-solid fa-credit-card"></i> <span>💳 UPI Payments</span>
         </a>
@@ -815,6 +821,148 @@
         </div>
       </section>
 
+      <!-- SECTION 12: 3D MODELS & COLOR MAPPING -->
+      <section id="sec-models3d" class="view-section">
+        <div class="section-title">
+          <div class="title-with-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2>🧊 3D Models &amp; Yarn Part Mapping</h2>
+              <p>Manage 3D WebGL models, map customizable parts (petals, core, ribbon, body), and upload custom GLB files.</p>
+            </div>
+            <button class="btn-primary-admin" onclick="load3DModelsTab()">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh 3D Models
+            </button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>3D Model Status</th>
+                  <th>Model Type</th>
+                  <th>Customizable Parts</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="models3d-table-tbody">
+                <!-- Populated dynamically via admin.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3D Model Live Inspection Box -->
+        <div class="card-header margin-top" style="margin-top: 24px;">
+          <h3><i class="fa-solid fa-eye"></i> 3D Model Interactive Viewport</h3>
+        </div>
+        <div style="background: #0F172A; border: 1px solid #334155; border-radius: 16px; padding: 20px; text-align: center;">
+          <div id="admin-3d-viewport" style="width: 100%; height: 320px; border-radius: 12px; background: radial-gradient(circle, #1E293B 0%, #0F172A 100%); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <canvas id="admin-3d-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+            <div id="admin-3d-empty-msg" style="position: absolute; color: #94A3B8; font-size: 13px;">
+              <i class="fa-solid fa-cube" style="font-size: 28px; display: block; margin-bottom: 8px; color: #E89CAE;"></i>
+              Select "Inspect 3D" on any product above to preview the 3D model with drag-to-rotate controls.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 13: IMAGE-TO-3D STUDIO -->
+      <section id="sec-image3d" class="view-section">
+        <div class="section-title">
+          <h2>🪄 AI Image-to-3D Studio (External Service Workflow)</h2>
+          <p>Generate textured 3D crochet meshes from reference photographs via external AI reconstruction pipelines.</p>
+        </div>
+
+        <!-- Advisory Notice Banner -->
+        <div style="background: #1E293B; border-left: 4px solid #E89CAE; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; color: #CBD5E1; font-size: 13px; line-height: 1.6;">
+          <strong style="color: #F8FAFC; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <i class="fa-solid fa-circle-info" style="color: #E89CAE;"></i> Note on 2D Photos vs 3D Mesh Accuracy:
+          </strong>
+          A single 2D photograph cannot guarantee an exact 3D crochet stitch model; multi-angle photos (front, side, close-up) provide optimal mesh geometry. If external generation API (Meshy / CSM / Tripo) is unconfigured, upload custom GLB files directly via the 3D Models tab.
+        </div>
+
+        <div class="analytics-grid" style="display: grid; grid-cols: 1; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          
+          <!-- Generator Form Box -->
+          <div class="analytics-card" style="background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 24px;">
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 18px; color: #F8FAFC; margin-bottom: 16px;">
+              <i class="fa-solid fa-cloud-arrow-up" style="color: #E89CAE;"></i> 1. Upload Reference Photos
+            </h3>
+            
+            <form id="form-image-to-3d" onsubmit="handleImageTo3DSubmit(event)" style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <label style="display: block; font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px;">Target Product *</label>
+                <select id="img3d-target-product" required class="select-clean" style="width: 100%; padding: 10px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 13px;">
+                  <!-- Injected via admin.js -->
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px;">Reference Angle 1 (Front View) *</label>
+                <input type="file" id="img3d-file-front" accept="image/*" class="input-clean" style="width: 100%; padding: 8px 12px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 12px;">
+              </div>
+
+              <div>
+                <label style="display: block; font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px;">Reference Angle 2 (Side / Detail) [Optional]</label>
+                <input type="file" id="img3d-file-side" accept="image/*" class="input-clean" style="width: 100%; padding: 8px 12px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 12px;">
+              </div>
+
+              <div>
+                <label style="display: block; font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px;">Crochet Stitch Style Prompt Hint</label>
+                <input type="text" id="img3d-prompt-hint" placeholder="e.g. Handcrafted combed milk cotton with ribbed purl stitches" class="input-clean" style="width: 100%; padding: 10px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 13px;">
+              </div>
+
+              <button type="submit" id="btn-start-3d-job" class="btn-primary-admin" style="padding: 12px; font-weight: 700; font-size: 13px; border-radius: 20px; margin-top: 8px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Submit 3D Reconstruction Job
+              </button>
+            </form>
+          </div>
+
+          <!-- Pipeline Status & 3D Preview Box -->
+          <div class="analytics-card" style="background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 24px;">
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 18px; color: #F8FAFC; margin-bottom: 16px;">
+              <i class="fa-solid fa-microchip" style="color: #8A9A86;"></i> 2. Pipeline Progress &amp; Preview
+            </h3>
+
+            <!-- Progress Bar -->
+            <div id="img3d-progress-wrap" style="display: none; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+                <span id="img3d-stage-text">Processing...</span>
+                <span id="img3d-percent-text">0%</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: #0F172A; border-radius: 10px; overflow: hidden;">
+                <div id="img3d-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #E89CAE, #8A9A86); transition: width 0.4s ease;"></div>
+              </div>
+            </div>
+
+            <!-- Preview Viewport -->
+            <div id="img3d-preview-viewport" style="width: 100%; height: 220px; background: #0F172A; border: 1px solid #334155; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin-bottom: 16px;">
+              <div id="img3d-preview-empty" style="text-align: center; color: #64748B; font-size: 12px;">
+                <i class="fa-solid fa-box-open" style="font-size: 24px; display: block; margin-bottom: 6px;"></i>
+                No active generation job. Submit photos on the left to start.
+              </div>
+              <canvas id="img3d-preview-canvas" style="width: 100%; height: 100%; display: none;"></canvas>
+            </div>
+
+            <!-- Action Controls -->
+            <div id="img3d-action-controls" style="display: none; gap: 10px;">
+              <button type="button" onclick="approveGenerated3DModel()" class="btn-primary-admin" style="flex: 1; padding: 10px; font-size: 12.5px; border-radius: 20px;">
+                <i class="fa-solid fa-check"></i> Approve &amp; Publish to Product
+              </button>
+              <button type="button" onclick="discardGenerated3DJob()" class="btn-secondary-admin" style="padding: 10px 16px; font-size: 12.5px; border-radius: 20px;">
+                Discard
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -926,6 +1074,32 @@
           <div class="form-group-clean" style="margin-bottom: 16px;">
             <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Detailed Description</label>
             <textarea id="prod-description" rows="3" placeholder="Write item details, dimensions, care instructions..." class="input-clean textarea-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box; font-family: inherit;"></textarea>
+          </div>
+
+          <!-- Production Lead Time -->
+          <div class="form-group-clean" style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">⏳ Production Lead Time</label>
+            <input type="text" id="prod-leadtime" placeholder="e.g. Handmade in 2–4 business days" class="input-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+          </div>
+
+          <!-- 3D Model Configuration -->
+          <div class="form-row-clean" style="display: flex; gap: 14px; margin-bottom: 16px;">
+            <div class="form-group-clean flex-1" style="flex: 1;">
+              <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">🧊 3D Interactive Model</label>
+              <select id="prod-model-type" class="select-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+                <option value="none">None (Photo Gallery Only)</option>
+                <option value="bouquet">Bouquet (Multi-flower arrangement)</option>
+                <option value="sunflower">Sunflower (Petals, Center disk, Stem)</option>
+                <option value="bow">Coquette Bow (Loops, Knot, Ribbons)</option>
+                <option value="scrunchie">Scrunchie (Yarn ruffle & elastic ring)</option>
+                <option value="hamper">Gift Hamper Basket (Woven basket & items)</option>
+                <option value="bunny">Amigurumi Plushie (Body, Ears, Cheeks)</option>
+              </select>
+            </div>
+            <div class="form-group-clean flex-1" style="flex: 1;">
+              <label style="display: block; font-weight: 600; font-size: 13.5px; color: #CBD5E1; margin-bottom: 6px;">Custom GLB Model URL</label>
+              <input type="text" id="prod-model-url" placeholder="https://.../model.glb" class="input-clean" style="width: 100%; padding: 11px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 10px; color: #FFF; font-size: 14px; outline: none; box-sizing: border-box;">
+            </div>
           </div>
 
           <!-- Hidden SKU & Cost Price fields -->
@@ -1045,6 +1219,10 @@
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-container" class="toast-container"></div>
+
+  <!-- Three.js & OrbitControls for Admin 3D Viewport -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
   <!-- Admin JavaScript Engine -->
   <script src="js/admin.js"></script>

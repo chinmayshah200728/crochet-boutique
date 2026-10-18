@@ -130,6 +130,18 @@
         "allowColorPicker": true,
         "allowCustomText": true,
         "textLabel": "Gift Card Message"
+      },
+      "has3DModel": true,
+      "model3dUrl": "/models/generated-job-3d-1792323864941.glb",
+      "customParts": {
+        "petals": {
+          "label": "Main Body",
+          "defaultColor": "#E89CAE"
+        },
+        "center": {
+          "label": "Accent / Core",
+          "defaultColor": "#F9E79F"
+        }
       }
     },
     {
@@ -405,6 +417,66 @@
   "payments": [],
   "webhookEvents": [],
   "auditLogs": [
+    {
+      "id": "audit-1792323869000-909",
+      "adminId": "usr-prisha-master",
+      "adminName": "Prisha Shah",
+      "adminEmail": "prishashah2809@crochetbyprisha.com",
+      "role": "super_admin",
+      "action": "3D Model Approved & Published",
+      "entity": "3D Studio",
+      "details": "Attached generated 3D model to \"Bow keychain\" (prod-plush-1)",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-18T11:44:29.000Z"
+    },
+    {
+      "id": "audit-1792323864943-38",
+      "adminId": "usr-prisha-master",
+      "adminName": "Prisha Shah",
+      "adminEmail": "prishashah2809@crochetbyprisha.com",
+      "role": "super_admin",
+      "action": "3D Model Generation Job Started",
+      "entity": "3D Studio",
+      "details": "Started generation job job-3d-1792323864941 for product prod-plush-1",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-18T11:44:24.943Z"
+    },
+    {
+      "id": "audit-1792323864933-610",
+      "adminId": "usr-prisha-master",
+      "adminName": "Prisha Shah",
+      "adminEmail": "prishashah2809@crochetbyprisha.com",
+      "role": "super_admin",
+      "action": "Admin Login",
+      "entity": "Authentication",
+      "details": "Logged into admin dashboard from IP 127.0.0.1",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-18T11:44:24.933Z"
+    },
+    {
+      "id": "audit-1792323816072-629",
+      "adminId": "usr-prisha-master",
+      "adminName": "Prisha Shah",
+      "adminEmail": "prishashah2809@crochetbyprisha.com",
+      "role": "super_admin",
+      "action": "Admin Login",
+      "entity": "Authentication",
+      "details": "Logged into admin dashboard from IP 127.0.0.1",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-18T11:43:36.072Z"
+    },
+    {
+      "id": "audit-1792323770880-894",
+      "adminId": "usr-prisha-master",
+      "adminName": "Prisha Shah",
+      "adminEmail": "prishashah2809@crochetbyprisha.com",
+      "role": "super_admin",
+      "action": "Admin Login",
+      "entity": "Authentication",
+      "details": "Logged into admin dashboard from IP 127.0.0.1",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-18T11:42:50.880Z"
+    },
     {
       "id": "audit-1791708826415-1",
       "adminId": "usr-prisha-master",
