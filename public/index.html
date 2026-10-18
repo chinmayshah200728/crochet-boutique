@@ -67,95 +67,61 @@
   <!-- ===================================================
        2. THREE.JS CROCHET WORLD CANVAS (BACKGROUND)
        =================================================== -->
-  <div id="crochet-world-canvas-wrap">
-    <canvas id="crochet-world-canvas"></canvas>
-  </div>
-  
-  <!-- Interactive Cursor Layer for 3D physics interaction -->
-  <div id="crochet-interactive-layer"></div>
-
-  <!-- Announcement Bar -->
-  <aside class="relative z-50 bg-[#2E252E] text-[#FAF8F5] text-[11px] sm:text-xs py-2 px-4 text-center font-medium flex justify-between items-center border-b border-white/10">
-    <div class="hidden md:flex items-center gap-2">
-      <span>🧶</span>
-      <span><strong>Crochet by Prisha</strong> • <i>A little world, woven by hand ♡</i></span>
-    </div>
-    <div class="mx-auto md:mx-0">
-      <span>Free Delivery on all orders over <strong>₹499</strong> across India</span>
-    </div>
-    <div class="hidden md:flex items-center gap-4 text-xs">
-      <button onclick="openPolicyModal('shipping')" class="hover:underline text-[#F9E79F]">Shipping &amp; Delivery</button>
-      <span>|</span>
-      <button onclick="navigate('track-order')" class="hover:underline text-[#FAF8F5]">Track Order</button>
-    </div>
+  <!-- ===================================================
+       ANNOUNCEMENT BAR (MATCHING SCREENSHOT)
+       =================================================== -->
+  <aside class="relative z-50 bg-[#F5F2EB] text-[#5C544C] text-[12px] sm:text-[13px] py-2 px-4 text-center font-normal tracking-wide border-b border-[#E8E2D8]">
+    <span>A little yarn. A whole lot of heart.</span>
   </aside>
 
-  <!-- Sticky Header Navigation -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-[#EFE4EA] transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20">
+  <!-- ===================================================
+       MAIN EDITORIAL NAVIGATION HEADER (MATCHING SCREENSHOT)
+       =================================================== -->
+  <header class="sticky top-0 z-40 bg-[#F5F2EB]/95 backdrop-blur-md border-b border-[#E8E2D8]/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+      <div class="flex items-center justify-between h-20 sm:h-24">
         
-        <!-- Mobile Menu Button & Brand Logo -->
-        <div class="flex items-center gap-3">
-          <button class="lg:hidden text-xl text-[#2E252E] p-1.5 focus:outline-none" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+        <!-- Left Nav Links -->
+        <div class="flex items-center gap-6 sm:gap-10">
+          <button class="md:hidden text-xl text-[#2E252E] p-1.5 focus:outline-none" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
             <i class="fa-solid fa-bars-staggered"></i>
           </button>
-          
-          <a href="#" onclick="scrollToGardenZone('zone-meadow')" class="flex items-center gap-2.5 shrink-0 group">
-            <span class="text-2xl group-hover:rotate-12 transition-transform duration-300">🌸</span>
-            <div class="leading-tight">
-              <span class="font-editorial text-lg sm:text-xl font-bold tracking-tight text-[#2E252E] block">
-                Crochet <span class="text-[#D88A9A]">by Prisha</span>
-              </span>
-              <span class="text-[9px] sm:text-[10px] font-semibold text-[#8A9A86] tracking-wider block">
-                A Little World, Woven by Hand ♡
-              </span>
-            </div>
-          </a>
+          <nav class="hidden md:flex items-center gap-8 text-[13.5px] font-normal tracking-wide text-[#332E2A]">
+            <a href="#section-shop" onclick="scrollToGardenZone('section-shop')" class="hover:text-[#8A9A86] transition-colors">The collection</a>
+            <a href="#zone-maker" onclick="scrollToGardenZone('zone-maker')" class="hover:text-[#8A9A86] transition-colors">Our story</a>
+          </nav>
         </div>
 
-        <!-- Desktop Navigation Links -->
-        <nav class="hidden lg:flex items-center space-x-6 text-xs font-semibold tracking-wide" aria-label="Main Navigation">
-          <a href="#zone-meadow" onclick="scrollToGardenZone('zone-meadow')" class="nav-link">Welcome Meadow</a>
-          <a href="#zone-flowers" onclick="scrollToGardenZone('zone-flowers')" class="nav-link">Flower Garden</a>
-          <a href="#zone-cozy" onclick="scrollToGardenZone('zone-cozy')" class="nav-link">Cozy Corner</a>
-          <a href="#zone-style" onclick="scrollToGardenZone('zone-style')" class="nav-link">Style Pavilion</a>
-          <a href="#zone-studio" onclick="scrollToGardenZone('zone-studio')" class="nav-link text-[#D88A9A]">Color Studio 🎨</a>
-          <a href="#zone-maker" onclick="scrollToGardenZone('zone-maker')" class="nav-link">Maker's Nook</a>
-          <a href="#zone-gifts" onclick="scrollToGardenZone('zone-gifts')" class="nav-link">Gift Garden</a>
-          <a href="#section-shop" onclick="scrollToGardenZone('section-shop')" class="nav-link font-bold text-[#C96554]">Shop All</a>
-        </nav>
+        <!-- Center Brand Logo -->
+        <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="text-center group block">
+          <span class="font-editorial text-2xl sm:text-3xl font-normal text-[#2E252E] tracking-tight block">
+            crochetbyprisha
+          </span>
+          <span class="text-[9px] sm:text-[10px] uppercase tracking-[0.24em] font-medium text-[#7D756C] block mt-0.5">
+            A LITTLE WORLD, HANDMADE
+          </span>
+        </a>
 
-        <!-- Right Action Controls -->
-        <div class="flex items-center gap-2.5 sm:gap-3.5">
-          <!-- Replay Curtain Entrance Button -->
-          <button onclick="replayCinematicEntrance()" class="btn-sound-toggle hidden sm:inline-flex" title="Replay Opening Curtains">
-            <i class="fa-solid fa-clapperboard text-[#D88A9A]"></i>
-            <span class="hidden xl:inline text-xs">Replay Intro</span>
+        <!-- Right Controls & Bag -->
+        <div class="flex items-center gap-5 sm:gap-8 text-[13.5px] font-normal text-[#332E2A]">
+          <a href="#zone-studio" onclick="scrollToGardenZone('zone-studio')" class="hidden sm:inline-flex items-center gap-1.5 hover:text-[#8A9A86] transition-colors">
+            <span>The studio</span> <span class="text-xs">↗</span>
+          </a>
+
+          <!-- Ambient Audio Soundscape Toggle (Discreet) -->
+          <button id="ambient-audio-btn" onclick="toggleAmbientAudio()" class="hidden md:inline-flex items-center gap-1.5 text-xs text-[#6A6157] hover:text-[#2E252E] transition-colors" title="Toggle cozy handmade garden soundscape">
+            <i class="fa-solid fa-volume-xmark text-sm" id="audio-icon"></i>
+            <span id="audio-text">Audio</span>
           </button>
 
-          <!-- Ambient Audio Soundscape Toggle -->
-          <button id="ambient-audio-btn" onclick="toggleAmbientAudio()" class="btn-sound-toggle" title="Toggle cozy handmade garden soundscape">
-            <i class="fa-solid fa-volume-xmark text-[#8A9A86]" id="audio-icon"></i>
-            <span class="hidden sm:inline text-xs" id="audio-text">Garden Audio</span>
-            <div class="soundwave-bars" aria-hidden="true">
-              <span class="soundwave-bar"></span>
-              <span class="soundwave-bar"></span>
-              <span class="soundwave-bar"></span>
-            </div>
-          </button>
-
-          <!-- Wishlist Badge -->
-          <button onclick="toggleWishlistDrawer()" class="relative p-2 text-[#2E252E] hover:text-[#D88A9A] transition" aria-label="View Wishlist">
-            <i class="fa-regular fa-heart text-lg"></i>
-            <span id="wishlist-badge" class="badge-count hidden">0</span>
-          </button>
-
-          <!-- Basket / Cart Drawer Button -->
-          <button onclick="toggleCartDrawer()" class="btn-artisan !py-2.5 !px-4 text-xs" aria-label="View Shopping Basket">
-            <i class="fa-solid fa-basket-shopping text-sm"></i>
-            <span class="hidden sm:inline">Basket</span>
-            <span id="cart-badge" class="bg-white text-[#C96554] text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">0</span>
+          <!-- Shopping Bag Button -->
+          <button onclick="toggleCartDrawer()" class="flex items-center gap-2 hover:text-[#8A9A86] transition-colors" aria-label="Shopping Bag">
+            <svg class="w-5 h-5 text-[#332E2A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span class="text-[13.5px]">Bag (<span id="cart-badge-count">0</span>)</span>
           </button>
         </div>
 
@@ -164,39 +130,60 @@
   </header>
 
   <!-- ===================================================
+       HERO 3D DIORAMA STAGE (MATCHING SCREENSHOT)
+       =================================================== -->
+  <section id="hero-stage" class="relative w-full h-[calc(100vh-112px)] min-h-[580px] max-h-[880px] overflow-hidden select-none bg-[#E7EBE2]">
+    
+    <!-- 3D Canvas Viewport -->
+    <div id="crochet-world-canvas-wrap" class="absolute inset-0 z-0 w-full h-full">
+      <canvas id="crochet-world-canvas" class="w-full h-full block"></canvas>
+    </div>
+
+    <!-- Interactive Drag/Touch Layer -->
+    <div id="crochet-interactive-layer" class="absolute inset-0 z-10 cursor-grab active:cursor-grabbing"></div>
+
+    <!-- Top-Left Floating Story Overlay (Exact text & typography from screenshot) -->
+    <div class="absolute top-8 left-6 sm:top-14 sm:left-12 lg:left-16 z-20 max-w-sm sm:max-w-md pointer-events-none">
+      <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-[#55504A] block mb-3 drop-shadow-sm">
+        A LITTLE WORLD, HANDMADE
+      </span>
+      <h1 class="font-editorial text-4xl sm:text-5xl lg:text-[64px] font-normal text-[#272320] leading-[1.08] tracking-tight mb-4 drop-shadow-sm">
+        A world,<br>
+        <span class="italic font-normal">softly made.</span>
+      </h1>
+      <p class="text-xs sm:text-[13.5px] text-[#4F4A44] leading-relaxed mb-6 max-w-[340px] drop-shadow-sm font-normal">
+        Where the river is a ribbon of yarn, and every little life has a story.
+      </p>
+      <a href="#section-shop" onclick="scrollToGardenZone('section-shop')" class="pointer-events-auto inline-flex items-center gap-3 px-6 py-3.5 bg-[#FAF7F2] hover:bg-white text-[#2E2824] rounded-full text-xs sm:text-[13px] font-medium tracking-wide shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 border border-[#E6DFD4]">
+        <span>Find your little treasure</span>
+        <span class="text-xs">↗</span>
+      </a>
+    </div>
+
+    <!-- Bottom-Left Floating Caption -->
+    <div class="absolute bottom-6 left-6 sm:bottom-8 sm:left-12 lg:left-16 z-20 pointer-events-none">
+      <span class="text-[9.5px] sm:text-[10.5px] uppercase tracking-[0.22em] font-medium text-[#504A44] drop-shadow-sm">
+        IMAGINED &amp; STITCHED BY CROCHETBYPRISHA
+      </span>
+    </div>
+
+    <!-- Bottom-Right Floating Controls -->
+    <div class="absolute bottom-6 right-6 sm:bottom-8 sm:right-12 z-20 flex items-center gap-4 pointer-events-none">
+      <span class="hidden sm:inline-block text-[9.5px] sm:text-[10.5px] uppercase tracking-[0.2em] font-medium text-[#504A44] drop-shadow-sm">
+        DRAG GENTLY TO EXPLORE
+      </span>
+      <button id="btn-pause-motion" onclick="togglePauseWorldMotion()" class="pointer-events-auto inline-flex items-center gap-2 px-4 py-2 bg-[#2D3328]/80 hover:bg-[#2D3328] text-[#F5F2EB] backdrop-blur-md rounded-full text-xs font-medium shadow-md transition-all">
+        <i class="fa-solid fa-pause text-[11px]" id="pause-motion-icon"></i>
+        <span id="pause-motion-text">Pause motion</span>
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ===================================================
        3. THE 7 SCROLL-GUIDED STORYBOOK GARDEN ZONES
        =================================================== -->
   <main class="relative z-10">
-
-    <!-- ZONE 1: WELCOME MEADOW -->
-    <section id="zone-meadow" class="garden-zone" data-zone="meadow">
-      <div class="max-w-3xl mx-auto text-center px-4">
-        <div class="story-card-narrative mx-auto max-w-2xl">
-          <div class="zone-pill-tag mb-4">
-            <span>🌿</span> Zone 1 • Welcome Meadow
-          </div>
-          <h2 class="font-editorial text-3xl sm:text-4xl md:text-5xl font-bold text-[#2E252E] leading-tight mb-4">
-            A Little World, <br><span class="italic text-[#D88A9A]">Woven by Hand.</span>
-          </h2>
-          <p class="text-sm sm:text-base text-[#7A6B7A] leading-relaxed mb-6 max-w-xl mx-auto">
-            Welcome to our living miniature garden crafted from soft yarn. Woven pathways, knitted clouds, and everlasting flowers that stay vibrant forever.
-          </p>
-          <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2">
-            <button onclick="scrollToGardenZone('zone-flowers')" class="btn-artisan">
-              <span>Enter Flower Garden</span> <i class="fa-solid fa-arrow-down text-xs"></i>
-            </button>
-            <button onclick="scrollToGardenZone('section-shop')" class="btn-artisan-outline">
-              <i class="fa-solid fa-bag-shopping text-[#D88A9A]"></i> <span>Shop All Products</span>
-            </button>
-          </div>
-          <div class="mt-6 pt-5 border-t border-[#EFE4EA] flex items-center justify-center gap-6 text-xs text-[#7A6B7A]">
-            <span class="flex items-center gap-1.5">🌸 Everlasting Petals</span>
-            <span class="flex items-center gap-1.5">🧶 100% Milk Cotton</span>
-            <span class="flex items-center gap-1.5">✨ 3D Color Picker</span>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- ZONE 2: FLOWER GARDEN -->
     <section id="zone-flowers" class="garden-zone" data-zone="flowers">
