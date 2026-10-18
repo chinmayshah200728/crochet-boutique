@@ -243,12 +243,76 @@ function isFlowerProduct(p) {
 }
 
 /* ===================================================
-   1. PROCEDURAL YARN STITCH TEXTURE GENERATOR
+   1. PROCEDURAL REALISTIC YARN & CROCHET TEXTURE GENERATOR
    =================================================== */
 let cachedYarnBumpTexture = null;
+let cachedRoofRibTexture = null;
+let cachedSilkRibbonTexture = null;
 
+// High-Definition Interlocking Purl & Knit Stitch Texture (512x512)
 function getCrochetYarnBumpTexture() {
   if (cachedYarnBumpTexture) return cachedYarnBumpTexture;
+  if (typeof THREE === 'undefined') return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  // Base neutral grey
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, 512, 512);
+
+  const rowHeight = 24;
+  const colWidth = 24;
+
+  for (let y = 0; y < 512; y += rowHeight) {
+    const isOdd = (y / rowHeight) % 2 === 1;
+    const xOffset = isOdd ? colWidth / 2 : 0;
+
+    for (let x = -colWidth; x < 512 + colWidth; x += colWidth) {
+      const cx = x + xOffset;
+      const cy = y;
+
+      // Outer highlight loop
+      ctx.beginPath();
+      ctx.arc(cx, cy, 10, 0, Math.PI, false);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+
+      // Inner shadow recess loop
+      ctx.beginPath();
+      ctx.arc(cx, cy + 6, 10, Math.PI, 0, false);
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+
+      // Plied yarn twisted cord lines
+      ctx.beginPath();
+      ctx.moveTo(cx - 7, cy - 2);
+      ctx.lineTo(cx + 7, cy + 4);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Micro fibrous wool grain
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+      ctx.fillRect(cx - 3, cy - 3, 6, 6);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(10, 10);
+  cachedYarnBumpTexture = texture;
+  return texture;
+}
+
+// Scalloped Ribbed Cable Shingle Texture for Cottage Roof
+function getRoofRibBumpTexture() {
+  if (cachedRoofRibTexture) return cachedRoofRibTexture;
   if (typeof THREE === 'undefined') return null;
 
   const canvas = document.createElement('canvas');
@@ -256,76 +320,61 @@ function getCrochetYarnBumpTexture() {
   canvas.height = 256;
   const ctx = canvas.getContext('2d');
 
-  // Fill neutral mid-grey
   ctx.fillStyle = '#808080';
   ctx.fillRect(0, 0, 256, 256);
 
-  // Draw procedural interlocking crochet/knit purl stitches
-  const rowHeight = 16;
-  const colWidth = 16;
+  // Vertical knit ribs with horizontal scallop overlap
+  for (let x = 0; x < 256; x += 16) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillRect(x + 2, 0, 6, 256);
 
-  for (let y = 0; y < 256; y += rowHeight) {
-    const isOdd = (y / rowHeight) % 2 === 1;
-    const xOffset = isOdd ? colWidth / 2 : 0;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.fillRect(x + 8, 0, 8, 256);
+  }
 
-    for (let x = -colWidth; x < 256 + colWidth; x += colWidth) {
-      const cx = x + xOffset;
-      const cy = y;
+  for (let y = 0; y < 256; y += 32) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fillRect(0, y, 256, 4);
 
-      // Highlight loop
-      ctx.beginPath();
-      ctx.arc(cx, cy, 7, 0, Math.PI, false);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-      ctx.lineWidth = 3.5;
-      ctx.stroke();
-
-      // Shadow loop
-      ctx.beginPath();
-      ctx.arc(cx, cy + 4, 7, Math.PI, 0, false);
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-      ctx.lineWidth = 3.5;
-      ctx.stroke();
-
-      // Micro fibrous grain
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-      ctx.fillRect(cx - 2, cy - 2, 4, 4);
-    }
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.fillRect(0, y + 4, 256, 3);
   }
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(8, 8);
-  cachedYarnBumpTexture = texture;
+  texture.repeat.set(4, 4);
+  cachedRoofRibTexture = texture;
   return texture;
 }
 
-function createCrochetMaterial(colorHex, roughness = 0.88, metalness = 0.04) {
-  const bump = getCrochetYarnBumpTexture();
+function createCrochetMaterial(colorHex, roughness = 0.88, metalness = 0.03, bumpScale = 0.04, customBump = null) {
+  const bump = customBump || getCrochetYarnBumpTexture();
   return new THREE.MeshStandardMaterial({
     color: colorHex,
     roughness: roughness,
     metalness: metalness,
     bumpMap: bump,
-    bumpScale: 0.035
+    bumpScale: bumpScale
   });
 }
 
 /* ===================================================
-   2. THREE.JS LIVING CROCHET WORLD ENGINE (MINIATURE DIORAMA)
+   2. THREE.JS LIVING CROCHET WORLD ENGINE (REALISTIC MINIATURE DIORAMA)
    =================================================== */
 let worldScene, worldCamera, worldRenderer;
 let worldFlowers = [];
 let worldButterflies = [];
 let worldBirds = [];
+let worldRiverRipples = [];
 let isWorldActive = false;
 let isMotionPaused = false;
 let isDioramaDragging = false;
 let dragStartX = 0, dragStartY = 0;
 let orbitAngleX = 0, targetOrbitAngleX = 0;
-let orbitAngleY = 0.30, targetOrbitAngleY = 0.30;
-let orbitDistance = 14.8;
-let lookAtTarget = new THREE.Vector3(0.5, 1.2, 0);
+let orbitAngleY = 0.32, targetOrbitAngleY = 0.32;
+let orbitDistance = 14.2;
+let lookAtTarget = new THREE.Vector3(0.6, 1.25, 0);
 let riverRibbonMesh = null;
 let scrollProgress = 0, targetScrollProgress = 0;
 
@@ -353,10 +402,10 @@ function init3DCrochetWorld() {
 
   worldScene = new THREE.Scene();
   worldScene.background = new THREE.Color(0xE4ECE0);
-  worldScene.fog = new THREE.FogExp2(0xE4ECE0, 0.016);
+  worldScene.fog = new THREE.FogExp2(0xE4ECE0, 0.015);
 
-  worldCamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 120);
-  worldCamera.position.set(0, 4.4, 13.5);
+  worldCamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 140);
+  worldCamera.position.set(0, 4.3, 13.8);
   worldCamera.lookAt(lookAtTarget);
 
   worldRenderer = new THREE.WebGLRenderer({
@@ -370,23 +419,38 @@ function init3DCrochetWorld() {
   worldRenderer.shadowMap.enabled = true;
   worldRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-  // Warm Golden Sunlight & Ambient Radiance
-  const ambientLight = new THREE.AmbientLight(0xFFF9F0, 1.25);
+  // 1. Warm Golden Sunlight & Ambient Radiance
+  const ambientLight = new THREE.AmbientLight(0xFFF9F0, 0.95);
   worldScene.add(ambientLight);
 
-  const sunLight = new THREE.DirectionalLight(0xFFF2D6, 1.4);
-  sunLight.position.set(15, 22, 14);
+  const hemiLight = new THREE.HemisphereLight(0xFFF8ED, 0x8DA088, 0.75);
+  worldScene.add(hemiLight);
+
+  const sunLight = new THREE.DirectionalLight(0xFFF3D8, 1.6);
+  sunLight.position.set(16, 24, 14);
   sunLight.castShadow = true;
-  sunLight.shadow.mapSize.width = 1024;
-  sunLight.shadow.mapSize.height = 1024;
-  sunLight.shadow.bias = -0.0005;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  sunLight.shadow.camera.near = 0.5;
+  sunLight.shadow.camera.far = 60;
+  sunLight.shadow.camera.left = -18;
+  sunLight.shadow.camera.right = 18;
+  sunLight.shadow.camera.top = 18;
+  sunLight.shadow.camera.bottom = -18;
+  sunLight.shadow.bias = -0.0003;
+  sunLight.shadow.radius = 2.8;
   worldScene.add(sunLight);
 
-  const fillLight = new THREE.DirectionalLight(0xC6D8C2, 0.65);
-  fillLight.position.set(-14, 10, -6);
+  const fillLight = new THREE.DirectionalLight(0xC6D8C2, 0.6);
+  fillLight.position.set(-15, 10, -6);
   worldScene.add(fillLight);
 
-  // Build the complete handcrafted diorama
+  // Warm Amber Point Light Inside Cottage Porch
+  const cottageGlowLight = new THREE.PointLight(0xFFB74D, 1.7, 8, 1.4);
+  cottageGlowLight.position.set(5.1, 1.6, 2.1);
+  worldScene.add(cottageGlowLight);
+
+  // Build the complete realistic handcrafted diorama
   buildMiniatureDioramaWorld();
 
   // Setup Event Listeners
@@ -398,21 +462,37 @@ function init3DCrochetWorld() {
 
 function buildMiniatureDioramaWorld() {
   const bump = getCrochetYarnBumpTexture();
+  const roofBump = getRoofRibBumpTexture();
 
-  // 1. Distant Sun Disc in Sky (Top Right)
-  const sunGeo = new THREE.SphereGeometry(1.6, 24, 24);
+  // 1. Distant Glowing Sun Disc in Pale Sky (Top Right)
+  const sunGroup = new THREE.Group();
+  sunGroup.position.set(10.5, 15.5, -16);
+
+  const sunGeo = new THREE.SphereGeometry(1.65, 24, 24);
   const sunMat = new THREE.MeshBasicMaterial({ color: 0xFFF1CE });
   const sunMesh = new THREE.Mesh(sunGeo, sunMat);
-  sunMesh.position.set(9.5, 14.5, -15);
-  worldScene.add(sunMesh);
+  sunGroup.add(sunMesh);
 
-  // 2. Distant Soft Mountain Ridges
-  const mtnColors = [0xCAD4C5, 0xB8C5B3, 0xD4DDD0];
+  // Subtle sun aura halo
+  const haloGeo = new THREE.RingGeometry(1.8, 3.2, 32);
+  const haloMat = new THREE.MeshBasicMaterial({
+    color: 0xFFF6DB,
+    transparent: true,
+    opacity: 0.28,
+    side: THREE.DoubleSide
+  });
+  const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+  haloMesh.lookAt(worldCamera.position);
+  sunGroup.add(haloMesh);
+  worldScene.add(sunGroup);
+
+  // 2. Distant Soft Mountain Ridges (Layered Atmospheric Depth)
+  const mtnColors = [0xCAD5C5, 0xB8C5B3, 0xD6DFD2, 0xC0CDBB];
   const mtnCoords = [
-    { x: -14, y: 3.5, z: -25, r: 8, h: 9.5 },
-    { x: -5,  y: 3.0, z: -27, r: 9, h: 8.5 },
-    { x: 5,   y: 3.8, z: -26, r: 8, h: 10.0 },
-    { x: 14,  y: 3.2, z: -24, r: 7.5, h: 8.0 }
+    { x: -16, y: 3.8, z: -27, r: 9.0, h: 10.5 },
+    { x: -6,  y: 3.2, z: -29, r: 10.0, h: 9.5 },
+    { x: 5,   y: 4.2, z: -28, r: 9.2, h: 11.0 },
+    { x: 15,  y: 3.5, z: -26, r: 8.5, h: 9.0 }
   ];
   mtnCoords.forEach((m, idx) => {
     const mtnGeo = new THREE.ConeGeometry(m.r, m.h, 24);
@@ -427,8 +507,8 @@ function buildMiniatureDioramaWorld() {
     worldScene.add(mtnMesh);
   });
 
-  // 3. Rolling Sage-Green Yarn Ground with River Valley
-  const groundGeom = new THREE.PlaneGeometry(64, 52, 48, 48);
+  // 3. Rolling Sage-Green Yarn Landscape with Natural River Valley
+  const groundGeom = new THREE.PlaneGeometry(68, 56, 52, 52);
   groundGeom.rotateX(-Math.PI / 2);
 
   const pos = groundGeom.attributes.position;
@@ -436,223 +516,309 @@ function buildMiniatureDioramaWorld() {
     const x = pos.getX(i);
     const z = pos.getZ(i);
 
-    // River centerline: x = -0.32 * z + 0.5
-    const riverCenter = -0.32 * z + 0.5;
+    // Natural diagonal curve of riverbed
+    const riverCenter = -0.34 * z + 0.4;
     const riverDist = Math.abs(x - riverCenter);
 
-    let y = Math.sin(x * 0.12) * 0.35 + Math.cos(z * 0.1) * 0.3;
+    let y = Math.sin(x * 0.12) * 0.38 + Math.cos(z * 0.1) * 0.32;
 
-    // Valley dip for river
-    if (riverDist < 3.2) {
-      y -= (1 - riverDist / 3.2) * 0.85;
+    // Valley dip along river path
+    if (riverDist < 3.4) {
+      y -= (1 - riverDist / 3.4) * 0.88;
     }
-    // Cottage mound on right
+    // Cottage knoll on the right
     const cottageDist = Math.hypot(x - 5.0, z - 0.2);
-    if (cottageDist < 5.5) {
-      y += (1 - cottageDist / 5.5) * 0.45;
+    if (cottageDist < 5.8) {
+      y += (1 - cottageDist / 5.8) * 0.48;
     }
-    // Left tree mound
-    const treeDist = Math.hypot(x + 6.0, z - 2.5);
-    if (treeDist < 5.0) {
-      y += (1 - treeDist / 5.0) * 0.35;
+    // Tree & bench hill on the left
+    const treeDist = Math.hypot(x + 6.2, z - 2.5);
+    if (treeDist < 5.5) {
+      y += (1 - treeDist / 5.5) * 0.42;
     }
 
-    pos.setY(i, y - 0.25);
+    pos.setY(i, y - 0.22);
   }
   groundGeom.computeVertexNormals();
 
-  const groundMat = createCrochetMaterial(0x8B9E87, 0.92);
+  const groundMat = createCrochetMaterial(0x8B9E87, 0.92, 0.03, 0.038);
   const groundMesh = new THREE.Mesh(groundGeom, groundMat);
   groundMesh.position.set(0, 0, 0);
   groundMesh.receiveShadow = true;
   worldScene.add(groundMesh);
 
-  // 4. Winding Turquoise Ribbon River of Yarn
+  // 4. Winding Turquoise Ribbon River of Silk Yarn
   const riverCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(6.5, -0.35, -18),
-    new THREE.Vector3(4.2, -0.38, -12),
-    new THREE.Vector3(1.8, -0.42, -5),
-    new THREE.Vector3(-0.2, -0.46, 1),
-    new THREE.Vector3(-2.6, -0.42, 7),
-    new THREE.Vector3(-5.8, -0.36, 14)
+    new THREE.Vector3(7.2, -0.32, -19),
+    new THREE.Vector3(4.6, -0.36, -12),
+    new THREE.Vector3(1.9, -0.42, -5),
+    new THREE.Vector3(-0.3, -0.46, 1),
+    new THREE.Vector3(-2.8, -0.42, 7),
+    new THREE.Vector3(-6.2, -0.35, 15)
   ]);
 
-  const riverGeom = new THREE.TubeGeometry(riverCurve, 64, 1.25, 8, false);
+  const riverGeom = new THREE.TubeGeometry(riverCurve, 72, 1.35, 8, false);
   const riverMat = new THREE.MeshStandardMaterial({
-    color: 0x7CA89E,
-    roughness: 0.55,
-    metalness: 0.12,
+    color: 0x76A69C,
+    roughness: 0.52,
+    metalness: 0.14,
     bumpMap: bump,
     bumpScale: 0.04
   });
   riverRibbonMesh = new THREE.Mesh(riverGeom, riverMat);
-  riverRibbonMesh.scale.set(1, 0.18, 1);
+  riverRibbonMesh.scale.set(1, 0.16, 1);
   riverRibbonMesh.receiveShadow = true;
   worldScene.add(riverRibbonMesh);
 
-  // Smooth Riverbank Pebbles
-  const pebbleColors = [0xC7BEB2, 0xB5ABA0, 0x9E9387, 0xD4CBC0];
-  const pebblePoints = riverCurve.getSpacedPoints(30);
+  // Raised Yarn Piping Cord on River Edges
+  [-1.4, 1.4].forEach(offsetSide => {
+    const edgeCurve = new THREE.CatmullRomCurve3(
+      riverCurve.getSpacedPoints(40).map(p => new THREE.Vector3(p.x + offsetSide * 0.9, p.y + 0.05, p.z))
+    );
+    const edgeGeo = new THREE.TubeGeometry(edgeCurve, 48, 0.08, 6, false);
+    const edgeMat = createCrochetMaterial(0x89B7AE, 0.75, 0.05, 0.03);
+    const edgeMesh = new THREE.Mesh(edgeGeo, edgeMat);
+    worldScene.add(edgeMesh);
+  });
+
+  // Smooth Handcrafted Riverbank Felt Pebbles
+  const pebbleColors = [0xC7BEB2, 0xB5ABA0, 0x9E9387, 0xD4CBC0, 0xAA9F93];
+  const pebblePoints = riverCurve.getSpacedPoints(34);
 
   pebblePoints.forEach((pt, idx) => {
-    // Left & Right bank pebbles
-    [-1.5, 1.5].forEach(side => {
-      const pRadius = 0.22 + (idx % 4) * 0.07;
-      const pGeo = new THREE.DodecahedronGeometry(pRadius, 1);
-      pGeo.scale(1.2, 0.6, 1.0);
-      const pMat = createCrochetMaterial(pebbleColors[(idx + (side > 0 ? 1 : 0)) % pebbleColors.length], 0.82);
+    [-1.6, 1.6].forEach(side => {
+      const pRadius = 0.22 + (idx % 5) * 0.06;
+      const pGeo = new THREE.SphereGeometry(pRadius, 12, 10);
+      pGeo.scale(1.25, 0.55, 1.0);
+      const pMat = createCrochetMaterial(pebbleColors[(idx + (side > 0 ? 1 : 0)) % pebbleColors.length], 0.85);
       const pMesh = new THREE.Mesh(pGeo, pMat);
 
-      const offsetDist = side + (Math.sin(idx * 1.5) * 0.35);
-      pMesh.position.set(pt.x + offsetDist, pt.y + 0.1, pt.z + (Math.cos(idx) * 0.2));
-      pMesh.rotation.set(Math.random(), Math.random(), Math.random());
+      const offsetDist = side + (Math.sin(idx * 1.4) * 0.4);
+      pMesh.position.set(pt.x + offsetDist, pt.y + 0.1, pt.z + (Math.cos(idx * 1.2) * 0.25));
+      pMesh.rotation.set(Math.random() * 0.4, Math.random() * Math.PI, Math.random() * 0.4);
       pMesh.castShadow = true;
       pMesh.receiveShadow = true;
       worldScene.add(pMesh);
     });
   });
 
-  // 5. Arched Knitted Bridge (Crossing Over the River)
+  // 5. Knitted Arched Bridge with Alternating Cream & Sage Balustrades
   const bridgeGroup = new THREE.Group();
-  bridgeGroup.position.set(0.2, -0.15, 1.0);
+  bridgeGroup.position.set(0.15, -0.16, 1.0);
 
-  // Arched deck
+  // Arched deck with stitched wooden plank feel
   const archCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-2.2, 0, 0),
-    new THREE.Vector3(-1.0, 0.75, 0),
-    new THREE.Vector3(0, 0.95, 0),
-    new THREE.Vector3(1.0, 0.75, 0),
-    new THREE.Vector3(2.2, 0, 0)
+    new THREE.Vector3(-2.3, 0, 0),
+    new THREE.Vector3(-1.1, 0.82, 0),
+    new THREE.Vector3(0, 1.05, 0),
+    new THREE.Vector3(1.1, 0.82, 0),
+    new THREE.Vector3(2.3, 0, 0)
   ]);
-  const deckGeom = new THREE.TubeGeometry(archCurve, 32, 0.65, 8, false);
-  deckGeom.scale(1, 0.22, 1.6);
+  const deckGeom = new THREE.TubeGeometry(archCurve, 36, 0.72, 8, false);
+  deckGeom.scale(1, 0.2, 1.65);
   const deckMat = createCrochetMaterial(0xEDE6DC, 0.88);
   const deckMesh = new THREE.Mesh(deckGeom, deckMat);
   deckMesh.castShadow = true;
   deckMesh.receiveShadow = true;
   bridgeGroup.add(deckMesh);
 
-  // Striped Balustrades (Sage & Cream)
-  [-0.95, 0.95].forEach(zOffset => {
+  // Plush Knitted Striped Balustrades
+  [-1.02, 1.02].forEach(zOffset => {
+    // Upper handrail cord
     const railCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-2.2, 0.45, zOffset),
-      new THREE.Vector3(-1.0, 1.25, zOffset),
-      new THREE.Vector3(0, 1.45, zOffset),
-      new THREE.Vector3(1.0, 1.25, zOffset),
-      new THREE.Vector3(2.2, 0.45, zOffset)
+      new THREE.Vector3(-2.3, 0.5, zOffset),
+      new THREE.Vector3(-1.1, 1.35, zOffset),
+      new THREE.Vector3(0, 1.58, zOffset),
+      new THREE.Vector3(1.1, 1.35, zOffset),
+      new THREE.Vector3(2.3, 0.5, zOffset)
     ]);
-    const railGeom = new THREE.TubeGeometry(railCurve, 32, 0.08, 8, false);
+    const railGeom = new THREE.TubeGeometry(railCurve, 36, 0.09, 8, false);
     const railMat = createCrochetMaterial(0x829A7F, 0.85);
     const railMesh = new THREE.Mesh(railGeom, railMat);
     railMesh.castShadow = true;
     bridgeGroup.add(railMesh);
 
-    // Vertical striped posts
-    const postCount = 10;
-    for (let p = 0; p < postCount; p++) {
-      const u = p / (postCount - 1);
+    // 14 Vertical Spindles Alternating Cream and Sage
+    const spindleCount = 14;
+    for (let s = 0; s < spindleCount; s++) {
+      const u = s / (spindleCount - 1);
       const pt = railCurve.getPoint(u);
-      const isCream = p % 2 === 0;
-      const postGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.65, 8);
-      const postMat = createCrochetMaterial(isCream ? 0xF7F4EE : 0x829A7F, 0.85);
-      const postMesh = new THREE.Mesh(postGeo, postMat);
-      postMesh.position.set(pt.x, pt.y - 0.32, zOffset);
-      postMesh.castShadow = true;
-      bridgeGroup.add(postMesh);
+      const isCream = s % 2 === 0;
+      const spinGeo = new THREE.CylinderGeometry(0.065, 0.065, 0.72, 8);
+      const spinMat = createCrochetMaterial(isCream ? 0xF7F4EE : 0x829A7F, 0.85);
+      const spinMesh = new THREE.Mesh(spinGeo, spinMat);
+      spinMesh.position.set(pt.x, pt.y - 0.36, zOffset);
+      spinMesh.castShadow = true;
+      bridgeGroup.add(spinMesh);
     }
   });
   worldScene.add(bridgeGroup);
 
-  // 6. The Handcrafted White Cottage (Right Side)
+  // 6. The Handcrafted White Cottage (Right Side with Plush Scalloped Shingle Roof)
   const cottageGroup = new THREE.Group();
-  cottageGroup.position.set(5.0, 0.25, 0.4);
+  cottageGroup.position.set(5.1, 0.28, 0.4);
   cottageGroup.rotation.y = -0.34;
 
-  // Stucco walls
-  const wallGeo = new THREE.BoxGeometry(3.3, 2.7, 3.3);
-  const wallMat = createCrochetMaterial(0xF5F2EB, 0.92);
+  // Stucco walls with soft fleece plaster
+  const wallGeo = new THREE.BoxGeometry(3.4, 2.75, 3.4);
+  const wallMat = createCrochetMaterial(0xF5F2EB, 0.94);
   const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-  wallMesh.position.y = 1.35;
+  wallMesh.position.y = 1.38;
   wallMesh.castShadow = true;
   wallMesh.receiveShadow = true;
   cottageGroup.add(wallMesh);
 
-  // Ribbed Green Knitted Roof
+  // Gable Scalloped Green Shingle Roof
   const roofGroup = new THREE.Group();
-  roofGroup.position.y = 2.7;
+  roofGroup.position.y = 2.75;
 
-  // Angled roof slabs
-  const roofSlabGeo = new THREE.BoxGeometry(2.6, 0.22, 3.8);
-  const roofMat = createCrochetMaterial(0x5F7A5E, 0.88);
+  const roofMat = createCrochetMaterial(0x5F7A5E, 0.86, 0.02, 0.05, roofBump);
 
-  const leftRoof = new THREE.Mesh(roofSlabGeo, roofMat);
-  leftRoof.position.set(-1.0, 0.75, 0);
-  leftRoof.rotation.z = Math.PI / 4.2;
-  leftRoof.castShadow = true;
-  roofGroup.add(leftRoof);
+  // Main Left & Right Roof Slabs
+  [-1, 1].forEach(side => {
+    const slabGeo = new THREE.BoxGeometry(2.7, 0.24, 3.9);
+    const slab = new THREE.Mesh(slabGeo, roofMat);
+    slab.position.set(side * 1.05, 0.78, 0);
+    slab.rotation.z = side * -Math.PI / 4.1;
+    slab.castShadow = true;
+    roofGroup.add(slab);
 
-  const rightRoof = new THREE.Mesh(roofSlabGeo, roofMat);
-  rightRoof.position.set(1.0, 0.75, 0);
-  rightRoof.rotation.z = -Math.PI / 4.2;
-  rightRoof.castShadow = true;
-  roofGroup.add(rightRoof);
+    // Thick Scalloped Shingle Rows for Tactile Crochet Shingle Feel
+    const rowCount = 5;
+    for (let r = 0; r < rowCount; r++) {
+      const u = r / (rowCount - 1);
+      const rowY = 0.2 + u * 1.1;
+      const rowX = side * (1.8 - u * 1.4);
 
-  // Chimney
-  const chimGeo = new THREE.BoxGeometry(0.55, 1.4, 0.55);
-  const chimMat = createCrochetMaterial(0x8D7E73, 0.9);
+      const shingleTorus = new THREE.TorusGeometry(0.22, 0.08, 8, 12, Math.PI);
+      shingleTorus.rotateX(Math.PI / 2);
+      const shingleMesh = new THREE.Mesh(shingleTorus, roofMat);
+      shingleMesh.position.set(rowX, rowY, 1.95);
+      roofGroup.add(shingleMesh);
+    }
+  });
+
+  // Front Gable White Scalloped Trim
+  const gableCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-1.9, 0.1, 1.96),
+    new THREE.Vector3(0, 1.75, 1.96),
+    new THREE.Vector3(1.9, 0.1, 1.96)
+  ]);
+  const gableGeo = new THREE.TubeGeometry(gableCurve, 24, 0.08, 6, false);
+  const gableMat = createCrochetMaterial(0xF7F4EE, 0.9);
+  const gableMesh = new THREE.Mesh(gableGeo, gableMat);
+  roofGroup.add(gableMesh);
+
+  // Stone Chimney with Terracotta Flue Pot
+  const chimGeo = new THREE.BoxGeometry(0.58, 1.5, 0.58);
+  const chimMat = createCrochetMaterial(0x8D7E73, 0.92);
   const chimMesh = new THREE.Mesh(chimGeo, chimMat);
-  chimMesh.position.set(-0.9, 1.1, -0.6);
+  chimMesh.position.set(-0.95, 1.15, -0.6);
   chimMesh.castShadow = true;
   roofGroup.add(chimMesh);
 
+  const flueGeo = new THREE.CylinderGeometry(0.18, 0.2, 0.35, 12);
+  const flueMat = createCrochetMaterial(0xAF5F45, 0.88);
+  const flueMesh = new THREE.Mesh(flueGeo, flueMat);
+  flueMesh.position.set(-0.95, 1.95, -0.6);
+  roofGroup.add(flueMesh);
+
   cottageGroup.add(roofGroup);
 
-  // Upstairs Glowing Dormer Window
-  const dormerWin = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.75, 0.65),
+  // Upstairs Glowing Dormer Window on Roof
+  const dormerGroup = new THREE.Group();
+  dormerGroup.position.set(0, 3.15, 1.68);
+
+  const dormerFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(0.9, 0.8, 0.3),
+    createCrochetMaterial(0x5A4232, 0.9)
+  );
+  dormerGroup.add(dormerFrame);
+
+  const dormerGlass = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.72, 0.62),
+    new THREE.MeshStandardMaterial({
+      color: 0xFFE599,
+      emissive: 0xFFD269,
+      emissiveIntensity: 1.4
+    })
+  );
+  dormerGlass.position.z = 0.16;
+  dormerGroup.add(dormerGlass);
+  cottageGroup.add(dormerGroup);
+
+  // Downstairs Glowing 6-Pane Window with Flower Box
+  const winGroup = new THREE.Group();
+  winGroup.position.set(-0.85, 1.45, 1.72);
+
+  const winGlass = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.9, 1.05),
     new THREE.MeshStandardMaterial({
       color: 0xFFE599,
       emissive: 0xFFD269,
       emissiveIntensity: 1.3
     })
   );
-  dormerWin.position.set(0, 3.1, 1.68);
-  cottageGroup.add(dormerWin);
+  winGroup.add(winGlass);
 
-  // Downstairs Glowing Window
-  const downWin = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.85, 0.95),
-    new THREE.MeshStandardMaterial({
-      color: 0xFFE599,
-      emissive: 0xFFD269,
-      emissiveIntensity: 1.2
-    })
+  // Wood Window Frame & Mullions
+  const winFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(1.05, 1.2, 0.08),
+    createCrochetMaterial(0x5A4232, 0.9)
   );
-  downWin.position.set(-0.85, 1.4, 1.68);
-  cottageGroup.add(downWin);
+  winFrame.position.z = -0.02;
+  winGroup.add(winFrame);
 
-  // Arched Wooden Door
-  const doorGeo = new THREE.CylinderGeometry(0.55, 0.55, 1.35, 16, 1, false, 0, Math.PI);
-  doorGeo.rotateZ(Math.PI / 2);
-  const doorMat = createCrochetMaterial(0x5A4232, 0.88);
-  const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.4, 0.1), doorMat);
-  doorMesh.position.set(0.65, 0.72, 1.68);
-  doorMesh.castShadow = true;
-  cottageGroup.add(doorMesh);
+  // Flower Window Box with Tiny Blooms
+  const fBoxGeo = new THREE.BoxGeometry(1.0, 0.2, 0.24);
+  const fBoxMat = createCrochetMaterial(0x644E3D, 0.9);
+  const fBox = new THREE.Mesh(fBoxGeo, fBoxMat);
+  fBox.position.set(0, -0.62, 0.12);
+  winGroup.add(fBox);
 
-  // Pink Crochet Rose Garland Arch Over Door
+  // Florets in window box
+  for (let fl = 0; fl < 5; fl++) {
+    const flColor = fl % 2 === 0 ? 0xE89CAE : 0xF9E79F;
+    const flMesh = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), createCrochetMaterial(flColor, 0.8));
+    flMesh.position.set(-0.35 + fl * 0.18, -0.5, 0.14);
+    winGroup.add(flMesh);
+  }
+  cottageGroup.add(winGroup);
+
+  // Arched Dark Wooden Door with Brass Knob
+  const doorGroup = new THREE.Group();
+  doorGroup.position.set(0.68, 0.72, 1.72);
+
+  const doorWood = new THREE.Mesh(
+    new THREE.BoxGeometry(0.95, 1.45, 0.08),
+    createCrochetMaterial(0x563E2E, 0.9)
+  );
+  doorGroup.add(doorWood);
+
+  // Brass knob
+  const knob = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 8, 8),
+    new THREE.MeshStandardMaterial({ color: 0xF9E79F, roughness: 0.3, metalness: 0.8 })
+  );
+  knob.position.set(0.32, 0, 0.06);
+  doorGroup.add(knob);
+  cottageGroup.add(doorGroup);
+
+  // Pink Crochet Rose Garland Arch Framing Doorway (Exact match to screenshot)
   const garlandCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.1, 0.1, 1.72),
-    new THREE.Vector3(0.12, 1.3, 1.72),
-    new THREE.Vector3(0.65, 1.65, 1.72),
-    new THREE.Vector3(1.18, 1.3, 1.72),
-    new THREE.Vector3(1.2, 0.1, 1.72)
+    new THREE.Vector3(0.08, 0.1, 1.76),
+    new THREE.Vector3(0.1, 1.4, 1.76),
+    new THREE.Vector3(0.68, 1.74, 1.76),
+    new THREE.Vector3(1.26, 1.4, 1.76),
+    new THREE.Vector3(1.28, 0.1, 1.76)
   ]);
-  const garlandPoints = garlandCurve.getSpacedPoints(12);
+  const garlandPoints = garlandCurve.getSpacedPoints(18);
+  const roseColors = [0xF7D2DC, 0xE89CAE, 0xD47A8F];
+
   garlandPoints.forEach((gp, idx) => {
     const isRose = idx % 2 === 0;
-    const gGeo = new THREE.SphereGeometry(isRose ? 0.09 : 0.06, 8, 8);
-    const gMat = createCrochetMaterial(isRose ? 0xE89CAE : 0x7E9A7B, 0.8);
+    const gGeo = new THREE.SphereGeometry(isRose ? 0.095 : 0.06, 8, 8);
+    const gMat = createCrochetMaterial(isRose ? roseColors[idx % roseColors.length] : 0x72926E, 0.82);
     const gMesh = new THREE.Mesh(gGeo, gMat);
     gMesh.position.copy(gp);
     cottageGroup.add(gMesh);
@@ -660,75 +826,92 @@ function buildMiniatureDioramaWorld() {
 
   worldScene.add(cottageGroup);
 
-  // Cottage Stone Pathway
-  for (let s = 0; s < 5; s++) {
-    const stepGeo = new THREE.CylinderGeometry(0.35 - s * 0.02, 0.38 - s * 0.02, 0.08, 12);
+  // Cottage Flagstone Steps Path
+  for (let s = 0; s < 6; s++) {
+    const stepGeo = new THREE.CylinderGeometry(0.38 - s * 0.02, 0.42 - s * 0.02, 0.08, 14);
     const stepMat = createCrochetMaterial(0xCCC2B6, 0.88);
     const step = new THREE.Mesh(stepGeo, stepMat);
-    step.position.set(4.4 - s * 0.65, 0.1, 2.0 + s * 0.45);
+    step.position.set(4.5 - s * 0.62, 0.1, 2.0 + s * 0.42);
     step.receiveShadow = true;
     worldScene.add(step);
   }
 
-  // 7. Tiered Sage Cone Pine Trees (Matching Screenshot)
+  // 7. Tiered Amigurumi Sage Cone Pine Trees (Plush Concentric Rings)
   const pineCoords = [
-    { x: 8.2, z: -0.8, h: 4.5 },
-    { x: 7.5, z: -4.5, h: 4.0 },
-    { x: 3.6, z: -8.5, h: 4.8 },
-    { x: 1.2, z: -12.0, h: 4.2 },
-    { x: -2.6, z: -10.0, h: 4.6 },
-    { x: 9.5, z: 3.2, h: 3.8 },
-    { x: 6.8, z: 4.5, h: 3.2 }
+    { x: 8.4, z: -0.8, scale: 1.15 },
+    { x: 7.6, z: -4.5, scale: 1.0 },
+    { x: 3.8, z: -8.8, scale: 1.2 },
+    { x: 1.4, z: -12.5, scale: 1.1 },
+    { x: -2.8, z: -10.5, scale: 1.15 },
+    { x: 9.6, z: 3.4, scale: 0.95 },
+    { x: 6.9, z: 4.8, scale: 0.85 }
   ];
 
   pineCoords.forEach(pc => {
     const treeGroup = new THREE.Group();
     treeGroup.position.set(pc.x, 0, pc.z);
+    treeGroup.scale.set(pc.scale, pc.scale, pc.scale);
 
-    // Trunk
-    const trunkGeo = new THREE.CylinderGeometry(0.16, 0.22, 1.0, 10);
-    const trunkMat = createCrochetMaterial(0x5B4638, 0.9);
+    // Brown trunk
+    const trunkGeo = new THREE.CylinderGeometry(0.18, 0.24, 1.2, 10);
+    const trunkMat = createCrochetMaterial(0x5B4638, 0.92);
     const trunkMesh = new THREE.Mesh(trunkGeo, trunkMat);
-    trunkMesh.position.y = 0.5;
+    trunkMesh.position.y = 0.6;
     trunkMesh.castShadow = true;
     treeGroup.add(trunkMesh);
 
-    // 4 Stacked Concentric Ribbed Cone Tiers
-    const tierCount = 4;
+    // 5 Stacked Concentric Ribbed Torus Tiers
+    const tierCount = 5;
     for (let t = 0; t < tierCount; t++) {
-      const radius = 1.25 - t * 0.26;
-      const height = 1.1;
-      const coneGeo = new THREE.ConeGeometry(radius, height, 16);
-      const coneMat = createCrochetMaterial(t % 2 === 0 ? 0x6E856A : 0x7E957A, 0.9);
-      const coneMesh = new THREE.Mesh(coneGeo, coneMat);
-      coneMesh.position.y = 1.1 + t * 0.72;
-      coneMesh.castShadow = true;
-      treeGroup.add(coneMesh);
+      const radius = 1.35 - t * 0.24;
+      const heightY = 1.1 + t * 0.68;
+      const isAlt = t % 2 === 1;
+
+      // Puffy torus ring with ribbed yarn material
+      const torusGeo = new THREE.TorusGeometry(radius, 0.35, 10, 24);
+      torusGeo.rotateX(Math.PI / 2);
+      const torusMat = createCrochetMaterial(isAlt ? 0x7E967A : 0x6D8669, 0.9);
+      const torusMesh = new THREE.Mesh(torusGeo, torusMat);
+      torusMesh.position.y = heightY;
+      torusMesh.castShadow = true;
+      treeGroup.add(torusMesh);
+
+      // Inner fill cone
+      const coneFill = new THREE.Mesh(
+        new THREE.ConeGeometry(radius, 0.6, 16),
+        torusMat
+      );
+      coneFill.position.y = heightY + 0.15;
+      treeGroup.add(coneFill);
     }
 
     worldScene.add(treeGroup);
   });
 
-  // 8. The Great Tree & Teddy Bear (Left Side)
+  // 8. The Great Tree, Wooden Garden Bench & Amigurumi Teddy Bear (Left Side)
   const greatTreeGroup = new THREE.Group();
-  greatTreeGroup.position.set(-6.2, 0, 2.0);
+  greatTreeGroup.position.set(-6.4, 0, 2.2);
 
-  // Curved Trunk
-  const tTrunkGeo = new THREE.CylinderGeometry(0.35, 0.55, 3.6, 12);
-  tTrunkGeo.rotateZ(-0.14);
-  const tTrunkMat = createCrochetMaterial(0x645042, 0.9);
-  const tTrunkMesh = new THREE.Mesh(tTrunkGeo, tTrunkMat);
-  tTrunkMesh.position.set(-0.2, 1.7, 0);
-  tTrunkMesh.castShadow = true;
-  greatTreeGroup.add(tTrunkMesh);
+  // Sculpted Curved Bark Trunk
+  const trunkCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(-0.25, 1.5, 0),
+    new THREE.Vector3(-0.6, 2.8, 0.1),
+    new THREE.Vector3(-0.3, 4.0, 0)
+  ]);
+  const trunkGeo = new THREE.TubeGeometry(trunkCurve, 24, 0.45, 10, false);
+  const trunkMat = createCrochetMaterial(0x645042, 0.92);
+  const trunkMesh = new THREE.Mesh(trunkGeo, trunkMat);
+  trunkMesh.castShadow = true;
+  greatTreeGroup.add(trunkMesh);
 
-  // Cloud-like Leafy Canopy Spheres
-  const canopyMat = createCrochetMaterial(0x566F50, 0.92);
+  // Moss-Green Cloud Canopy Spheres
+  const canopyMat = createCrochetMaterial(0x567050, 0.92);
   const leafClusters = [
-    { x: -0.5, y: 3.8, z: 0, r: 1.6 },
-    { x: 0.8,  y: 3.6, z: 0.4, r: 1.3 },
-    { x: -1.2, y: 3.4, z: -0.5, r: 1.4 },
-    { x: 0.2,  y: 4.4, z: -0.2, r: 1.5 }
+    { x: -0.6, y: 4.0, z: 0, r: 1.7 },
+    { x: 0.9,  y: 3.8, z: 0.4, r: 1.4 },
+    { x: -1.4, y: 3.6, z: -0.6, r: 1.5 },
+    { x: 0.3,  y: 4.6, z: -0.2, r: 1.55 }
   ];
   leafClusters.forEach(lc => {
     const cGeo = new THREE.SphereGeometry(lc.r, 16, 16);
@@ -738,90 +921,118 @@ function buildMiniatureDioramaWorld() {
     greatTreeGroup.add(cMesh);
   });
 
-  // Wooden Garden Bench
+  // Miniature Wooden Garden Bench
   const benchGroup = new THREE.Group();
-  benchGroup.position.set(0.9, 0.1, 1.8);
-  benchGroup.rotation.y = 0.25;
+  benchGroup.position.set(1.0, 0.12, 1.9);
+  benchGroup.rotation.y = 0.28;
 
-  const bSeatGeo = new THREE.BoxGeometry(1.4, 0.1, 0.55);
-  const bMat = createCrochetMaterial(0x9E8C7D, 0.88);
-  const bSeat = new THREE.Mesh(bSeatGeo, bMat);
-  bSeat.position.y = 0.42;
+  const bWoodMat = createCrochetMaterial(0x9E8C7D, 0.88);
+
+  // 3-Slat Bench Seat
+  const bSeatGeo = new THREE.BoxGeometry(1.45, 0.1, 0.58);
+  const bSeat = new THREE.Mesh(bSeatGeo, bWoodMat);
+  bSeat.position.y = 0.44;
   bSeat.castShadow = true;
   benchGroup.add(bSeat);
 
-  const bBackGeo = new THREE.BoxGeometry(1.4, 0.45, 0.08);
-  const bBack = new THREE.Mesh(bBackGeo, bMat);
-  bBack.position.set(0, 0.72, -0.25);
+  // Bench Backrest
+  const bBackGeo = new THREE.BoxGeometry(1.45, 0.48, 0.08);
+  const bBack = new THREE.Mesh(bBackGeo, bWoodMat);
+  bBack.position.set(0, 0.76, -0.26);
   bBack.castShadow = true;
   benchGroup.add(bBack);
 
-  // Amigurumi Teddy Bear Sitting on Bench
+  // Handcrafted Amigurumi Teddy Bear Sitting on Bench (With Pink Scarf)
   const bearGroup = new THREE.Group();
-  bearGroup.position.set(-0.2, 0.46, 0);
+  bearGroup.position.set(-0.2, 0.48, 0.02);
 
-  const bearMat = createCrochetMaterial(0xB08968, 0.9);
+  const bearYarnMat = createCrochetMaterial(0xAF8866, 0.9);
 
-  // Body
-  const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.32, 14, 14), bearMat);
-  bBody.position.y = 0.25;
+  // Chubby Body
+  const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.33, 16, 16), bearYarnMat);
+  bBody.position.y = 0.26;
   bBody.castShadow = true;
   bearGroup.add(bBody);
 
-  // Head
-  const bHead = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), bearMat);
-  bHead.position.set(0, 0.65, 0.05);
+  // Cute Head
+  const bHead = new THREE.Mesh(new THREE.SphereGeometry(0.29, 16, 16), bearYarnMat);
+  bHead.position.set(0, 0.68, 0.06);
   bHead.castShadow = true;
   bearGroup.add(bHead);
 
-  // Round Ears
-  [-0.18, 0.18].forEach(ex => {
-    const bEar = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), bearMat);
-    bEar.position.set(ex, 0.85, 0.02);
-    bearGroup.add(bEar);
+  // Cream Snout & Embroidered Nose
+  const snoutMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12, 12, 12),
+    createCrochetMaterial(0xF7EFE7, 0.88)
+  );
+  snoutMesh.position.set(0, 0.64, 0.32);
+  bearGroup.add(snoutMesh);
+
+  const noseDot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.038, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x2A221C })
+  );
+  noseDot.position.set(0, 0.68, 0.43);
+  bearGroup.add(noseDot);
+
+  // Embroidered Button Eyes
+  [-0.09, 0.09].forEach(eyeX => {
+    const eye = new THREE.Mesh(
+      new THREE.SphereGeometry(0.032, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0x1A1410 })
+    );
+    eye.position.set(eyeX, 0.74, 0.31);
+    bearGroup.add(eye);
   });
 
-  // Pink Scarf
-  const scarfGeo = new THREE.TorusGeometry(0.2, 0.07, 8, 16);
+  // Cupped Ears
+  [-0.19, 0.19].forEach(earX => {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.095, 10, 10), bearYarnMat);
+    ear.position.set(earX, 0.88, 0.03);
+    bearGroup.add(ear);
+  });
+
+  // Ribbed Pink Knitted Scarf with Tassels
+  const scarfGeo = new THREE.TorusGeometry(0.22, 0.075, 10, 20);
   scarfGeo.rotateX(Math.PI / 2);
   const scarfMat = createCrochetMaterial(0xE89CAE, 0.85);
   const scarfMesh = new THREE.Mesh(scarfGeo, scarfMat);
-  scarfMesh.position.set(0, 0.48, 0.05);
+  scarfMesh.position.set(0, 0.5, 0.06);
   bearGroup.add(scarfMesh);
 
   benchGroup.add(bearGroup);
   greatTreeGroup.add(benchGroup);
   worldScene.add(greatTreeGroup);
 
-  // 9. Wildflower Patches & Wooden Fence (Foreground)
+  // 9. Wildflower Patches & Rustic Split-Rail Wooden Fence
   worldFlowers = [];
   const flowerCoords = [
-    { x: -3.2, z: 2.5, color: 0xE89CAE, type: 'tulip' },
-    { x: -2.0, z: 4.2, color: 0xF7F4EE, type: 'daisy' },
-    { x: -1.2, z: 6.5, color: 0xE89CAE, type: 'tulip' },
-    { x: -3.8, z: 7.2, color: 0xF9E79F, type: 'buttercup' },
-    { x: 1.8,  z: 3.5, color: 0xE89CAE, type: 'tulip' },
-    { x: 2.8,  z: 5.2, color: 0xF7F4EE, type: 'daisy' },
-    { x: 3.5,  z: 7.0, color: 0xF9E79F, type: 'buttercup' }
+    { x: -3.3, z: 2.6, color: 0xE89CAE, type: 'tulip' },
+    { x: -2.1, z: 4.4, color: 0xF7F4EE, type: 'daisy' },
+    { x: -1.3, z: 6.8, color: 0xE89CAE, type: 'tulip' },
+    { x: -3.9, z: 7.4, color: 0xF9E79F, type: 'buttercup' },
+    { x: 1.9,  z: 3.6, color: 0xE89CAE, type: 'tulip' },
+    { x: 2.9,  z: 5.4, color: 0xF7F4EE, type: 'daisy' },
+    { x: 3.6,  z: 7.2, color: 0xF9E79F, type: 'buttercup' }
   ];
 
   flowerCoords.forEach((fc, idx) => {
     const fGroup = new THREE.Group();
-    fGroup.position.set(fc.x, 0.05, fc.z);
+    fGroup.position.set(fc.x, 0.06, fc.z);
 
     const fStem = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.03, 0.03, 0.7, 8),
+      new THREE.CylinderGeometry(0.03, 0.03, 0.75, 8),
       createCrochetMaterial(0x829A7F, 0.85)
     );
-    fStem.position.y = 0.35;
+    fStem.position.y = 0.38;
     fStem.castShadow = true;
     fGroup.add(fStem);
 
     const fBloom = new THREE.Mesh(
-      new THREE.SphereGeometry(fc.type === 'tulip' ? 0.22 : 0.18, 10, 10),
+      new THREE.SphereGeometry(fc.type === 'tulip' ? 0.24 : 0.19, 12, 12),
       createCrochetMaterial(fc.color, 0.82)
     );
-    fBloom.position.y = 0.72;
+    fBloom.position.y = 0.76;
     fBloom.castShadow = true;
     fGroup.add(fBloom);
 
@@ -830,46 +1041,44 @@ function buildMiniatureDioramaWorld() {
     worldFlowers.push(fGroup);
   });
 
-  // Split-Rail Wooden Fence (Lower Right Corner)
+  // Split-Rail Wooden Fence (Lower Right Foreground)
   const fenceGroup = new THREE.Group();
-  fenceGroup.position.set(4.8, 0.05, 6.2);
-  fenceGroup.rotation.y = -0.42;
+  fenceGroup.position.set(4.9, 0.06, 6.4);
+  fenceGroup.rotation.y = -0.44;
 
   const fWoodMat = createCrochetMaterial(0x8B7969, 0.9);
-  // Posts
-  [-1.2, 0, 1.2].forEach(fx => {
-    const pMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.85, 8), fWoodMat);
-    pMesh.position.set(fx, 0.42, 0);
+  [-1.25, 0, 1.25].forEach(fx => {
+    const pMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.9, 8), fWoodMat);
+    pMesh.position.set(fx, 0.45, 0);
     pMesh.castShadow = true;
     fenceGroup.add(pMesh);
   });
-  // Rails
-  [0.32, 0.62].forEach(ry => {
-    const rMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.6, 8), fWoodMat);
+  [0.34, 0.66].forEach(ry => {
+    const rMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 2.7, 8), fWoodMat);
     rMesh.rotateZ(Math.PI / 2);
     rMesh.position.set(0, ry, 0);
     rMesh.castShadow = true;
     fenceGroup.add(rMesh);
   });
 
-  // Colorful Little Mushrooms Near Fence
+  // Plump Colorful Amigurumi Mushrooms Along the Fence
   const mushColors = [0xE89CAE, 0xE59866, 0xF9E79F, 0xFAF4EB];
   [-0.6, -0.2, 0.4, 0.8].forEach((mx, idx) => {
     const mGroup = new THREE.Group();
-    mGroup.position.set(mx, 0, 0.35);
+    mGroup.position.set(mx, 0, 0.38);
 
     const stemMesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.04, 0.05, 0.22, 8),
+      new THREE.CylinderGeometry(0.045, 0.06, 0.24, 8),
       createCrochetMaterial(0xFFFAF2, 0.85)
     );
-    stemMesh.position.y = 0.11;
+    stemMesh.position.y = 0.12;
     mGroup.add(stemMesh);
 
     const capMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.12, 10, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+      new THREE.SphereGeometry(0.13, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2),
       createCrochetMaterial(mushColors[idx % mushColors.length], 0.8)
     );
-    capMesh.position.y = 0.22;
+    capMesh.position.y = 0.24;
     mGroup.add(capMesh);
 
     fenceGroup.add(mGroup);
@@ -877,23 +1086,23 @@ function buildMiniatureDioramaWorld() {
 
   worldScene.add(fenceGroup);
 
-  // 10. Flying Low-Poly Birds in Sky
+  // 10. Low-Poly Flying Birds in Sky
   worldBirds = [];
   for (let b = 0; b < 2; b++) {
     const bird = new THREE.Group();
-    const wingMat = createCrochetMaterial(0x504B46, 0.8);
+    const wingMat = createCrochetMaterial(0x504B46, 0.82);
 
-    const lWing = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.02, 0.1), wingMat);
-    lWing.position.x = -0.12;
+    const lWing = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.02, 0.1), wingMat);
+    lWing.position.x = -0.13;
     lWing.rotation.z = 0.25;
     bird.add(lWing);
 
-    const rWing = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.02, 0.1), wingMat);
-    rWing.position.x = 0.12;
+    const rWing = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.02, 0.1), wingMat);
+    rWing.position.x = 0.13;
     rWing.rotation.z = -0.25;
     bird.add(rWing);
 
-    bird.position.set(6.5 + b * 2.2, 10.5 + b * 0.8, -8 - b * 3);
+    bird.position.set(6.8 + b * 2.2, 10.8 + b * 0.8, -9 - b * 3);
     bird.userData = { lWing, rWing, speed: 2.5 + b, basePos: bird.position.clone() };
     worldScene.add(bird);
     worldBirds.push(bird);
@@ -969,7 +1178,7 @@ function animateCrochetWorld() {
   worldCamera.position.z = lookAtTarget.z + orbitDistance * Math.cos(cx) * Math.cos(cy);
   worldCamera.lookAt(lookAtTarget);
 
-  // 2. Animated Swaying Flowers
+  // 2. Animated Swaying Flowers & Gentle Breeze
   if (!isMotionPaused) {
     worldFlowers.forEach(fg => {
       const sway = Math.sin(time * fg.userData.speed + fg.userData.offset) * 0.08;
@@ -984,9 +1193,9 @@ function animateCrochetWorld() {
       bg.position.x = bg.userData.basePos.x + Math.sin(time * 0.2) * 1.5;
     });
 
-    // 4. Subtle River Water Flow / Ribbon Bump Ripple
+    // 4. Subtle River Silk Yarn Bump Ripple Flow
     if (riverRibbonMesh) {
-      riverRibbonMesh.material.bumpScale = 0.035 + Math.sin(time * 1.5) * 0.008;
+      riverRibbonMesh.material.bumpScale = 0.038 + Math.sin(time * 1.4) * 0.008;
     }
   }
 
