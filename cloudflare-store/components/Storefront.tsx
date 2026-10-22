@@ -174,26 +174,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
    <main id="main-content">
     <GardenJourney/>
 
-    <div className="brand-strip">
-     <span>100% Handcrafted in India</span>
-     <Flower2 size={14}/>
-     <span>Combed Cotton Keepsakes</span>
-     <Flower2 size={14}/>
-     <span>Customisable Part Colours</span>
-     <Flower2 size={14}/>
-     <span>Thoughtfully Gift-Packed</span>
-    </div>
-
-    <section className="studio-intro">
-     <span className="eyebrow">SLOW CRAFT · TACTILE WONDER</span>
-     <h2>For the ones you love.<br/><em>Including yourself.</em></h2>
-     <p>A favourite shade. A gentle texture. A keepsake that feels personal and permanent.<br/>Discover Prisha’s handmade crochet collection, shaped stitch-by-stitch in India.</p>
-     <div className="intro-actions">
-      <a className="button hero-shop" href="#collection">Explore pieces ↗</a>
-      <a className="text-link" href="/about">A note from the studio <Arrow/></a>
-     </div>
-    </section>
-
     {/* The Collection */}
     <section className="collection section" id="collection">
      <div className="section-heading">
