@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const base='http://127.0.0.1:5176';
 const get=async p=>{const r=await fetch(base+p);return {status:r.status,body:await r.text(),headers:r.headers}};
-const home=await get('/');assert.equal(home.status,200);assert(home.body.includes('QA bow'));assert(home.body.includes('application/ld+json'));assert(home.body.includes('Handmade Crochet Flowers'));assert(home.body.includes('/products/qa-bow--81000000-0000-4000-8000-000000000001'));assert(home.body.includes('rel="canonical"'));assert(home.body.includes('garden-editorial'));
+const home=await get('/');assert.equal(home.status,200);assert(home.body.includes('QA bow'));assert(home.body.includes('application/ld+json'));assert(home.body.includes('Handmade Crochet Flowers'));assert(home.body.includes('/products/qa-bow--81000000-0000-4000-8000-000000000001'));assert(home.body.includes('rel="canonical"'));assert(home.body.includes('garden-welcome'));
 const page=await get('/products/qa-bow--81000000-0000-4000-8000-000000000001');assert.equal(page.status,200);assert(page.body.includes('QA bow | crochetbyprisha'));assert(page.body.includes('schema.org/InStock'));assert(page.body.includes('priceCurrency'));
 const faq=await get('/help');assert.equal(faq.status,200);assert(faq.body.includes('FAQPage'));assert(faq.body.includes('How do UPI payments work?'));
 assert.equal((await get('/about')).status,200);

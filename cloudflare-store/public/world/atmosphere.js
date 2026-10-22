@@ -18,7 +18,16 @@ export function atmosphere({scene,camera,renderer,staticRoot,m,group,rod,flower,
  for(let i=0;i<12;i++){const x=6.3+rnd()*4,z=3+rnd()*3,g=group(staticRoot,[x,height(x,z),z]),s=.16+rnd()*.18;rod(g,[0,0,0],[0,s*1.6,0],s*.18,m.ivory);oval(g,i%3?m.clay:m.rose,[0,s*1.6,0],[s,s*.55,s]);for(let k=0;k<5;k++){const a=k*2.4;oval(g,m.ivory,[Math.cos(a)*s*.55,s*1.85,Math.sin(a)*s*.55],[s*.09,s*.045,s*.09]);}}
  // Dense planted borders anchor the objects to the garden instead of an empty plane.
  const smallPetal=new T.SphereGeometry(1,12,8);
- for(let i=0;i<310;i++){const z=-10+rnd()*22,side=i%2?1:-1,x=riverX(z)+side*(2.4+rnd()*1.8);if(Math.abs(x+3.8)<1.4||(x>4&&z<-4))continue;const y=height(x,z),scale=.18+rnd()*.38;mesh(staticRoot,smallPetal,i%3?m.moss:m.sage,[x,y+.08,z],[scale*1.3,.14,scale]);for(let j=0;j<5;j++){const a=j*Math.PI*.4;mesh(staticRoot,smallPetal,[m.pink,m.rose,m.ivory,m.gold][i%4],[x+Math.cos(a)*scale*.25,y+scale*.65+Math.sin(a)*scale*.25,z],[scale*.15,scale*.2,scale*.12],[0,0,-a]);}mesh(staticRoot,smallPetal,m.gold,[x,y+scale*.65,z+.04],[scale*.11,scale*.11,scale*.09]);}
+ for(let i=0;i<430;i++){const z=-10+rnd()*22,side=i%2?1:-1,x=riverX(z)+side*(2.4+rnd()*1.8);if(Math.abs(x+3.8)<1.4||(x>4&&z<-4))continue;const y=height(x,z),scale=.18+rnd()*.38;mesh(staticRoot,smallPetal,i%3?m.moss:m.sage,[x,y+.08,z],[scale*1.3,.14,scale]);for(let j=0;j<5;j++){const a=j*Math.PI*.4;mesh(staticRoot,smallPetal,[m.pink,m.rose,m.ivory,m.gold][i%4],[x+Math.cos(a)*scale*.25,y+scale*.65+Math.sin(a)*scale*.25,z],[scale*.15,scale*.2,scale*.12],[0,0,-a]);}mesh(staticRoot,smallPetal,m.gold,[x,y+scale*.65,z+.04],[scale*.11,scale*.11,scale*.09]);}
+
+ // Layered planting fills the distant ground while keeping the river and path clear.
+ for(let i=0;i<650;i++){
+  const x=-24+rnd()*48,z=-28+rnd()*40;
+  if(Math.abs(x-riverX(z))<2.8||Math.abs(x+3.8)<1.25||(x>3&&x<9&&z>-10&&z<-3))continue;
+  const y=height(x,z),r=.25+rnd()*.65;
+  mesh(staticRoot,smallPetal,i%3?m.moss:m.sage,[x,y+r*.28,z],[r,r*.48,r*.8]);
+  if(i%4===0){const stem=r*.9;rod(staticRoot,[x,y,z],[x,y+stem,z],.015,m.dark);for(let j=0;j<5;j++){const a=j*Math.PI*.4;mesh(staticRoot,smallPetal,[m.ivory,m.rose,m.pink][i%3],[x+Math.cos(a)*.1,y+stem+Math.sin(a)*.1,z],[.075,.11,.045],[0,0,-a]);}}
+ }
  const boat=group(scene);const boatMat=yarn('#8c6244',3);oval(boat,boatMat,[0,.09,0],[.56,.22,1.3]);oval(boat,m.bark,[0,.27,0],[.45,.055,1.12]);for(let j=0;j<2;j++)mesh(boat,new T.BoxGeometry(1,1,1),m.wood,[0,.32,-.4+j*.8],[.88,.08,.2]);const rim=[];for(let i=0;i<=60;i++){const a=i/60*Math.PI*2;rim.push([Math.sin(a)*.52,.28,Math.cos(a)*1.23])}tube(boat,rim,.045,m.cream,60);
  const person=group(boat,[0,.31,.12]);const shirt=yarn('#687c78',3),skin=yarn('#b48e6a',2),trousers=yarn('#5b6255',3);
  oval(person,shirt,[0,.52,0],[.22,.34,.15]);oval(person,skin,[0,.98,0],[.14,.19,.13]);oval(person,m.bark,[0,1.1,-.015],[.145,.095,.13]);oval(person,m.cream,[0,1.14,0],[.24,.035,.22]);oval(person,m.cream,[0,1.21,0],[.13,.1,.12]);for(let side of [-1,1]){tube(person,[[side*.11,.25,0],[side*.16,.1,-.36],[side*.16,-.09,-.48]],.09,trousers);oval(person,m.bark,[side*.16,-.06,-.55],[.1,.07,.16]);}
@@ -30,7 +39,7 @@ export function atmosphere({scene,camera,renderer,staticRoot,m,group,rod,flower,
  // Soft wake ribbons follow the hull and drift outwards behind the oars.
  const wakes=[];for(let i=0;i<8;i++){const g=group(boat);for(const side of [-1,1])tube(g,[[side*.25,0,0],[side*.44,0,.18],[side*.62,0,.4]],.009,new T.MeshBasicMaterial({color:'#eee4cb',transparent:true,opacity:.24,depthWrite:false}),12);wakes.push(g)}
  const motesGeo=new T.BufferGeometry(),points=new Float32Array(70*3);for(let i=0;i<points.length;i+=3){points[i]=-10+rnd()*20;points[i+1]=.7+rnd()*6;points[i+2]=-9+rnd()*18}motesGeo.setAttribute('position',new T.BufferAttribute(points,3));const motes=new T.Points(motesGeo,new T.PointsMaterial({color:'#f5d69c',size:.035,transparent:true,opacity:.45,depthWrite:false}));scene.add(motes);
- const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));const ao=new SSAOPass(scene,camera,512,512,16);ao.kernelRadius=3;ao.minDistance=.001;ao.maxDistance=.035;composer.addPass(ao);const bloom=new UnrealBloomPass(new T.Vector2(512,512),.15,.4,1.25);composer.addPass(bloom);composer.addPass(new OutputPass());
+ const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));const ao=new SSAOPass(scene,camera,512,512,16);ao.kernelRadius=2.2;ao.minDistance=.001;ao.maxDistance=.035;composer.addPass(ao);const bloom=new UnrealBloomPass(new T.Vector2(512,512),.2,.45,1.15);composer.addPass(bloom);composer.addPass(new OutputPass());
  return {resize(w,h){ao.enabled=w>=760;composer.setSize(w,h);ao.setSize(Math.max(1,w>>1),Math.max(1,h>>1));},render(){composer.render()},animate(t){
   swaying.forEach(({g,phase,weight})=>{g.rotation.z=(Math.sin(t*.85+phase)*.13+Math.sin(t*1.8+phase)*.025+.035)*weight;g.rotation.x=Math.cos(t*.65+phase)*.05});
   normals.offset.y=-t*.055;normals.offset.x=t*.003;for(let i=0;i<waterPos.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];waterPos.setY(i,-.04+Math.sin(z*2.1-t*1.8+x)*.014+Math.sin(z*5-t*2.4)*.005)}waterPos.needsUpdate=true;waterMesh.geometry.computeVertexNormals();
