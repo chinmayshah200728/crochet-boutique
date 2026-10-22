@@ -76,7 +76,11 @@ for (const file of files) collect(file);
 let changed = 0;
 for (const [relative, data] of planned) {
   const to = within(target, path.resolve(target, relative));
-  if (fs.existsSync(to) && fs.readFileSync(to).equals(data)) continue;
+  if (fs.existsSync(to)) {
+    const current = fs.readFileSync(to);
+    if (current.equals(data)) continue;
+    if (textFile.test(relative) && current.toString('utf8').replaceAll('\r\n', '\n') === data.toString('utf8').replaceAll('\r\n', '\n')) continue;
+  }
   fs.mkdirSync(path.dirname(to), {recursive: true});
   fs.writeFileSync(to, data);
   changed++;
