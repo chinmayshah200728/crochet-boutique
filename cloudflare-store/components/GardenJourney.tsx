@@ -7,6 +7,9 @@ export default function GardenJourney(){
  const root=useRef<HTMLElement>(null);
  const [progress,setProgress]=useState(0);
  const [reduced,setReduced]=useState(false);
+ const [curtainOpen,setCurtainOpen]=useState(false);
+ const [textVisible,setTextVisible]=useState(false);
+ const [curtainRemoved,setCurtainRemoved]=useState(false);
 
  useEffect(()=>{
   const query=matchMedia('(prefers-reduced-motion: reduce), (max-width: 600px)');
@@ -14,6 +17,18 @@ export default function GardenJourney(){
   const handler=(e:MediaQueryListEvent)=>setReduced(e.matches);
   query.addEventListener('change',handler);
   return ()=>query.removeEventListener('change',handler);
+ },[]);
+
+ useEffect(()=>{
+  // Clean landing reveal on every visit - no text seen during opening
+  const openTimer=setTimeout(()=>setCurtainOpen(true),250);
+  const textTimer=setTimeout(()=>setTextVisible(true),1900);
+  const removeTimer=setTimeout(()=>setCurtainRemoved(true),2700);
+  return ()=>{
+   clearTimeout(openTimer);
+   clearTimeout(textTimer);
+   clearTimeout(removeTimer);
+  };
  },[]);
 
  useEffect(()=>{
@@ -49,13 +64,25 @@ export default function GardenJourney(){
    <div className="restored-world journey-sticky">
     <LivingGarden/>
 
-    {/* Moment 1 — Enter the Garden */}
+    {/* Grand Landing Curtain Reveal - Pure Craft Luxury, Zero Text */}
+    {!curtainRemoved&&(
+     <div className={'grand-landing-curtains '+(curtainOpen?'open':'')} aria-hidden="true">
+      <div className="grand-drape grand-drape-left"/>
+      <div className="grand-drape grand-drape-right"/>
+      <div className="grand-curtain-seam"/>
+     </div>
+    )}
+
+    {/* Moment 1 — Enter the Garden: Revealed smoothly after curtains part */}
     <div
      className="garden-editorial journey-phase journey-phase-1"
      style={{
-      opacity: reduced ? 1 : Math.max(0, 1 - progress * 2.8),
-      transform: reduced ? 'none' : `translateY(${progress * -40}px)`,
-      pointerEvents: progress < 0.28 || reduced ? 'auto' : 'none'
+      opacity: !textVisible ? 0 : (reduced ? 1 : Math.max(0, 1 - progress * 2.8)),
+      transform: !textVisible
+       ? 'translateY(28px)'
+       : (reduced ? 'none' : `translateY(${progress * -40}px)`),
+      transition: textVisible && progress === 0 ? 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+      pointerEvents: textVisible && (progress < 0.28 || reduced) ? 'auto' : 'none'
      }}
     >
      <div className="hero-featured-pill">
@@ -86,7 +113,7 @@ export default function GardenJourney(){
      <div
       className="journey-phase journey-phase-2"
       style={{
-       opacity: progress >= 0.28 && progress <= 0.68
+       opacity: textVisible && progress >= 0.28 && progress <= 0.68
         ? Math.min(1, (progress - 0.28) * 4.5) * Math.min(1, (0.68 - progress) * 4.5)
         : 0,
        transform: `translateY(${(0.48 - progress) * 35}px)`,
@@ -115,7 +142,7 @@ export default function GardenJourney(){
      <div
       className="journey-phase journey-phase-3"
       style={{
-       opacity: progress >= 0.64
+       opacity: textVisible && progress >= 0.64
         ? Math.min(1, (progress - 0.64) * 4)
         : 0,
        transform: `translateY(${(0.85 - progress) * 25}px)`,
@@ -136,8 +163,25 @@ export default function GardenJourney(){
      </div>
     )}
 
-    <a className="skip-journey" href="#collection">Skip animation · Shop ↗</a>
-    <span className="garden-caption">A WORLD WOVEN WITH CARE · CROCHETBYPRISHA</span>
+    <a
+     className="skip-journey"
+     href="#collection"
+     style={{
+      opacity: textVisible ? 1 : 0,
+      transition: 'opacity 0.8s ease'
+     }}
+    >
+     Skip animation · Shop ↗
+    </a>
+    <span
+     className="garden-caption"
+     style={{
+      opacity: textVisible ? 1 : 0,
+      transition: 'opacity 0.8s ease'
+     }}
+    >
+     A WORLD WOVEN WITH CARE · CROCHETBYPRISHA
+    </span>
    </div>
   </section>
  );

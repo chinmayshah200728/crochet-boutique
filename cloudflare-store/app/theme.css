@@ -26,6 +26,60 @@
 @media(max-width:420px){.product-grid{grid-template-columns:1fr;max-width:330px;gap:38px}.product-card:nth-child(even){margin-top:0}.product-photo{aspect-ratio:4/4.6}.garden-editorial h1{font-size:62px}.garden-editorial{top:18%}.garden-caption{display:none}.product-facts{grid-template-columns:90px 1fr}}
 @media(max-width:420px){.garden-editorial h1{font-size:46px;letter-spacing:-1.5px;line-height:1.02}.garden-editorial{top:21%}.garden-editorial p{margin-top:24px}.hero-story{max-width:240px}}
 
+/* --- Grand Landing Curtains (Every Visit - Zero Text) --- */
+.grand-landing-curtains{position:absolute;inset:0;z-index:25;pointer-events:none;overflow:hidden;perspective:1200px}
+.grand-drape{position:absolute;top:0;bottom:0;width:51%;
+  background-color:#2a3a30;
+  background-image:
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.06) 0px,
+      rgba(0,0,0,0.20) 18px,
+      rgba(255,255,255,0.08) 36px,
+      rgba(0,0,0,0.25) 54px,
+      rgba(255,255,255,0.05) 72px
+    ),
+    radial-gradient(ellipse at 50% 25%, rgba(160,195,170,0.22), transparent 70%),
+    linear-gradient(180deg, #223328 0%, #354a3c 50%, #1c2b21 100%),
+    url('/art/cotton-crochet.png');
+  background-size:100% 100%, 100% 100%, 100% 100%, 260px 260px;
+  background-blend-mode:normal, normal, normal, overlay;
+  transition:transform 2.2s cubic-bezier(0.76, 0, 0.175, 1);
+  will-change:transform;
+}
+.grand-drape-left{
+  left:0;
+  box-shadow:inset -30px 0 60px rgba(0,0,0,0.5), 15px 0 35px rgba(0,0,0,0.3);
+  transform-origin:left center;
+  border-right:1px solid rgba(235,215,185,0.4);
+}
+.grand-drape-right{
+  right:0;
+  box-shadow:inset 30px 0 60px rgba(0,0,0,0.5), -15px 0 35px rgba(0,0,0,0.3);
+  transform-origin:right center;
+  border-left:1px solid rgba(235,215,185,0.4);
+}
+.grand-curtain-seam{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:50%;
+  width:2px;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg, transparent 0%, rgba(240,220,185,0.8) 30%, rgba(240,220,185,0.8) 70%, transparent 100%);
+  box-shadow:0 0 10px rgba(240,220,185,0.6);
+  transition:opacity 0.6s ease;
+  z-index:26;
+}
+.grand-landing-curtains.open .grand-drape-left{
+  transform:translateX(-104%) scaleX(0.7) skewY(1deg);
+}
+.grand-landing-curtains.open .grand-drape-right{
+  transform:translateX(104%) scaleX(0.7) skewY(-1deg);
+}
+.grand-landing-curtains.open .grand-curtain-seam{
+  opacity:0;
+}
+
 /* --- Scroll-Driven 3D Garden Journey --- */
 .garden-journey{position:relative;height:260vh}
 .garden-journey.is-static-journey{height:auto}
