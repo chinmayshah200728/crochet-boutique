@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import {randomBytes,createHash} from 'node:crypto';
+fs.mkdirSync('.wrangler',{recursive:true});
+const production={vars:{AUTH_MODE:'password',MEDIA_STORAGE:'d1',OWNER_EMAIL:'test@example.invalid'}};
+const setup=randomBytes(32).toString('hex');
+production.vars.ADMIN_SETUP_HASH=createHash('sha256').update(setup).digest('hex');
+production.vars.OWNER_USERNAME='prishashah2809';
+production.name='crochet-launch-qa';
+fs.writeFileSync('.wrangler/launch-qa-secret.json',JSON.stringify({setup}));
+fs.writeFileSync('wrangler.launch-qa.json',JSON.stringify(production,null,2));
+const modelFiles=fs.readdirSync('public/models').filter(n=>/^collection-1-[a-f0-9]{16}\.glb$/.test(n));
+fs.writeFileSync('.wrangler/launch-qa-seed.sql',`INSERT INTO products(id,name,description,category,price,stock,status,images,colours,model,lead_time,created_at,updated_at) VALUES ('81000000-0000-4000-8000-000000000001','QA bow','Isolated test fixture','Little joys',29000,5,'active','["/art/collection-sheet.png#1"]','["#C38A91"]','/models/${modelFiles.at(-1)}','Test only','2026-10-20','2026-10-20');\nINSERT INTO settings(id,value) VALUES ('store','{"acceptingOrders":true,"shipping":0,"email":"test@example.invalid","upiId":"test@example","payee":"QA ONLY"}');`);
+console.log('Prepared isolated local launch QA configuration. No production data changed.');

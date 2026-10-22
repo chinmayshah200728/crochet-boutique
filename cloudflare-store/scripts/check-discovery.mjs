@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+const base='http://127.0.0.1:5176';
+const get=async p=>{const r=await fetch(base+p);return {status:r.status,body:await r.text(),headers:r.headers}};
+const home=await get('/');assert.equal(home.status,200);assert(home.body.includes('QA bow'));assert(home.body.includes('application/ld+json'));assert(home.body.includes('Handmade Crochet Flowers'));assert(home.body.includes('/products/qa-bow--81000000-0000-4000-8000-000000000001'));assert(home.body.includes('rel="canonical"'));assert(home.body.includes('garden-editorial'));
+const page=await get('/products/qa-bow--81000000-0000-4000-8000-000000000001');assert.equal(page.status,200);assert(page.body.includes('QA bow | crochetbyprisha'));assert(page.body.includes('schema.org/InStock'));assert(page.body.includes('priceCurrency'));
+const faq=await get('/help');assert.equal(faq.status,200);assert(faq.body.includes('FAQPage'));assert(faq.body.includes('How do UPI payments work?'));
+assert.equal((await get('/about')).status,200);
+const map=await get('/sitemap.xml');assert.equal(map.status,200);assert(map.headers.get('content-type').includes('xml'));assert(map.body.includes('/products/qa-bow--'));assert(!map.body.includes('/admin'));
+const robots=await get('/robots.txt');assert.equal(robots.status,200);assert(robots.body.includes('Sitemap: https://crochetbyprisha.pages.dev/sitemap.xml'));
+assert.equal((await get('/products/missing')).status,404);
+const admin=await get('/admin');assert(admin.body.includes('noindex'));
+console.log('PASS: server-rendered catalogue, product metadata/schema, answer content, sitemap/robots, missing-product 404 and private-page noindex.');

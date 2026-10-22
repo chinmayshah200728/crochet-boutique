@@ -1,0 +1,1 @@
+export const collectionModels=["/models/collection-0-39b5f13676ce2bc2.glb","/models/collection-1-986117c7c8aa38df.glb","/models/collection-2-54d47a030f6a2d54.glb","/models/collection-3-2d7ac276de1f8e58.glb"];

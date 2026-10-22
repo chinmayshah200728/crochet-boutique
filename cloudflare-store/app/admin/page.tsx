@@ -1,0 +1,7 @@
+import {env} from 'cloudflare:workers';
+import StudioLogin from '../../components/StudioLogin';
+import {owner} from '../../lib/owner';
+import {getChatGPTUser,chatGPTSignInPath} from '../chatgpt-auth';
+import Dashboard from '../../components/Dashboard';
+export const metadata={title:'Owner Studio | crochetbyprisha',robots:{index:false,follow:false},alternates:{canonical:'https://crochetbyprisha.pages.dev/admin'}};
+export default async function AdminPage(){const configured=env.AUTH_MODE==='password'?!!await env.DB.prepare("SELECT id FROM settings WHERE id='admin_credentials'").first():true;const user=await getChatGPTUser();if(!(await owner()))return <main className="login-page"><a className="wordmark" href="/">crochetbyprisha<span>THE HANDMADE STUDIO</span></a><div className="login-card"><span className="eyebrow">THE STUDIO • OWNER ACCESS</span><h1>A little space<br/>to make <em>big things.</em></h1><p>Manage your collection, orders and genuine customer stories.</p>{user?<p className="alert">This account doesn’t have access to the studio. Sign in with the store owner account.</p>:null}{env.AUTH_MODE==='password'?<StudioLogin configured={configured}/>:<a className="button" href={user?'/signout-with-chatgpt?return_to=/admin':chatGPTSignInPath('/admin')}>{user?'Switch account':'Sign in with ChatGPT'} <span>↗</span></a>}<a className="text-link" href="/">Back to the garden</a></div></main>;return <Dashboard passwordAuth={env.AUTH_MODE==='password'} name={user?.fullName?.split(' ')[0]||'Prisha'}/>;}

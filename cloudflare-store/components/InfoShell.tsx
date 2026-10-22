@@ -1,0 +1,2 @@
+import {Brand} from './UI';
+export default function InfoShell({children}:{children:React.ReactNode}){return <><header className="info-nav"><Brand/><a href="/#collection">Explore the collection ↗</a></header><main id="main-content" className="info-page">{children}</main><footer className="info-footer"><a href="/">The garden</a><a href="/about">Meet the studio</a><a href="/help">Orders & questions</a><a href="/admin">Studio login</a></footer></>}

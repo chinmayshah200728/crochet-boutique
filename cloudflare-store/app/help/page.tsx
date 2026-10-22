@@ -1,0 +1,5 @@
+import InfoShell from '../../components/InfoShell';
+import {getCatalog} from '../../lib/catalog';
+import {site,questions,jsonLd} from '../../lib/seo';
+export const metadata={title:'Custom Colours, Orders & UPI Payment Help | crochetbyprisha',description:'Answers about crochet customisation, 3D previews, ordering, making times and manually verified UPI payments at crochetbyprisha.',alternates:{canonical:site+'/help'}};
+export default async function Help(){const {settings:s}=await getCatalog(),qa=questions(s);return <InfoShell><script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd({'@context':'https://schema.org','@type':'FAQPage',mainEntity:qa.map(({q,a})=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:a}}))})}}/><span className="eyebrow">A FEW THOUGHTFUL ANSWERS</span><h1>Before your<br/><em>little happy mail.</em></h1><p className="info-lead">Custom colours, making times and what happens after you order.</p><div className="answer-list">{qa.map(({q,a})=><section key={q}><h2>{q}</h2><p>{a}</p></section>)}</div><a className="button" href="/#collection">Back to the collection ↗</a></InfoShell>}
