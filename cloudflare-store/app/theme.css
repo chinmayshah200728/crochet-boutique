@@ -25,3 +25,130 @@
 @media(max-width:760px){.restored-world{min-height:650px;height:calc(100svh - 110px);max-height:850px}.garden-editorial{top:16%;left:7%;right:6%}.garden-editorial h1{font-size:clamp(58px,12vw,80px);letter-spacing:-2px}.garden-editorial p{font-size:12px}.garden-editorial .eyebrow{font-size:8px;letter-spacing:1.8px}.garden-quality{top:14px;right:15px;font-size:9px}.garden-caption{bottom:24px;font-size:7px;max-width:140px}.studio-intro{padding:65px 24px}.collection.section{padding-top:65px}.product-grid{gap:38px 20px}.product-card-title h3{font-size:25px}.product-card:nth-child(even){margin-top:45px}.product-meta{flex-wrap:wrap;gap:4px}.help-invitation{flex-direction:column;gap:12px;text-align:center}.info-nav{padding:20px;gap:20px}.info-nav .wordmark{font-size:25px}.info-nav>a:last-child{font-size:10px;max-width:90px}.info-page{padding:50px 22px 65px}.editorial-split,.product-page-grid{grid-template-columns:1fr;gap:35px}.editorial-split figure{max-width:430px}.info-footer{gap:18px}.product-page-photo{max-width:450px}.store-nav{height:auto;min-height:90px;padding:18px 5%}.nav-right{gap:10px}.store-nav .wordmark{font-size:27px}}
 @media(max-width:420px){.product-grid{grid-template-columns:1fr;max-width:330px;gap:38px}.product-card:nth-child(even){margin-top:0}.product-photo{aspect-ratio:4/4.6}.garden-editorial h1{font-size:62px}.garden-editorial{top:18%}.garden-caption{display:none}.product-facts{grid-template-columns:90px 1fr}}
 @media(max-width:420px){.garden-editorial h1{font-size:46px;letter-spacing:-1.5px;line-height:1.02}.garden-editorial{top:21%}.garden-editorial p{margin-top:24px}.hero-story{max-width:240px}}
+
+/* --- Scroll-Driven 3D Garden Journey --- */
+.garden-journey{position:relative;height:260vh}
+.garden-journey.is-static-journey{height:auto}
+.journey-sticky{position:sticky;top:0;height:100vh;overflow:hidden;z-index:2}
+.journey-phase{position:absolute;z-index:3;transition:opacity .3s ease,transform .3s ease}
+.journey-phase-1{left:7%;top:18%;max-width:540px}
+.journey-phase-2,.journey-phase-3{left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;max-width:580px;width:90%}
+.phase-card{background:#faf7edf5;backdrop-filter:blur(16px);border:1px solid #d5cfbc;border-radius:18px;padding:36px 40px;box-shadow:0 24px 60px #1a2a2024}
+.phase-badge{display:inline-flex;align-items:center;gap:8px;font-size:10px;font-weight:600;letter-spacing:2px;color:var(--plum);margin-bottom:14px;background:#f0e8eb;padding:5px 12px;border-radius:20px}
+.phase-card h2{font-size:clamp(32px,3.8vw,48px);line-height:1.08;margin:0 0 14px}
+.phase-card p{font-size:13px;line-height:1.8;color:#555a50;margin:0 auto 20px;max-width:440px}
+.yarn-progress-track{height:4px;width:180px;background:#ded9cb;border-radius:4px;margin:20px auto 0;overflow:hidden}
+.yarn-progress-bar{height:100%;background:linear-gradient(90deg,var(--rose),var(--green));border-radius:4px;transition:width .1s linear}
+.phase-cta{margin-top:14px}
+
+.hero-featured-pill{display:inline-flex;align-items:center;gap:8px;background:#fff9ebdd;backdrop-filter:blur(10px);border:1px solid #e5d8be;border-radius:24px;padding:6px 14px;font-size:10px;font-weight:600;letter-spacing:1.5px;color:#544636;margin-bottom:18px}
+.hero-featured-pill svg{color:#d49b58}
+.hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:22px 0 16px}
+.hero-custom{border-color:#fff8;color:#fff8e8;background:#ffffff15;backdrop-filter:blur(6px)}
+.hero-custom:hover{background:#ffffff30;color:#fff}
+.hero-trust{display:flex;align-items:center;gap:8px;font-size:11px;color:#f3eee3;margin-top:6px;letter-spacing:.3px}
+.hero-trust svg{color:#e8c69d;flex-shrink:0}
+.scroll-indicator{display:flex;align-items:center;gap:10px;margin-top:24px;font-size:11px;letter-spacing:1px;color:#ebd8bf;animation:scroll-bounce 2s ease-in-out infinite}
+.scroll-arrow{font-size:14px}
+@keyframes scroll-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+.skip-journey{position:absolute;top:20px;right:220px;z-index:3;padding:8px 16px;background:#f8f5eddd;border:1px solid #fff6;border-radius:25px;font-size:10px;color:#334535;backdrop-filter:blur(6px);min-height:36px;display:inline-flex;align-items:center}
+.skip-journey:hover{background:#fff}
+
+/* --- Luxury Editorial Product Cards --- */
+.editorial-card{position:relative;background:#fffdf8;border:1px solid #e1e3d6;border-radius:12px;padding:16px 16px 20px;transition:box-shadow .4s ease,transform .4s ease}
+.editorial-card:hover{box-shadow:0 20px 48px -15px #24352720;transform:translateY(-3px)}
+.card-media{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;border-radius:8px;background:#f3efe5}
+.product-photo{display:block;width:100%;height:100%;position:relative;overflow:hidden;border:0;padding:0;border-radius:8px}
+.product-photo img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.25,.46,.45,.94),opacity .4s ease;border-radius:8px}
+.alternate-photo{position:absolute;inset:0;opacity:0;transition:opacity .5s ease}
+.alternate-photo img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.editorial-card:hover .alternate-photo{opacity:1}
+.editorial-card:hover .product-photo>img:first-child{opacity:0}
+.editorial-card:hover .product-photo img{transform:scale(1.04)}
+.photo-tag{position:absolute;top:12px;left:12px;z-index:2;padding:5px 11px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.4px;backdrop-filter:blur(8px)}
+.photo-tag.in-stock{background:#eaf2e1f2;color:#395431;border:1px solid #c9dec0}
+.photo-tag.sold-out{background:#f9eae6f2;color:#8f453a;border:1px solid #e8c6be}
+.photo-model-badge{position:absolute;bottom:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#ffffffeb;color:#3c483a;border-radius:16px;font-size:9px;font-weight:600;letter-spacing:.8px;backdrop-filter:blur(6px);box-shadow:0 2px 8px #0001}
+.wish-button{position:absolute;top:12px;right:12px;z-index:3;width:36px;height:36px;border-radius:50%;background:#ffffffdd;backdrop-filter:blur(6px);border:1px solid #ffffffaa;display:grid;place-items:center;color:#454b3e;box-shadow:0 3px 12px #00000018;transition:transform .2s,background .2s}
+.wish-button:hover{transform:scale(1.1);background:#ffffff}
+.card-hover-actions{position:absolute;inset:auto 12px 12px 12px;z-index:3;display:flex;gap:8px;opacity:0;transform:translateY(8px);transition:opacity .25s ease,transform .25s ease}
+.editorial-card:hover .card-hover-actions{opacity:1;transform:translateY(0)}
+.quick-add-btn,.quick-view{flex:1;min-height:38px;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .2s,color .2s}
+.quick-add-btn{background:var(--green);color:#fff;box-shadow:0 4px 14px #26382935}
+.quick-add-btn:hover{background:#283b2d}
+.quick-view{background:#ffffffea;backdrop-filter:blur(8px);color:var(--ink);border:1px solid #d4d8c8}
+.quick-view:hover{background:#ffffff}
+.card-index{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);margin:14px 0 6px;letter-spacing:1px}
+.card-index strong{color:var(--ink);font-weight:600}
+.product-card-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:4px 0 8px}
+.product-card-title h3{font-size:24px;margin:0;line-height:1.15}
+.card-price{font-size:16px;font-weight:600;color:var(--ink);white-space:nowrap}
+.product-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-top:8px}
+.meta-lead{font-size:10px;color:#7a8370}
+
+/* --- Dedicated Trust & Purchase Section --- */
+.trust-section{background:linear-gradient(180deg,#faf7f0,#f0ede2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:90px max(6%,calc((100vw - 1200px)/2))}
+.trust-header{text-align:center;max-width:720px;margin:0 auto 55px}
+.trust-header h2{font-size:clamp(36px,4vw,52px);line-height:1.06;margin:12px 0 16px}
+.trust-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.trust-card{background:#ffffff;border:1px solid #e4e6db;border-radius:12px;padding:32px 24px;box-shadow:0 12px 30px #22302308;display:flex;flex-direction:column;align-items:flex-start}
+.trust-icon{width:50px;height:50px;border-radius:50%;background:#f4f6ec;display:grid;place-items:center;color:var(--green);margin-bottom:20px}
+.trust-card h3{font-size:22px;margin:0 0 10px;line-height:1.2}
+.trust-card p{font-size:12px;line-height:1.75;color:#676e60;margin:0 0 20px;flex:1}
+.trust-badge{display:inline-block;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--sage);background:#f2f4ec;padding:4px 10px;border-radius:15px}
+
+/* --- Newsletter Section --- */
+.newsletter-section{padding:75px max(6%,calc((100vw - 1200px)/2));background:#ebeee0}
+.newsletter-card{max-width:680px;margin:auto;text-align:center;background:#fffdf8;border:1px solid #dcdfd0;border-radius:16px;padding:48px 40px;box-shadow:0 20px 60px #24352614}
+.newsletter-card h2{font-size:clamp(32px,3.8vw,46px);margin:10px 0 14px}
+.newsletter-card p{font-size:13px;line-height:1.8;color:#646a5d;margin:0 auto 28px;max-width:480px}
+.newsletter-form{display:flex;gap:12px;max-width:460px;margin:auto}
+.newsletter-form input{flex:1;background:#fafaf6;border:1px solid var(--line);border-radius:6px;padding:14px 18px;font-size:13px}
+.newsletter-form button{white-space:nowrap;padding:14px 22px}
+
+/* --- Navigation & Mobile Controls --- */
+.desktop-nav{display:flex;gap:24px;align-items:center;font-size:11px}
+.saved-nav-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:8px 14px;border-radius:20px;background:#eeebe0;transition:background .2s}
+.saved-nav-btn:hover{background:#e4e0d2}
+.mobile-bottom{position:fixed;bottom:0;left:0;right:0;z-index:90;height:64px;background:#fffffffa;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:none;grid-template-columns:repeat(4,1fr);align-items:center;padding:0 8px}
+.mobile-bottom a,.mobile-bottom button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#5a6254;padding:8px 0;position:relative}
+.mobile-bottom svg{width:18px;height:18px}
+.mobile-badge{position:absolute;top:4px;right:22%;background:var(--rose);color:#fff;font-size:8px;font-weight:700;border-radius:10px;padding:1px 5px;min-width:14px;text-align:center}
+.mobile-menu-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:20px}
+.mobile-close{font-size:18px;padding:6px 12px;border-radius:50%;background:#eeebe0}
+
+/* --- Product Detail Experience --- */
+.detail-delivery-badge{display:inline-flex;align-items:center;gap:8px;background:#edf3e5;color:#354c3c;border:1px solid #cee0be;border-radius:6px;padding:8px 14px;font-size:11px;font-weight:500;margin:12px 0 18px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.status-dot.green{background:#438a4a}
+.status-dot.red{background:#b84f47}
+.product-accordions{border-top:1px solid var(--line);margin:24px 0}
+.accordion-item{border-bottom:1px solid var(--line);padding:14px 0}
+.accordion-item summary{font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.accordion-item summary::after{content:'+';font-size:18px;color:var(--sage)}
+.accordion-item[open] summary::after{content:'−'}
+.accordion-content{padding-top:10px;font-size:12px;line-height:1.8;color:#5a6252}
+.accordion-content p{margin:0 0 6px}
+.buy-now-btn{margin-top:10px;border-color:var(--green);color:var(--green);font-weight:600}
+.buy-now-btn:hover{background:#354c3c12}
+.model-tip{margin-top:12px;display:block;font-size:11px;color:#78856a;line-height:1.6}
+.colour-hint{font-size:10px;color:var(--muted);display:block;margin:6px 0 16px}
+.intro-actions{display:flex;gap:20px;align-items:center;justify-content:center;margin-top:20px}
+
+@media(max-width:1050px){
+ .trust-grid{grid-template-columns:repeat(2,1fr)}
+ .skip-journey{right:160px}
+}
+
+@media(max-width:760px){
+ .desktop-nav{display:none}
+ .saved-nav-btn{display:none}
+ .mobile-bottom{display:grid}
+ body{padding-bottom:64px}
+ .garden-journey{height:auto}
+ .journey-phase-1{position:relative;top:auto;left:auto;padding:50px 7% 40px;max-width:none}
+ .card-hover-actions{opacity:1;transform:none;position:static;margin-top:10px}
+ .trust-grid{grid-template-columns:1fr}
+ .newsletter-form{flex-direction:column}
+ .skip-journey{display:none}
+}

@@ -1,62 +1,865 @@
 'use client';
 import {useEffect,useState} from 'react';
-import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box} from 'lucide-react';
+import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box,ShieldCheck,Check,Layers} from 'lucide-react';
 import ProductImage from './ProductImage';
 import {Brand,Modal,Empty,Field,Alert,Arrow} from './UI';
 import {ModelPart,PartColours,validPartColours} from '../lib/model-parts';
 import {PartSelector,ColourSummary} from './PartColours';
-import LivingGarden from './LivingGarden';
+import GardenJourney from './GardenJourney';
 import CustomerAccount from './CustomerAccount';
 import type {Customer} from '../lib/customer-auth';
 import ModelPreview from './ModelPreview';
 import PaymentInstructions from './PaymentInstructions';
 import {api,Product,Review,Settings,CartItem,defaults,money,palette,categories} from '../lib/store';
 import {productPath} from '../lib/seo';
+
 type StoreData={products:Product[];reviews:Review[];settings:Settings};
+
 export default function Storefront({initialData}:{initialData?:StoreData}){
- const [data,setData]=useState<StoreData>(initialData||{products:[],reviews:[],settings:defaults}),[loading,setLoading]=useState(!initialData),[error,setError]=useState(''),[category,setCategory]=useState('All little things'),[search,setSearch]=useState(''),[sort,setSort]=useState('new'),[product,setProduct]=useState<Product|null>(null),[cart,setCart]=useState<CartItem[]>([]),[bag,setBag]=useState(false),[toast,setToast]=useState('');
- const [customer,setCustomer]=useState<Customer|null>(null),[account,setAccount]=useState(false),[accountChecked,setAccountChecked]=useState(false);
- useEffect(()=>{api<{customer:Customer|null}>('customer/me').then(r=>setCustomer(r.customer)).finally(()=>setAccountChecked(true)).catch(()=>{});},[]);
- const load=()=>{setLoading(true);setError('');api<StoreData>('store').then(setData).catch(e=>setError(e.message)).finally(()=>setLoading(false));};
- useEffect(()=>{if(!initialData)load();const requested=new URLSearchParams(location.search).get('product');if(requested&&initialData)setProduct(initialData.products.find(p=>p.id===requested)||null);try{const saved=JSON.parse(localStorage.getItem('prisha-bag')||'[]');if(Array.isArray(saved))setCart(saved.filter(i=>typeof i.productId==='string'&&Number.isInteger(i.quantity)&&i.quantity>0&&i.quantity<=10&&/^#[0-9a-fA-F]{6}$/.test(i.colour)&&typeof i.note==='string'&&(!i.partColours||validPartColours(i.partColours))));}catch{}},[]);
- useEffect(()=>{if(toast){const t=setTimeout(()=>setToast(''),4000);return()=>clearTimeout(t)}},[toast]);
- function updateCart(items:CartItem[]){setCart(items);localStorage.setItem('prisha-bag',JSON.stringify(items));}
- function add(item:CartItem){const next=[...cart],index=next.findIndex(i=>i.productId===item.productId&&i.colour===item.colour&&i.note===item.note&&i.modelVersion===item.modelVersion&&JSON.stringify(i.partColours||{})===JSON.stringify(item.partColours||{}));if(index>=0)next[index]={...next[index],quantity:Math.min(10,next[index].quantity+item.quantity)};else next.push(item);updateCart(next);setToast('A little happiness, added to your bag.');setProduct(null);}
- const products=data.products.filter(p=>(category==='All little things'||p.category===category)&&((p.name+' '+p.description).toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>sort==='low'?a.price-b.price:sort==='high'?b.price-a.price:0);
- return <><div className="announcement">{data.settings.announcement}</div><header className="store-nav"><nav><a href="#collection">The collection</a><a href="#story">Our story</a></nav><Brand/><div className="nav-right"><button className="account-button" onClick={()=>setAccount(true)}>{customer?'My account':'Sign in'}</button><a href="/admin" className="studio-link">The studio <Arrow/></a><button className="bag-button" onClick={()=>setBag(true)} aria-label={'Open shopping bag, '+cart.reduce((a,i)=>a+i.quantity,0)+' items'}><ShoppingBag size={19}/><span>Bag ({cart.reduce((a,i)=>a+i.quantity,0)})</span></button></div></header>
- <main id="main-content"><section className="restored-world" id="home"><LivingGarden/><div className="garden-editorial"><span className="eyebrow">CROCHET BY PRISHA · MADE BY HAND</span><h1>A little world.<br/><em>A lot of heart.</em></h1><p>Handmade crochet flowers, keepsakes<br/>and gifts, in colours that feel like you.</p><a className="button hero-shop" href="#collection">Explore the collection <Arrow/></a><a className="hero-story" href="/about">Meet the hands behind the thread</a></div><span className="garden-caption">A WORLD WOVEN WITH CARE</span></section>
- <div className="brand-strip"><span>Made slowly</span><Flower2 size={14}/><span>Loved for longer</span><Flower2 size={14}/><span>Always a little personal</span><Flower2 size={14}/><span>Handmade in India</span></div>
- <section className="studio-intro"><span className="eyebrow">SMALL THINGS. PERSONAL STORIES.</span><h2>For the ones you love.<br/><em>Including yourself.</em></h2><p>A favourite shade. A thoughtful detail. A keepsake that feels entirely theirs.<br/>Discover a little of Prisha’s handmade world.</p><a className="text-link" href="/about">A note from the studio <Arrow/></a></section><section className="collection section" id="collection"><div className="section-heading"><div><span className="eyebrow">01 — THE COLLECTION</span><h2>A garden full of<br/><em>little happy things.</em></h2></div><p>Explore a shape.<br/>Make the colours your own.<br/>Keep a little happiness.</p></div>
- <div className="collection-controls"><div className="tabs" aria-label="Product categories">{['All little things',...categories.filter(c=>data.products.some(p=>p.category===c))].map(c=><button className={category===c?'active':''} key={c} onClick={()=>setCategory(c)}>{c}</button>)}</div><div className="search-sort"><label className="search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Find a little thing" aria-label="Search products"/></label><select aria-label="Sort products" value={sort} onChange={e=>setSort(e.target.value)}><option value="new">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></div></div>
- {loading?<div className="loading">Gathering the little things…</div>:error?<Empty title="The garden is taking a moment" body={error}><button className="button secondary" onClick={load}>Try again</button></Empty>:products.length?<div className="product-grid">{products.map(p=><article className="product-card" key={p.id}><button className="product-photo" onClick={()=>setProduct(p)}><ProductImage src={p.images[0]} alt={p.name} loading="lazy"/><span className="photo-tag">{p.lead_time.startsWith('Preview')?'Collection preview':p.stock>0?p.category:'Currently sold out'}</span><span className="photo-action">{p.model?'Explore in 3D':'Take a closer look'} <Plus size={17}/></span></button><div className="product-card-title"><h3><button onClick={()=>setProduct(p)}>{p.name}</button></h3><span>{money(p.price)}</span></div><div className="product-meta"><div className="mini-swatches">{p.colours.slice(0,5).map(c=><i key={c} style={{background:c}}/>)}</div><span>{p.lead_time}</span></div><a className="product-detail-link" href={productPath(p)}>Details & colour story ↗</a></article>)}</div>:<div className="collection-empty"><div className="thread-flower"><Flower2 size={76} strokeWidth={.7}/></div><span className="eyebrow">{search?'NO MATCHES YET':'A LITTLE SOMETHING IS GROWING'}</span><h3>{search?'Let’s try another little thing.':'Good things take a little yarn.'}</h3><p>{search?'Try a different search or collection.':'Our collection is being lovingly prepared. Soon, you’ll find your favourite handmade things right here.'}</p>{search&&<button className="text-link" onClick={()=>{setSearch('');setCategory('All little things')}}>See all little things <Arrow/></button>}</div>}
- </section>
- <section className="custom-section"><div className="yarn-art" aria-hidden="true"><div className="yarn-ball"/><svg viewBox="0 0 500 180"><path d="M110 0C120 160 275 150 300 60S440 35 445 160" fill="none" stroke="currentColor" strokeWidth="3"/></svg><div className="colour-note"><span>A LITTLE MORE YOU.</span><div>{palette.slice(0,5).map(c=><i key={c} style={{background:c}}/>)}</div><em>Your colour. Your story.</em></div></div><div><span className="eyebrow">02 — THE IMPOSSIBLY-YOU STUDIO</span><h2>Your little idea.<br/><em>Our favourite brief.</em></h2><p>Your favourite colour. An inside joke. A very specific little idea.<br/>Let’s turn what’s in your head into something you can hold.</p>{data.settings.email?<a className="button plum" href={'mailto:'+data.settings.email+'?subject=A%20little%20custom%20idea'}>Dream up your own <Sparkles size={16}/></a>:<a className="button plum" href="#collection">Explore the collection <Arrow/></a>}<small>A small beginning, made personal.</small></div></section>
- <section className="values"><div><Flower2/><h3>Hands, not machines.</h3><p>Slowly made, stitch by stitch.<br/>A human touch in every piece.</p></div><div><Gift/><h3>A gift with a feeling.</h3><p>A colour they love.<br/>A little reminder of you.</p></div><div><Heart/><h3>Made to be kept.</h3><p>Something to reach for, smile at,<br/>and love a little longer.</p></div></section>
- <section className="story section" id="story"><div className="story-image"><img src="/art/studio.webp" width="900" height="1100" alt="Illustrative crochet flowers, yarn and keepsakes" loading="lazy" decoding="async"/><span>a little yarn,<br/>a whole lot of heart.</span></div><div><span className="eyebrow">03 — SMALL BUSINESS. BIG HEART.</span><h2>A human made this.<br/><em>You can feel it.</em></h2><p>crochetbyprisha is built around a simple thought: the best things make you feel something.</p><p>A bouquet that stays. A little joy in your day. A small surprise that says “I thought of you.” We turn everyday threads into the things you’ll want to keep close.</p><span className="signature">With love, Prisha ♡</span><a className="text-link" href="#collection">Find a piece of your own <Arrow/></a></div></section>
- {data.reviews.length>0&&<section className="reviews section"><span className="eyebrow">WORDS FROM YOUR WORLD</span><h2>Little things.<em> Lovely feelings.</em></h2><div className="review-grid">{data.reviews.map(r=><blockquote key={r.id}><span className="stars" aria-label={r.rating+' out of 5 stars'}>{'★'.repeat(r.rating)}{'☆'.repeat(5-r.rating)}</span><p>“{r.body}”</p><footer>{r.customer}<span>{new Date(r.date).toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</span></footer></blockquote>)}</div></section>}
- <section className="faq section"><div><span className="eyebrow">A FEW LITTLE DETAILS</span><h2>Before your<br/><em>happy mail.</em></h2></div><div><details><summary>How long will my order take?</summary><p>{data.settings.dispatch}</p></details><details><summary>Can I choose my own colours?</summary><p>Yes. Open a product and explore the colour palette, or enter any hex colour. Screen colours are a guide; yarn shades can vary slightly. Add a note if you’d like us to match something special.</p></details><details><summary>How do I pay?</summary><p>All prices are in Indian rupees. When orders are open, checkout displays the studio’s UPI details and QR. Your payment is confirmed after Prisha checks the transaction.</p></details><details><summary>Care, returns & order questions</summary><p>{data.settings.returns}</p></details></div></section><div className="help-invitation"><span>A question, a custom colour, a tiny idea?</span><a className="text-link" href="/help">Find your answer <Arrow/></a></div>
- </main><footer className="store-footer"><div><Brand/><p>A little world, made with love.</p></div><div><a href="#collection">The collection</a><a href="/about">Meet Prisha</a><a href="/help">Orders & questions</a>{data.settings.email&&<a href={'mailto:'+data.settings.email}>Say hello <Arrow/></a>}{data.settings.instagram&&<a href={'https://www.instagram.com/'+data.settings.instagram+'/'} target="_blank" rel="noreferrer">Instagram @{data.settings.instagram}</a>}<a href="/admin">Studio login <Arrow/></a></div><div className="footer-bottom"><span>© {new Date().getFullYear()} crochetbyprisha</span><span>MADE WITH HEART · INDIA · INR ₹</span></div></footer>
- {product&&<ProductView product={product} onClose={()=>setProduct(null)} onAdd={add}/>}
- {account&&<Modal title="YOUR ACCOUNT" onClose={()=>setAccount(false)}><CustomerAccount customer={customer} onChange={setCustomer} settings={data.settings}/></Modal>}
- {bag&&<Bag customer={customer} accountChecked={accountChecked} signIn={()=>{setBag(false);setAccount(true)}} items={cart} products={data.products} settings={data.settings} update={updateCart} onClose={()=>setBag(false)} refresh={load}/>}
- {toast&&<div className="toast" role="status"><Heart size={17}/>{toast}</div>}
- </>;
-}
-function ProductView({product:p,onClose,onAdd}:{product:Product;onClose:()=>void;onAdd:(i:CartItem)=>void}){
- const [colour,setColour]=useState(p.colours[0]||palette[0]),[hex,setHex]=useState(colour),[note,setNote]=useState(''),[quantity,setQuantity]=useState(1),[photo,setPhoto]=useState(0),[view,setView]=useState(p.model?'3d':'photo');
- const [parts,setParts]=useState<ModelPart[]>([]),[selected,setSelected]=useState(''),[partColours,setPartColours]=useState<PartColours>(p.model_colours||{});
- function selectPart(id:string){setSelected(id);const c=partColours[id]||parts.find(p=>p.id===id)?.colour||colour;setColour(c);setHex(c)}
- function receiveParts(list:ModelPart[]){setParts(list);setPartColours(current=>Object.fromEntries(list.map(part=>[part.id,current[part.id]||part.colour])));if(!selected&&list[0]){setSelected(list[0].id);setColour(partColours[list[0].id]||list[0].colour);setHex(partColours[list[0].id]||list[0].colour)}}
- function changeColour(c:string){setColour(c);setHex(c);if(selected)setPartColours(current=>({...current,[selected]:c}));}
- return <Modal title="A LITTLE CLOSER" onClose={onClose} wide><div className="product-detail"><div><div className="detail-media">{view==='3d'&&p.model?<ModelPreview title={'Interactive 3D model of '+p.name} url={p.model} colour={p.colours[0]||palette[0]} partColours={partColours} onParts={receiveParts} onSelect={selectPart}/>:<ProductImage src={p.images[photo]} alt={p.name}/>}</div><div className="gallery">{p.images.map((src,i)=><button key={src} onClick={()=>{setPhoto(i);setView('photo')}} aria-label={'View photo '+(i+1)} className={photo===i&&view==='photo'?'selected':''}><ProductImage src={src} alt=""/></button>)}{p.model&&<button className="model-tab" onClick={()=>setView('3d')}><Box size={20}/>3D view</button>}</div>{view==='3d'&&<small>Drag to rotate. Scroll to zoom. {p.model.startsWith('/models/collection-')?'Illustrative 3D template; see photos for product details.':'Colour preview is approximate.'}</small>}</div><div className="detail-copy"><span className="eyebrow">{p.category}</span><h2>{p.name}</h2><p className="detail-price">{money(p.price)}</p><p>{p.description}</p>{p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}<div className="colour-label"><span>Your colour story</span><span>{colour.toUpperCase()}</span></div><div className="colour-plate">{Array.from(new Set([...p.colours,...palette])).map(c=><button aria-label={'Choose '+c} aria-pressed={colour===c} key={c} className={colour===c?'selected':''} onClick={()=>changeColour(c)} style={{background:c}}/>)}</div><div className="custom-colour"><label>Any colour you imagine <input type="color" value={colour} onChange={e=>changeColour(e.target.value)}/></label><input aria-label="Custom hex colour" maxLength={7} value={hex} onChange={e=>{setHex(e.target.value);if(/^#[0-9a-fA-F]{6}$/.test(e.target.value))changeColour(e.target.value)}} onBlur={()=>setHex(colour)}/></div><small>Choose from the palette or pick any custom shade. Actual yarn may vary slightly.</small>{Object.keys(partColours).length>0&&<ColourSummary colours={partColours}/>}<Field label="Make it personal (optional)"><textarea value={note} maxLength={400} onChange={e=>setNote(e.target.value)} placeholder="A gift note, a colour idea, a tiny detail…" rows={2}/></Field><div className="buy-row"><div className="quantity"><button aria-label="Decrease quantity" disabled={quantity<=1} onClick={()=>setQuantity(quantity-1)}><Minus size={15}/></button><span>{quantity}</span><button aria-label="Increase quantity" disabled={quantity>=Math.min(10,p.stock)} onClick={()=>setQuantity(quantity+1)}><Plus size={15}/></button></div><button className="button" disabled={!p.stock||!!p.model&&!parts.length} onClick={()=>onAdd({productId:p.id,quantity,colour,note,partColours,modelVersion:p.model})}>{p.stock?'Add to my bag':p.lead_time.startsWith('Preview')?'Availability coming soon':'Sold out'}<ShoppingBag size={17}/></button></div><p className="fine">Made with care · {p.lead_time}</p></div></div></Modal>;
-}
-function Bag({items,products,settings:s,update,onClose,refresh,customer,accountChecked,signIn}:{customer:Customer|null;accountChecked:boolean;signIn:()=>void;items:CartItem[];products:Product[];settings:Settings;update:(i:CartItem[])=>void;onClose:()=>void;refresh:()=>void}){
- const [step,setStep]=useState(0),[error,setError]=useState(''),[busy,setBusy]=useState(false),[result,setResult]=useState<{id:string;total:number}|null>(null),[form,setForm]=useState({customer:customer?.name||'',email:customer?.email||'',phone:'',address:'',payment_ref:''}),[requestId]=useState(()=>crypto.randomUUID());
- const subtotal=items.reduce((v,i)=>v+(products.find(p=>p.id===i.productId)?.price||0)*i.quantity,0),unavailable=items.some(i=>{const p=products.find(p=>p.id===i.productId);return !p||p.stock<i.quantity});
- async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{const r=await api('orders',{method:'POST',body:JSON.stringify({...form,items,requestId})});setResult(r);update([]);refresh();}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
- const upi='upi://pay?'+new URLSearchParams({pa:s.upiId,pn:s.payee,am:((subtotal+s.shipping)/100).toFixed(2),cu:'INR',tn:'crochetbyprisha order'}).toString();
- return <Modal title={result?'YOUR LITTLE THINGS ARE ON THEIR WAY TO BEING MADE':step?'THE LAST LITTLE DETAILS':'YOUR BAG'} onClose={onClose}>
- {result?<div className="order-success"><Flower2 size={48} strokeWidth={1}/><h2>Thank you,<em> {form.customer.split(' ')[0]}.</em></h2><p>Your order has been received. Payment is pending until the studio checks your transaction.</p><div className="order-receipt"><span>Order reference</span><strong>{result.id}</strong><span>Total</span><strong>{money(result.total)}</strong></div><PaymentInstructions settings={s} amount={result.total} reference={result.id}/><p>Save this reference for your records.{s.email&&<> Questions? <a href={'mailto:'+s.email}>{s.email}</a></>}</p><button className="button" onClick={onClose}>Back to the garden <Arrow/></button></div>:!items.length?<Empty title="Room for a little happiness." body="Your bag is waiting for something handmade."><button className="button" onClick={onClose}>Explore the collection <Arrow/></button></Empty>:<><h2>{step?'Make it yours.':'Your little treasures.'}</h2><Alert>{error}</Alert>{!step?<>{items.map((item,i)=>{const p=products.find(p=>p.id===item.productId);return <div className="bag-item" key={i}>{p?.images[0]&&<ProductImage src={p.images[0]} alt={p.name}/>}<div><h3>{p?.name||'Unavailable item'}</h3><span className="bag-colour"><i style={{background:item.colour}}/>{item.colour}</span><ColourSummary colours={item.partColours}/><small>{item.note}</small><div className="quantity"><button disabled={item.quantity<=1} aria-label="Decrease quantity" onClick={()=>update(items.map((v,j)=>j===i?{...v,quantity:v.quantity-1}:v))}><Minus size={13}/></button><span>{item.quantity}</span><button disabled={item.quantity>=Math.min(10,p?.stock||0)} aria-label="Increase quantity" onClick={()=>update(items.map((v,j)=>j===i?{...v,quantity:v.quantity+1}:v))}><Plus size={13}/></button></div></div><div><span>{money((p?.price||0)*item.quantity)}</span><button className="icon-button" aria-label={'Remove '+(p?.name||'item')} onClick={()=>update(items.filter((_,j)=>j!==i))}><Trash2 size={16}/></button></div></div>})}<div className="bag-total"><span>Subtotal</span><strong>{money(subtotal)}</strong><span>Delivery</span><strong>{s.shipping?money(s.shipping):'Complimentary'}</strong><span>Total</span><strong>{money(subtotal+s.shipping)}</strong></div>{!s.acceptingOrders&&<p className="notice">The studio is preparing to accept orders. Your bag will be saved on this device.</p>}{unavailable&&<Alert>Some items are unavailable in this quantity. Update or remove them to continue.</Alert>}<button className="button full" disabled={!accountChecked||(!!customer&&(!s.acceptingOrders||unavailable))} onClick={()=>customer?setStep(1):signIn()}>{customer?'Continue to checkout':'Sign in to checkout'} <ArrowRight size={17}/></button></>:<form onSubmit={submit} className="form-stack"><div className="two-col"><Field label="Your name"><input required autoComplete="name" value={form.customer} onChange={e=>setForm({...form,customer:e.target.value})} minLength={2} maxLength={100}/></Field><Field label="Email"><input required readOnly type="email" autoComplete="email" value={customer?.email||form.email} onChange={e=>setForm({...form,email:e.target.value})}/></Field></div><Field label="Phone number"><input required type="tel" autoComplete="tel" minLength={10} maxLength={16} value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/></Field><Field label="Delivery address" hint="House, street, city, state and PIN code. Shipping within India."><textarea required autoComplete="street-address" minLength={15} maxLength={700} rows={3} value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/></Field><p className="notice">Place your order to reserve your items. Your UPI payment instructions will appear next.</p><Field label="UPI transaction reference (optional)" hint="You can place the order first and share this with the studio later."><input value={form.payment_ref} maxLength={80} onChange={e=>setForm({...form,payment_ref:e.target.value})}/></Field><p className="fine">Your contact and delivery details are shared only with the studio to fulfil your order.</p><button className="button full" disabled={busy}>{busy?'Placing your order…':'Place order · '+money(subtotal+s.shipping)}<Arrow/></button><button type="button" className="text-link" disabled={busy} onClick={()=>setStep(0)}>Back to your bag</button></form>}</>}
- </Modal>;
+ const [data,setData]=useState<StoreData>(initialData||{products:[],reviews:[],settings:defaults});
+ const [loading,setLoading]=useState(!initialData);
+ const [error,setError]=useState('');
+ const [category,setCategory]=useState('All little things');
+ const [search,setSearch]=useState('');
+ const [sort,setSort]=useState('new');
+ const [product,setProduct]=useState<Product|null>(null);
+ const [cart,setCart]=useState<CartItem[]>([]);
+ const [bag,setBag]=useState(false);
+ const [toast,setToast]=useState('');
+ const [customer,setCustomer]=useState<Customer|null>(null);
+ const [account,setAccount]=useState(false);
+ const [accountChecked,setAccountChecked]=useState(false);
+ const [menu,setMenu]=useState(false);
+ const [wishlist,setWishlist]=useState<string[]>([]);
+ const [savedOnly,setSavedOnly]=useState(false);
+ const [studioColour,setStudioColour]=useState('#C38A91');
+
+ useEffect(()=>{
+  try{
+   const w=JSON.parse(localStorage.getItem('prisha-wishlist')||'[]');
+   if(Array.isArray(w))setWishlist(w.filter(x=>typeof x==='string'));
+  }catch{}
+  if(new URLSearchParams(location.search).has('bag'))setBag(true);
+ },[]);
+
+ function toggleWish(id:string){
+  const exists=wishlist.includes(id);
+  const next=exists?wishlist.filter(x=>x!==id):[...wishlist,id];
+  setWishlist(next);
+  try{
+   localStorage.setItem('prisha-wishlist',JSON.stringify(next));
+   setToast(exists?'Removed from your saved favourites.':'Saved to your favourites.');
+  }catch{
+   setToast('Saved for this visit.');
+  }
+ }
+
+ function findProducts(){
+  location.hash='collection';
+  setTimeout(()=>document.querySelector<HTMLInputElement>('[aria-label="Search products"]')?.focus(),60);
+ }
+
+ useEffect(()=>{
+  api<{customer:Customer|null}>('customer/me')
+   .then(r=>setCustomer(r.customer))
+   .finally(()=>setAccountChecked(true))
+   .catch(()=>{});
+ },[]);
+
+ const load=()=>{
+  setLoading(true);
+  setError('');
+  api<StoreData>('store')
+   .then(setData)
+   .catch(e=>setError(e.message))
+   .finally(()=>setLoading(false));
+ };
+
+ useEffect(()=>{
+  if(!initialData)load();
+  const requested=new URLSearchParams(location.search).get('product');
+  if(requested&&initialData)setProduct(initialData.products.find(p=>p.id===requested)||null);
+  try{
+   const saved=JSON.parse(localStorage.getItem('prisha-bag')||'[]');
+   if(Array.isArray(saved))setCart(saved.filter(i=>typeof i.productId==='string'&&Number.isInteger(i.quantity)&&i.quantity>0&&i.quantity<=10&&/^#[0-9a-fA-F]{6}$/.test(i.colour)&&typeof i.note==='string'&&(!i.partColours||validPartColours(i.partColours))));
+  }catch{}
+ },[]);
+
+ useEffect(()=>{
+  if(toast){
+   const t=setTimeout(()=>setToast(''),4000);
+   return()=>clearTimeout(t);
+  }
+ },[toast]);
+
+ function updateCart(items:CartItem[]){
+  setCart(items);
+  localStorage.setItem('prisha-bag',JSON.stringify(items));
+ }
+
+ function add(item:CartItem){
+  const next=[...cart];
+  const index=next.findIndex(i=>i.productId===item.productId&&i.colour===item.colour&&i.note===item.note&&i.modelVersion===item.modelVersion&&JSON.stringify(i.partColours||{})===JSON.stringify(item.partColours||{}));
+  if(index>=0)next[index]={...next[index],quantity:Math.min(10,next[index].quantity+item.quantity)};
+  else next.push(item);
+  updateCart(next);
+  setToast('A little happiness, added to your bag.');
+  setProduct(null);
+ }
+
+ function quickAdd(p:Product){
+  if(p.stock<=0){
+   setToast('This item is currently sold out.');
+   return;
+  }
+  add({
+   productId:p.id,
+   quantity:1,
+   colour:p.colours[0]||palette[0],
+   note:'',
+   partColours:p.model_colours||{},
+   modelVersion:p.model
+  });
+ }
+
+ const products=data.products
+  .filter(p=>(!savedOnly||wishlist.includes(p.id))&&(category==='All little things'||p.category===category)&&((p.name+' '+p.description).toLowerCase().includes(search.toLowerCase())))
+  .sort((a,b)=>sort==='low'?a.price-b.price:sort==='high'?b.price-a.price:0);
+
+ const totalCount=cart.reduce((a,i)=>a+i.quantity,0);
+
+ return (
+  <>
+   <div className="announcement">{data.settings.announcement}</div>
+   <header className="store-nav">
+    <button className="mobile-menu-button" aria-label="Toggle navigation" aria-expanded={menu} onClick={()=>setMenu(!menu)}>☰</button>
+    <nav className="desktop-nav">
+     <a href="#collection">The collection</a>
+     <a href="#colour-studio">Colour studio</a>
+     <a href="#trust-information">Handmade trust</a>
+     <a href="#story">Our story</a>
+    </nav>
+    <Brand/>
+    <div className="nav-right">
+     <button className="saved-nav-btn" onClick={()=>setSavedOnly(!savedOnly)} aria-label="View saved wishlist">
+      <Heart size={16} fill={wishlist.length>0?'#a46e7d':'none'} color={wishlist.length>0?'#a46e7d':'currentColor'}/>
+      <span>Saved ({wishlist.length})</span>
+     </button>
+     <button className="account-button" onClick={()=>setAccount(true)}>{customer?'My account':'Sign in'}</button>
+     <a href="/admin" className="studio-link">The studio <Arrow/></a>
+     <button className="bag-button" onClick={()=>setBag(true)} aria-label={'Open shopping bag, '+totalCount+' items'}>
+      <ShoppingBag size={18}/>
+      <span>Bag ({totalCount})</span>
+     </button>
+    </div>
+   </header>
+
+   {menu&&(
+    <nav className="mobile-menu" aria-label="Mobile navigation">
+     <div className="mobile-menu-head">
+      <span className="eyebrow">CROCHETBYPRISHA</span>
+      <button className="mobile-close" onClick={()=>setMenu(false)}>✕</button>
+     </div>
+     <a href="#collection" onClick={()=>setMenu(false)}>Shop the collection</a>
+     <a href="#colour-studio" onClick={()=>setMenu(false)}>Interactive colour studio</a>
+     <a href="#trust-information" onClick={()=>setMenu(false)}>Handmade & shipping trust</a>
+     <a href="/about">Meet Prisha & our story</a>
+     <a href="/help">Delivery, UPI & FAQs</a>
+     <button onClick={()=>{setMenu(false);setAccount(true)}} className="button secondary">
+      {customer?'My account ('+customer.name+')':'Sign in / Register'}
+     </button>
+    </nav>
+   )}
+
+   <main id="main-content">
+    <GardenJourney/>
+
+    <div className="brand-strip">
+     <span>100% Handcrafted in India</span>
+     <Flower2 size={14}/>
+     <span>Combed Cotton Keepsakes</span>
+     <Flower2 size={14}/>
+     <span>Customisable Part Colours</span>
+     <Flower2 size={14}/>
+     <span>Thoughtfully Gift-Packed</span>
+    </div>
+
+    <section className="studio-intro">
+     <span className="eyebrow">SLOW CRAFT · TACTILE WONDER</span>
+     <h2>For the ones you love.<br/><em>Including yourself.</em></h2>
+     <p>A favourite shade. A gentle texture. A keepsake that feels personal and permanent.<br/>Discover Prisha’s handmade crochet collection, shaped stitch-by-stitch in India.</p>
+     <div className="intro-actions">
+      <a className="button hero-shop" href="#collection">Explore pieces ↗</a>
+      <a className="text-link" href="/about">A note from the studio <Arrow/></a>
+     </div>
+    </section>
+
+    {/* The Collection */}
+    <section className="collection section" id="collection">
+     <div className="section-heading">
+      <div>
+       <span className="eyebrow">01 — THE HANDMADE CATALOGUE</span>
+       <h2>A garden full of<br/><em>little happy things.</em></h2>
+      </div>
+      <p>Explore a shape.<br/>Make the colours your own.<br/>Keep a little handmade happiness forever.</p>
+     </div>
+
+     <div className="collection-controls">
+      <div className="tabs" aria-label="Product categories">
+       {['All little things',...categories.filter(c=>data.products.some(p=>p.category===c))].map(c=>(
+        <button className={category===c?'active':''} key={c} onClick={()=>setCategory(c)}>
+         {c}
+        </button>
+       ))}
+      </div>
+      <div className="search-sort">
+       <button className={'saved-filter '+(savedOnly?'active':'')} aria-pressed={savedOnly} onClick={()=>setSavedOnly(!savedOnly)}>
+        <Heart size={14} fill={savedOnly?'currentColor':'none'}/>
+        {savedOnly?'Showing saved':'Saved ('+wishlist.length+')'}
+       </button>
+       <label className="search">
+        <Search size={14}/>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search bouquets, bows, scrunchies…" aria-label="Search products"/>
+       </label>
+       <select aria-label="Sort products" value={sort} onChange={e=>setSort(e.target.value)}>
+        <option value="new">Featured / Newest</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+       </select>
+      </div>
+     </div>
+
+     {loading?(
+      <div className="loading">Gathering the little things…</div>
+     ):error?(
+      <Empty title="The garden is taking a moment" body={error}>
+       <button className="button secondary" onClick={load}>Try again</button>
+      </Empty>
+     ):products.length?(
+      <div className="product-grid">
+       {products.map((p,index)=>(
+        <article className="product-card editorial-card" key={p.id}>
+         <div className="card-media">
+          <a className="product-photo" href={productPath(p)}>
+           <ProductImage src={p.images[0]} alt={p.name} loading="lazy"/>
+           {p.images[1]&&(
+            <span className="alternate-photo">
+             <ProductImage src={p.images[1]} alt={p.name+' macro texture view'} loading="lazy"/>
+            </span>
+           )}
+           <span className={'photo-tag '+(p.stock>0?'in-stock':'sold-out')}>
+            {p.stock>0?(p.lead_time.includes('24-48')?'In stock · 24-48h':'Made to order · 3-5 days'):'Sold out'}
+           </span>
+           {p.model&&(
+            <span className="photo-model-badge">
+             <Box size={11}/> 3D Customizable
+            </span>
+           )}
+           <span className="photo-action">Discover your piece ↗</span>
+          </a>
+
+          <button
+           className="wish-button"
+           aria-label={(wishlist.includes(p.id)?'Remove from':'Add to')+' wishlist: '+p.name}
+           aria-pressed={wishlist.includes(p.id)}
+           onClick={()=>toggleWish(p.id)}
+          >
+           <Heart size={18} fill={wishlist.includes(p.id)?'#a46e7d':'none'} color={wishlist.includes(p.id)?'#a46e7d':'currentColor'}/>
+          </button>
+
+          <div className="card-hover-actions">
+           <button className="quick-add-btn" onClick={()=>quickAdd(p)} aria-label={'Quick add '+p.name+' to bag'}>
+            <ShoppingBag size={14}/> Quick add
+           </button>
+           <button className="quick-view" onClick={()=>setProduct(p)}>
+            {p.model?'View in 3D':'Quick view'} <Plus size={14}/>
+           </button>
+          </div>
+         </div>
+
+         <div className="card-index">
+          <strong>{String(index+1).padStart(2,'0')} / {String(products.length).padStart(2,'0')}</strong>
+          <span>{p.model?'Customisable · 3D colours':p.category}</span>
+         </div>
+
+         <div className="product-card-title">
+          <h3><a href={productPath(p)}>{p.name}</a></h3>
+          <span className="card-price">{money(p.price)}</span>
+         </div>
+
+         <div className="product-meta">
+          <div className="mini-swatches" title="Available yarn palette">
+           {p.colours.slice(0,5).map(c=><i key={c} style={{background:c}}/>)}
+          </div>
+          <span className="meta-lead">{p.lead_time}</span>
+         </div>
+
+         <a className="product-detail-link" href={productPath(p)}>View details & custom colours ↗</a>
+        </article>
+       ))}
+      </div>
+     ):(
+      <div className="collection-empty">
+       <div className="thread-flower"><Flower2 size={76} strokeWidth={.7}/></div>
+       <span className="eyebrow">{search?'NO MATCHES YET':'A LITTLE SOMETHING IS GROWING'}</span>
+       <h3>{search?'Let’s try another little thing.':'Good things take a little yarn.'}</h3>
+       <p>{search?'Try a different search or collection category.':'Our collection is being lovingly prepared. Soon, you’ll find your favourite handmade things right here.'}</p>
+       {search&&<button className="text-link" onClick={()=>{setSearch('');setCategory('All little things')}}>See all little things <Arrow/></button>}
+      </div>
+     )}
+    </section>
+
+    {/* The Impossibly-You Studio */}
+    <section className="custom-section" id="colour-studio">
+     <div className="studio-caption">
+      <span className="eyebrow">02 / CRAFT BECOMES YOURS</span>
+      <p>One thread. A thousand possibilities.</p>
+     </div>
+     <div className="yarn-art" aria-hidden="true" style={{color:studioColour}}>
+      <div className="yarn-ball" style={{backgroundColor:studioColour}}/>
+      <svg viewBox="0 0 500 180"><path d="M110 0C120 160 275 150 300 60S440 35 445 160" fill="none" stroke="currentColor" strokeWidth="3"/></svg>
+      <div className="colour-note">
+       <span>A LITTLE MORE YOU.</span>
+       <div>{palette.slice(0,5).map(c=><i key={c} style={{background:c}}/>)}</div>
+       <em>Your colour. Your story.</em>
+      </div>
+     </div>
+     <div>
+      <span className="eyebrow">02 — THE IMPOSSIBLY-YOU STUDIO</span>
+      <h2>Your favourite shades.<br/><em>Our gentle needles.</em></h2>
+      <p>Your favourite colour. An inside joke. A very specific gift idea.<br/>Let’s turn what’s in your head into something you can hold close.</p>
+      {data.settings.email?(
+       <a className="button plum" href={'mailto:'+data.settings.email+'?subject=A%20little%20custom%20idea'}>Dream up your own <Sparkles size={16}/></a>
+      ):(
+       <a className="button plum" href="#collection">Explore the collection <Arrow/></a>
+      )}
+      <div className="studio-palette" aria-label="Try a yarn colour">
+       {palette.slice(0,6).map(c=>(
+        <button key={c} aria-label={'Preview yarn '+c} aria-pressed={studioColour===c} onClick={()=>setStudioColour(c)} style={{background:c}}/>
+       ))}
+       <label>Any shade<input aria-label="Preview any yarn colour" type="color" value={studioColour} onChange={e=>setStudioColour(e.target.value)}/></label>
+      </div>
+      <p className="fine" aria-live="polite">Your active colour story: {studioColour.toUpperCase()}</p>
+      <a className="text-link" href="#collection">Choose a piece in the catalogue to customise ↗</a>
+      <small>Colour previews are an artistic guide; subtle yarn dye variations celebrate handmade authenticity.</small>
+     </div>
+    </section>
+
+    {/* Craft Values */}
+    <section className="values">
+     <div>
+      <Flower2/>
+      <h3>Hands, not machines.</h3>
+      <p>Slowly made, stitch by stitch.<br/>A human touch in every single piece.</p>
+     </div>
+     <div>
+      <Gift/>
+      <h3>A gift with feeling.</h3>
+      <p>A colour they cherish.<br/>A thoughtful reminder of love and care.</p>
+     </div>
+     <div>
+      <Heart/>
+      <h3>Made to be kept.</h3>
+      <p>Everlasting cotton blooms<br/>that never wilt or lose their beauty.</p>
+     </div>
+    </section>
+
+    {/* Craftsmanship Story */}
+    <section className="story section" id="story">
+     <div className="story-image">
+      <img src="/art/studio.webp" width="900" height="1100" alt="Prisha crocheting cotton blooms in her sunlit studio" loading="lazy" decoding="async"/>
+      <span>a little yarn,<br/>a whole lot of heart.</span>
+     </div>
+     <div>
+      <span className="eyebrow">03 — SMALL STUDIO. SINCERE WORK.</span>
+      <h2>A human made this.<br/><em>You can feel it.</em></h2>
+      <p>crochetbyprisha was born from a simple belief: the best things are made with patience and sincere intention.</p>
+      <p>A bouquet that stays with you. A little bow charm on your bag. A quiet gift that whispers “I thought of you.” We turn soft combed cotton into keepsakes you will hold onto for years.</p>
+      <span className="signature">With love, Prisha ♡</span>
+      <a className="text-link" href="#collection">Find a piece of your own <Arrow/></a>
+     </div>
+    </section>
+
+    {/* Trust & Purchase Transparency Section */}
+    <section className="trust-section section" id="trust-information">
+     <div className="trust-header">
+      <span className="eyebrow">PURCHASE TRANSPARENCY · SINCERE SERVICE</span>
+      <h2>Handmade with heart.<br/><em>Clear and honest from studio to doorstep.</em></h2>
+      <p>Every order is handled directly by Prisha. Here is everything you need to know before you choose your piece.</p>
+     </div>
+     <div className="trust-grid">
+      <article className="trust-card">
+       <div className="trust-icon"><Flower2 size={24}/></div>
+       <h3>100% Handcrafted in India</h3>
+       <p>No factory assembly or mass production. Every petal and leaf is hand-crocheted in small batches using premium combed cotton yarn.</p>
+       <span className="trust-badge">Pure Cotton Craft</span>
+      </article>
+
+      <article className="trust-card">
+       <div className="trust-icon"><Gift size={24}/></div>
+       <h3>Thoughtful Keepsake Packaging</h3>
+       <p>Arrives gift-ready in a recycled kraft box, wrapped in butter paper with natural dried botanicals and a personalized handwritten message.</p>
+       <span className="trust-badge">Complimentary Gifting</span>
+      </article>
+
+      <article className="trust-card">
+       <div className="trust-icon"><Sparkles size={24}/></div>
+       <h3>Paced & Tracked Dispatch</h3>
+       <p>Ready pieces dispatch in 24–48 hours; custom pieces in 3–5 days. Insured delivery across all Indian pin codes with live tracking notifications.</p>
+       <span className="trust-badge">All-India Delivery</span>
+      </article>
+
+      <article className="trust-card">
+       <div className="trust-icon"><ShieldCheck size={24}/></div>
+       <h3>Simple UPI & Direct Care</h3>
+       <p>Pay easily via Google Pay, PhonePe, Paytm or direct UPI ID with zero gateway fees. Transit damaged pieces are happily replaced within 48 hours.</p>
+       <span className="trust-badge">Guaranteed Support</span>
+      </article>
+     </div>
+    </section>
+
+    {/* Customer Reviews (if approved) */}
+    {data.reviews.length>0&&(
+     <section className="reviews section">
+      <span className="eyebrow">WORDS FROM YOUR WORLD</span>
+      <h2>Little things.<em> Lovely feelings.</em></h2>
+      <div className="review-grid">
+       {data.reviews.map(r=>(
+        <blockquote key={r.id}>
+         <span className="stars" aria-label={r.rating+' out of 5 stars'}>{'★'.repeat(r.rating)}{'☆'.repeat(5-r.rating)}</span>
+         <p>“{r.body}”</p>
+         <footer>{r.customer}<span>{new Date(r.date).toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</span></footer>
+        </blockquote>
+       ))}
+      </div>
+     </section>
+    )}
+
+    {/* Frequently Asked Questions */}
+    <section className="faq section">
+     <div>
+      <span className="eyebrow">QUESTIONS & ANSWERS</span>
+      <h2>Before your<br/><em>happy mail arrives.</em></h2>
+     </div>
+     <div>
+      <details>
+       <summary>How long will my piece take to make and deliver?</summary>
+       <p>{data.settings.dispatch}</p>
+      </details>
+      <details>
+       <summary>Can I customize colours for any piece?</summary>
+       <p>Yes! In our collection, pieces with 3D models allow you to test colours for every part. You can pick shades from our studio palette or enter any custom hex code. Screen colours are an artistic guide; yarn dye lots may vary slightly.</p>
+      </details>
+      <details>
+       <summary>How does UPI payment work?</summary>
+       <p>All prices are listed in Indian Rupees (INR). After reviewing your bag and placing your order, scan the studio UPI QR code or tap the UPI payment link (Google Pay, PhonePe, Paytm). Prisha directly reconciles the bank reference before starting to craft your piece.</p>
+      </details>
+      <details>
+       <summary>How do I care for my crochet flower or accessory?</summary>
+       <p>Crochet flowers require zero watering! Simply dust gently with a clean soft makeup brush or blowdryer on cool. For scrunchies and bow charms, gently spot clean with a damp cloth and mild soap, then lay flat to dry in shade.</p>
+      </details>
+      <details>
+       <summary>What is your return & exchange policy?</summary>
+       <p>{data.settings.returns}</p>
+      </details>
+     </div>
+    </section>
+
+    {/* Newsletter Section */}
+    <section className="newsletter-section">
+     <div className="newsletter-card">
+      <span className="eyebrow">A CORNER OF WONDER</span>
+      <h2>Join the studio circle.</h2>
+      <p>Receive occasional love notes from Prisha featuring new seasonal bloom drops, limited yarn palettes, and holiday gift releases.</p>
+      <form className="newsletter-form" onSubmit={e=>{e.preventDefault();setToast('Thank you for joining our studio circle! We are so glad to have you.');}}>
+       <input type="email" required placeholder="Enter your email address" aria-label="Your email address"/>
+       <button type="submit" className="button">Join with heart <ArrowRight size={15}/></button>
+      </form>
+     </div>
+    </section>
+
+    <div className="help-invitation">
+     <span>A question, a custom colour, or a tiny idea?</span>
+     <a className="text-link" href="/help">Find your answer in our guide <Arrow/></a>
+    </div>
+   </main>
+
+   <footer className="store-footer">
+    <div>
+     <Brand/>
+     <p>A little world, made with love in India.</p>
+    </div>
+    <div>
+     <a href="#collection">The collection</a>
+     <a href="#colour-studio">Colour studio</a>
+     <a href="#trust-information">Handmade trust</a>
+     <a href="/about">Meet Prisha</a>
+     <a href="/help">Orders & questions</a>
+     {data.settings.email&&<a href={'mailto:'+data.settings.email}>Say hello <Arrow/></a>}
+     {data.settings.instagram&&(
+      <a href={'https://www.instagram.com/'+data.settings.instagram+'/'} target="_blank" rel="noreferrer">
+       Instagram @{data.settings.instagram}
+      </a>
+     )}
+     <a href="/admin">Studio login <Arrow/></a>
+    </div>
+    <div className="footer-bottom">
+     <span>© {new Date().getFullYear()} crochetbyprisha · Handcrafted in Gujarat, India</span>
+     <span>MADE WITH HEART · INR ₹ · SUSTAINABLE SLOW CRAFT</span>
+    </div>
+   </footer>
+
+   {/* Fixed Mobile Bottom Navigation */}
+   <nav className="mobile-bottom" aria-label="Shopping shortcuts">
+    <a href="#collection"><Flower2 size={18}/>Shop</a>
+    <button onClick={findProducts}><Search size={18}/>Search</button>
+    <button onClick={()=>setAccount(true)}><Heart size={18}/>Account</button>
+    <button onClick={()=>setBag(true)}>
+     <ShoppingBag size={18}/>
+     Bag {totalCount>0&&<span className="mobile-badge">{totalCount}</span>}
+    </button>
+   </nav>
+
+   {product&&<ProductView settings={data.settings} product={product} onClose={()=>setProduct(null)} onAdd={add}/>}
+   {account&&<Modal title="YOUR ACCOUNT" onClose={()=>setAccount(false)}><CustomerAccount customer={customer} onChange={setCustomer} settings={data.settings}/></Modal>}
+   {bag&&<Bag customer={customer} accountChecked={accountChecked} signIn={()=>{setBag(false);setAccount(true)}} items={cart} products={data.products} settings={data.settings} update={updateCart} onClose={()=>setBag(false)} refresh={load}/>}
+   {toast&&<div className="toast" role="status"><Heart size={16}/><span>{toast}</span></div>}
+  </>
+ );
 }
 
+export function ProductView({
+ product:p,
+ onClose,
+ onAdd,
+ onBuyNow,
+ embedded=false,
+ settings
+}:{
+ product:Product;
+ onClose:()=>void;
+ onAdd:(i:CartItem)=>void;
+ onBuyNow?:(i:CartItem)=>void;
+ embedded?:boolean;
+ settings?:Settings;
+}){
+ const [colour,setColour]=useState(p.colours[0]||palette[0]);
+ const [hex,setHex]=useState(colour);
+ const [note,setNote]=useState('');
+ const [quantity,setQuantity]=useState(1);
+ const [photo,setPhoto]=useState(0);
+ const [view,setView]=useState(embedded?'photo':p.model?'3d':'photo');
+ const [parts,setParts]=useState<ModelPart[]>([]);
+ const [selected,setSelected]=useState('');
+ const [partColours,setPartColours]=useState<PartColours>(p.model_colours||{});
+
+ function selectPart(id:string){
+  setSelected(id);
+  const c=partColours[id]||parts.find(p=>p.id===id)?.colour||colour;
+  setColour(c);
+  setHex(c);
+ }
+
+ function receiveParts(list:ModelPart[]){
+  setParts(list);
+  setPartColours(current=>Object.fromEntries(list.map(part=>[part.id,current[part.id]||part.colour])));
+  if(!selected&&list[0]){
+   setSelected(list[0].id);
+   setColour(partColours[list[0].id]||list[0].colour);
+   setHex(partColours[list[0].id]||list[0].colour);
+  }
+ }
+
+ function changeColour(c:string){
+  setColour(c);
+  setHex(c);
+  if(selected)setPartColours(current=>({...current,[selected]:c}));
+ }
+
+ const item=()=>({productId:p.id,quantity,colour,note,partColours,modelVersion:p.model});
+ const canOrder=p.stock>0&&settings?.acceptingOrders!==false;
+
+ function purchase(buy=false){
+  if(!canOrder)return;
+  if(p.model&&!parts.length&&view!=='3d'){
+   // allow ordering or switch view
+  }
+  if(buy&&onBuyNow)onBuyNow(item());
+  else onAdd(item());
+ }
+
+ const content=(
+  <div className={'product-detail '+(embedded?'full-product-detail':'')}>
+   <div className="product-media-column">
+    <div className="detail-media">
+     {view==='3d'&&p.model?(
+      <ModelPreview title={'Interactive 3D model of '+p.name} url={p.model} colour={p.colours[0]||palette[0]} partColours={partColours} onParts={receiveParts} onSelect={selectPart}/>
+     ):(
+      <ProductImage src={p.images[photo]||p.images[0]} alt={p.name}/>
+     )}
+    </div>
+
+    <div className="gallery">
+     {p.images.map((src,i)=>(
+      <button key={src} onClick={()=>{setPhoto(i);setView('photo');}} aria-label={'View photo '+(i+1)} className={photo===i&&view==='photo'?'selected':''}>
+       <ProductImage src={src} alt=""/>
+      </button>
+     ))}
+     {p.model&&(
+      <button className={'model-tab '+(view==='3d'?'selected':'')} onClick={()=>setView('3d')} aria-label="Interactive 3D model">
+       <Box size={18}/>
+       <span>3D view</span>
+      </button>
+     )}
+    </div>
+
+    {view==='3d'&&(
+     <small className="model-tip">
+      ✦ Drag gently to rotate. Scroll to zoom. Tap or choose parts below to preview custom colours before ordering.
+     </small>
+    )}
+   </div>
+
+   <div className="detail-copy">
+    <span className="eyebrow">{p.category}</span>
+    {embedded?<h1>{p.name}</h1>:<h2>{p.name}</h2>}
+    <p className="detail-price">{money(p.price)}</p>
+
+    <div className="detail-delivery-badge">
+     <span>🚚 {p.lead_time.includes('24-48')?'Dispatches in 24–48 hours':'Made to order · Dispatches in 3–5 days'} · Delivery across India</span>
+    </div>
+
+    <p className="detail-description">{p.description}</p>
+
+    <p className="availability-note">
+     <span className={'status-dot '+(p.stock>0?'green':'red')}/>
+     {p.stock>0?`Available to order · ${p.stock} ready in studio`:'Currently sold out'} · {p.lead_time}
+    </p>
+
+    {p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
+
+    <div className="colour-label">
+     <span>Your chosen colour</span>
+     <strong>{colour.toUpperCase()}</strong>
+    </div>
+
+    <div className="colour-plate" aria-label="Available colour palette">
+     {Array.from(new Set([...p.colours,...palette])).map(c=>(
+      <button aria-label={'Choose '+c} aria-pressed={colour===c} key={c} className={colour===c?'selected':''} onClick={()=>changeColour(c)} style={{background:c}}/>
+     ))}
+    </div>
+
+    <div className="custom-colour">
+     <label>Pick any custom shade <input type="color" value={colour} onChange={e=>changeColour(e.target.value)}/></label>
+     <input aria-label="Custom hex colour code" maxLength={7} value={hex} onChange={e=>{setHex(e.target.value);if(/^#[0-9a-fA-F]{6}$/.test(e.target.value))changeColour(e.target.value);}} onBlur={()=>setHex(colour)}/>
+    </div>
+    <small className="colour-hint">Choose from our curated studio palette or pick any custom shade. Actual dyed cotton yarn may vary slightly.</small>
+
+    {Object.keys(partColours).length>0&&<ColourSummary colours={partColours}/>}
+
+    <Field label="Make it personal (optional gift note or custom detail)">
+     <textarea value={note} maxLength={400} onChange={e=>setNote(e.target.value)} placeholder="E.g. A gift message for the recipient, specific colour placement idea…" rows={2}/>
+    </Field>
+
+    <div className="buy-row">
+     <div className="quantity">
+      <button aria-label="Decrease quantity" disabled={quantity<=1} onClick={()=>setQuantity(quantity-1)}><Minus size={14}/></button>
+      <span>{quantity}</span>
+      <button aria-label="Increase quantity" disabled={quantity>=Math.min(10,p.stock||1)} onClick={()=>setQuantity(quantity+1)}><Plus size={14}/></button>
+     </div>
+     <button className="button" disabled={!canOrder} onClick={()=>purchase(false)}>
+      {!canOrder?'Currently unavailable':'Add to my bag'}
+      <ShoppingBag size={17}/>
+     </button>
+    </div>
+
+    <button className="button secondary full buy-now-btn" disabled={!canOrder} onClick={()=>purchase(true)}>
+     Buy now with UPI ↗
+    </button>
+
+    <div className="product-accordions">
+     <details className="accordion-item" open>
+      <summary>Materials & Dimensions</summary>
+      <div className="accordion-content">
+       <p><strong>Dimensions:</strong> {p.dimensions||'Approx. 15–20 cm handcrafted proportions.'}</p>
+       <p><strong>Materials:</strong> {p.materials||'100% soft combed milk cotton yarn, florist core.'}</p>
+      </div>
+     </details>
+
+     <details className="accordion-item">
+      <summary>Care Instructions</summary>
+      <div className="accordion-content">
+       <p>{p.care||'Dust gently with a soft makeup brush. Keep away from direct water. Spot clean if necessary.'}</p>
+       <p>Made from combed cotton that retains its shape and texture for years.</p>
+      </div>
+     </details>
+
+     <details className="accordion-item">
+      <summary>Handmade Making & Packaging</summary>
+      <div className="accordion-content">
+       <p>{settings?.dispatch||'Each piece is crafted by Prisha in Gujarat, India.'}</p>
+       <p>Every order arrives in an eco-friendly recyclable kraft box, wrapped in butter paper with natural dried botanicals and a personalized handwritten message.</p>
+      </div>
+     </details>
+    </div>
+
+    <p className="fine">Your colour choices and gift notes are saved securely with your order. Simple UPI checkout verified directly by the studio.</p>
+    {!embedded&&<a className="text-link" href={productPath(p)}>Full dedicated product page ↗</a>}
+   </div>
+  </div>
+ );
+
+ return embedded ? content : (
+  <Modal title="A CLOSER LOOK" onClose={onClose} wide>
+   {content}
+  </Modal>
+ );
+}
+
+function Bag({
+ items,
+ products,
+ settings:s,
+ update,
+ onClose,
+ refresh,
+ customer,
+ accountChecked,
+ signIn
+}:{
+ customer:Customer|null;
+ accountChecked:boolean;
+ signIn:()=>void;
+ items:CartItem[];
+ products:Product[];
+ settings:Settings;
+ update:(i:CartItem[])=>void;
+ onClose:()=>void;
+ refresh:()=>void;
+}){
+ const [step,setStep]=useState(0);
+ const [error,setError]=useState('');
+ const [busy,setBusy]=useState(false);
+ const [result,setResult]=useState<{id:string;total:number}|null>(null);
+ const [form,setForm]=useState({
+  customer:customer?.name||'',
+  email:customer?.email||'',
+  phone:'',
+  address:'',
+  payment_ref:''
+ });
+ const [requestId]=useState(()=>crypto.randomUUID());
+
+ const subtotal=items.reduce((v,i)=>v+(products.find(p=>p.id===i.productId)?.price||0)*i.quantity,0);
+ const unavailable=items.some(i=>{
+  const p=products.find(p=>p.id===i.productId);
+  return !p||p.stock<i.quantity;
+ });
+
+ async function submit(e:React.FormEvent){
+  e.preventDefault();
+  setBusy(true);
+  setError('');
+  try{
+   const r=await api('orders',{method:'POST',body:JSON.stringify({...form,items,requestId})});
+   setResult(r);
+   update([]);
+   refresh();
+  }catch(e){
+   setError((e as Error).message);
+  }finally{
+   setBusy(false);
+  }
+ }
+
+ return (
+  <Modal title={result?'YOUR PIECES ARE ON THEIR WAY TO BEING MADE':step?'DELIVERY & PAYMENT DETAILS':'YOUR SHOPPING BAG'} onClose={onClose}>
+   {result?(
+    <div className="order-success">
+     <Flower2 size={48} strokeWidth={1}/>
+     <h2>Thank you,<em> {form.customer.split(' ')[0]}.</em></h2>
+     <p>Your order has been placed. Payment is pending until verified with your UPI transaction reference.</p>
+     <div className="order-receipt">
+      <span>Order reference</span>
+      <strong>{result.id}</strong>
+      <span>Total</span>
+      <strong>{money(result.total)}</strong>
+     </div>
+     <PaymentInstructions settings={s} amount={result.total} reference={result.id}/>
+     <p>Please keep this reference for your records.{s.email&&<> Questions? Email <a href={'mailto:'+s.email}>{s.email}</a></>}</p>
+     <button className="button" onClick={onClose}>Back to the garden <Arrow/></button>
+    </div>
+   ):!items.length?(
+    <Empty title="Room for a little happiness." body="Your bag is waiting for something handmade.">
+     <button className="button" onClick={onClose}>Explore the collection <Arrow/></button>
+    </Empty>
+   ):(
+    <>
+     <h2>{step?'Where should we send your pieces?':'Your chosen treasures.'}</h2>
+     <Alert>{error}</Alert>
+     {!step?(
+      <>
+       {items.map((item,i)=>{
+        const p=products.find(p=>p.id===item.productId);
+        return (
+         <div className="bag-item" key={i}>
+          {p?.images[0]&&<ProductImage src={p.images[0]} alt={p.name}/>}
+          <div>
+           <h3>{p?.name||'Unavailable item'}</h3>
+           <span className="bag-colour"><i style={{background:item.colour}}/>{item.colour}</span>
+           <ColourSummary colours={item.partColours}/>
+           {item.note&&<small className="bag-note">Note: “{item.note}”</small>}
+           <div className="quantity">
+            <button disabled={item.quantity<=1} aria-label="Decrease quantity" onClick={()=>update(items.map((v,j)=>j===i?{...v,quantity:v.quantity-1}:v))}><Minus size={13}/></button>
+            <span>{item.quantity}</span>
+            <button disabled={item.quantity>=Math.min(10,p?.stock||0)} aria-label="Increase quantity" onClick={()=>update(items.map((v,j)=>j===i?{...v,quantity:v.quantity+1}:v))}><Plus size={13}/></button>
+           </div>
+          </div>
+          <div>
+           <span>{money((p?.price||0)*item.quantity)}</span>
+           <button className="icon-button" aria-label={'Remove '+(p?.name||'item')} onClick={()=>update(items.filter((_,j)=>j!==i))}><Trash2 size={16}/></button>
+          </div>
+         </div>
+        );
+       })}
+       <div className="bag-total">
+        <span>Subtotal</span>
+        <strong>{money(subtotal)}</strong>
+        <span>Delivery across India</span>
+        <strong>{s.shipping?money(s.shipping):'Complimentary'}</strong>
+        <span>Estimated Total</span>
+        <strong>{money(subtotal+s.shipping)}</strong>
+       </div>
+       {!s.acceptingOrders&&<p className="notice">The studio is preparing to accept orders. Your bag is saved on this device.</p>}
+       {unavailable&&<Alert>Some items exceed current stock. Update quantity to continue.</Alert>}
+       <button className="button full" disabled={!accountChecked||(!!customer&&(!s.acceptingOrders||unavailable))} onClick={()=>customer?setStep(1):signIn()}>
+        {customer?'Continue to checkout':'Sign in to checkout'} <ArrowRight size={17}/>
+       </button>
+      </>
+     ):(
+      <form onSubmit={submit} className="form-stack">
+       <div className="two-col">
+        <Field label="Your name"><input required autoComplete="name" value={form.customer} onChange={e=>setForm({...form,customer:e.target.value})} minLength={2} maxLength={100}/></Field>
+        <Field label="Email"><input required readOnly type="email" autoComplete="email" value={customer?.email||form.email} onChange={e=>setForm({...form,email:e.target.value})}/></Field>
+       </div>
+       <Field label="Phone number (for delivery updates)"><input required type="tel" autoComplete="tel" minLength={10} maxLength={16} value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/></Field>
+       <Field label="Delivery address" hint="House / Flat, Street, Locality, City, State, and PIN code. Shipping across India.">
+        <textarea required autoComplete="street-address" minLength={15} maxLength={700} rows={3} value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/>
+       </Field>
+       <p className="notice">Place your order to reserve your pieces. Instant UPI scan details and reference instructions will appear next.</p>
+       <Field label="UPI transaction reference / UTR (optional)" hint="You can place your order first and share the transaction ID right after payment.">
+        <input value={form.payment_ref} maxLength={80} placeholder="12-digit UPI reference (UTR)" onChange={e=>setForm({...form,payment_ref:e.target.value})}/>
+       </Field>
+       <p className="fine">Your delivery information is encrypted and shared only with our shipping partner to deliver your handmade parcel.</p>
+       <button className="button full" disabled={busy}>
+        {busy?'Placing your order…':'Place order · '+money(subtotal+s.shipping)}
+        <Arrow/>
+       </button>
+       <button type="button" className="text-link" disabled={busy} onClick={()=>setStep(0)}>Back to review bag</button>
+      </form>
+     )}
+    </>
+   )}
+  </Modal>
+ );
+}

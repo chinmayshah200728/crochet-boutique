@@ -8,6 +8,7 @@ import {customerRoute,customerIdentity} from '../../../lib/customer-auth';
 import {collectionModels} from '../../../lib/collection-models';
 import {normaliseReference,validReference} from '../../../lib/payments';
 import {studioAuth} from '../../../lib/studio-auth';
+import {mergeWithCurated} from '../../../lib/curated-products';
 
 const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const decode=(p:any)=>({...p,images:JSON.parse(p.images),colours:JSON.parse(p.colours),model_colours:JSON.parse(p.model_colours||'{}')});
@@ -26,7 +27,7 @@ async function route(request:Request){
   return await getMedia(parts[1])||json({error:'File not found.'},404);
  }
  if(parts[0]==='store'&&method==='GET'){
-  const [products,reviews,settings]=await Promise.all([env.DB.prepare("SELECT * FROM products WHERE status='active' ORDER BY created_at DESC").all(),env.DB.prepare('SELECT * FROM reviews WHERE published=1 ORDER BY date DESC LIMIT 50').all(),storeSettings()]);return json({products:products.results.map(decode),reviews:reviews.results,settings});
+  const [products,reviews,settings]=await Promise.all([env.DB.prepare("SELECT * FROM products WHERE status='active' ORDER BY created_at DESC").all(),env.DB.prepare('SELECT * FROM reviews WHERE published=1 ORDER BY date DESC LIMIT 50').all(),storeSettings()]);return json({products:mergeWithCurated(products.results.map(decode)),reviews:reviews.results,settings});
  }
  if(admin&&parts[1]==='data'&&method==='GET'){
   const [products,reviews,orders,items,settings]=await Promise.all([env.DB.prepare('SELECT * FROM products ORDER BY created_at DESC').all(),env.DB.prepare('SELECT * FROM reviews ORDER BY created_at DESC').all(),env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT 500').all(),env.DB.prepare('SELECT * FROM order_items WHERE order_id IN (SELECT id FROM orders ORDER BY created_at DESC LIMIT 500)').all(),storeSettings()]);
