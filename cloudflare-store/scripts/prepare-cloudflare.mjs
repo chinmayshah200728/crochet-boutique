@@ -1,0 +1,11 @@
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {resolve} from 'node:path';
+const path=resolve('cloudflare.settings.json');
+if(!existsSync(path))throw Error('Missing cloudflare.settings.json deployment settings.');
+const settings=JSON.parse(readFileSync(path,'utf8'));
+for(const key of ['account_id','database_id','setup_hash'])if(!settings[key])throw Error('Missing '+key);
+const config=JSON.parse(readFileSync('dist/server/wrangler.json','utf8'));
+Object.assign(config,{name:'crochetbyprisha',account_id:settings.account_id,main:'./dist/server/index.js',workers_dev:true,preview_urls:false,assets:{directory:'./dist/client'},vars:{AUTH_MODE:'password',MEDIA_STORAGE:'d1',ADMIN_SETUP_HASH:settings.setup_hash,OWNER_EMAIL:settings.owner_email,OWNER_USERNAME:'prishashah2809'},d1_databases:[{binding:'DB',database_name:'crochetbyprisha-store',database_id:settings.database_id,migrations_dir:'./drizzle'}],r2_buckets:[]});
+delete config.topLevelName;
+writeFileSync('wrangler.production.json',JSON.stringify(config,null,2)+'\n');
+console.log('Cloudflare config prepared: D1 media, password-protected studio, no R2.');

@@ -1,0 +1,6 @@
+{
+  "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+  "database_id": "YOUR_D1_DATABASE_ID",
+  "setup_hash": "SHA256_OF_YOUR_PRIVATE_ONE_TIME_SETUP_CODE",
+  "owner_email": "YOUR_STUDIO_EMAIL"
+}

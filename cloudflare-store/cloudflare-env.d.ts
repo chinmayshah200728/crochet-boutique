@@ -1,0 +1,1 @@
+declare namespace Cloudflare { interface Env { DB: D1Database; BUCKET: R2Bucket; AUTH_MODE?: string; ADMIN_SETUP_HASH?: string; MEDIA_STORAGE?: string; OWNER_EMAIL?: string; OWNER_USERNAME?: string; } }

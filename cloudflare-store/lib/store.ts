@@ -1,0 +1,13 @@
+export type Product={id:string;name:string;description:string;category:string;price:number;stock:number;status:string;images:string[];colours:string[];model:string;model_colours?:Record<string,string>;lead_time:string;created_at:string;updated_at:string};
+export type Review={id:string;customer:string;body:string;rating:number;product_id:string|null;published:number;date:string};
+export type Settings={announcement:string;email:string;instagram:string;upiId:string;payee:string;qr:string;shipping:number;acceptingOrders:boolean;dispatch:string;returns:string};
+export type OrderItem={id:string;product_id:string;name:string;price:number;quantity:number;colour:string;note:string;partColours?:Record<string,string>;model_snapshot?:string};
+export type Order={id:string;customer:string;email:string;phone:string;address:string;total:number;shipping:number;status:string;payment_ref:string;tracking:string;created_at:string;bank_reference?:string;verified_amount?:number;verified_at?:string;items:OrderItem[]};
+export type CartItem={productId:string;quantity:number;colour:string;note:string;partColours?:Record<string,string>;modelVersion?:string};
+export const defaults:Settings={announcement:'A little yarn. A whole lot of heart.',email:'',instagram:'',upiId:'',payee:'',qr:'',shipping:0,acceptingOrders:false,dispatch:'Each piece is made with care. Please check the individual product for its making time.',returns:'For order enquiries, contact the studio using the email below. Please confirm custom colours with us before placing an order.'};
+export const categories=['Forever flowers','Little joys','Wearable wonders','Gift sets','Home & living'];
+export const palette=['#C38A91','#F0E4CF','#7A8862','#A09AB8','#A84D4A','#DAC27E','#5E7581','#453A43','#BF7456','#8FABA4','#FFFFFF','#181818'];
+export const money=(value:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(value/100);
+export const statuses=['awaiting_payment','paid','making','shipped','completed','cancelled'];
+export function label(value:string){return value.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase());}
+export async function api<T=any>(path:string,options:RequestInit={}):Promise<T>{const response=await fetch('/api/'+path,{...options,headers:{...(options.body instanceof FormData?{}:{'Content-Type':'application/json'}),...options.headers}});const data:any=await response.json();if(!response.ok)throw new Error(data.error||'Unable to complete this request. Please try again.');return data;}

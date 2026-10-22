@@ -1,0 +1,30 @@
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+const db=new DatabaseSync(':memory:');
+db.exec('PRAGMA foreign_keys=ON');
+for(const f of ['0000_eager_tigra.sql','0001_inventory_guards.sql','0002_media_storage.sql','0003_order_part_colours.sql'])db.exec(readFileSync(new URL('../drizzle/'+f,import.meta.url),'utf8'));
+assert.equal(db.prepare('SELECT count(*) n FROM reviews').get().n,0);
+db.prepare('INSERT INTO products(id,name,description,category,price,stock,status,lead_time,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)').run('test','Test','Test fixture','Test',10000,3,'active','test','now','now');
+function order(id,quantities,price=10000){db.exec('BEGIN');try{db.prepare('INSERT INTO orders(id,customer,email,phone,address,total,shipping,created_at) VALUES (?,?,?,?,?,?,?,?)').run(id,'Test','test@example.invalid','0000000000','Test address',quantities.reduce((n,q)=>n+q*price,0),0,'now');for(const [i,q]of quantities.entries())db.prepare('INSERT INTO order_items(id,order_id,product_id,name,price,quantity,colour,note) VALUES (?,?,?,?,?,?,?,?)').run(id+i,id,'test','Test',price,q,'#ffffff','');db.exec('COMMIT')}catch(e){db.exec('ROLLBACK');throw e;}}
+order('first',[2]);assert.equal(db.prepare('SELECT stock FROM products').get().stock,1);
+const choices={part_left_loop:'#aabbcc',part_knot:'#123456'};
+db.prepare('UPDATE order_items SET part_colours=? WHERE order_id=?').run(JSON.stringify(choices),'first');
+assert.deepEqual(JSON.parse(db.prepare('SELECT part_colours FROM order_items WHERE order_id=?').get('first').part_colours),choices);
+assert.throws(()=>order('oversell',[2]));assert.equal(db.prepare('SELECT count(*) n FROM orders').get().n,1);
+assert.throws(()=>order('split-oversell',[1,1]));assert.equal(db.prepare('SELECT stock FROM products').get().stock,1);
+assert.throws(()=>order('changed-price',[1],1));
+db.prepare("UPDATE orders SET status='cancelled' WHERE id=?").run('first');
+assert.equal(db.prepare('SELECT stock FROM products').get().stock,3);
+db.prepare("UPDATE orders SET status='cancelled' WHERE id=?").run('first');
+assert.equal(db.prepare('SELECT stock FROM products').get().stock,3);
+assert.throws(()=>db.prepare("UPDATE orders SET status='paid' WHERE id=?").run('first'));
+db.close();
+console.log('PASS: no seeded reviews; atomic stock reservations; overselling rollback; changed prices rejected; cancellation restores once.');
+for(let i=0;i<4;i++){const bytes=readFileSync(new URL('../public/models/collection-'+i+'.glb',import.meta.url));assert.equal(bytes.toString('utf8',0,4),'glTF');const gltf=JSON.parse(bytes.toString('utf8',20,20+bytes.readUInt32LE(12)));const parts=gltf.materials.map(m=>m.name);assert(parts.length>=3);assert(parts.every(p=>p.startsWith('part_')));assert.equal(new Set(parts).size,parts.length);assert(gltf.buffers.every(b=>!b.uri));}
+console.log('PASS: independent named model parts; self-contained GLBs; order part colours round-trip.');
+const base=process.env.STORE_URL||'http://127.0.0.1:5173';
+assert.equal((await fetch(base+'/api/admin/data')).status,401);
+assert.equal((await fetch(base+'/api/admin/settings',{method:'PUT',headers:{origin:'https://example.invalid','content-type':'application/json'},body:'{}'})).status,403);
+const store=await (await fetch(base+'/api/store')).json();assert(Array.isArray(store.products));assert(Array.isArray(store.reviews));
+console.log('PASS: admin authentication; origin protection; public catalogue responds.');

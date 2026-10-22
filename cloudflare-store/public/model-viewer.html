@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta name="robots" content="noindex,follow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Product in 3D</title><style>body{margin:0;background:#eee8df;font:12px system-ui;color:#62675b;overflow:hidden}canvas{display:block}#message{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:30px}#controls{position:absolute;bottom:12px;right:12px;display:flex;gap:5px}button{background:#f8f5eb;border:1px solid #d5d3c6;border-radius:20px;padding:8px 12px;cursor:pointer}</style><script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/":"/vendor/three/addons/"}}</script></head><body><div id="message">Preparing your 3D view…</div><div id="controls"><button id="left" aria-label="Rotate model left">↶</button><button id="right" aria-label="Rotate model right">↷</button><button id="reset">Reset</button></div><script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const message=document.getElementById('message');
+let renderer,scene,camera,controls,model,request=0,initial,latestColour='',loadedUrl='',partColours={},parts=[];
+try{
+renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;document.body.prepend(renderer.domElement);
+scene=new THREE.Scene();scene.background=new THREE.Color('#eee8df');camera=new THREE.PerspectiveCamera(35,1,.01,1000);camera.position.set(3,2,5);controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=false;
+scene.add(new THREE.HemisphereLight('#fff3dc','#7e806f',2));const key=new THREE.DirectionalLight('#fff2dc',2.4);key.position.set(4,6,4);scene.add(key);const fill=new THREE.DirectionalLight('#e7ecff',1);fill.position.set(-4,2,-2);scene.add(fill);
+function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();
+const materials=()=>{const result=new Set();model?.traverse(o=>{if(o.isMesh)for(const mat of Array.isArray(o.material)?o.material:[o.material])result.add(mat)});return [...result]};
+const validColour=c=>typeof c==='string'&&/^#[a-fA-F0-9]{6}$/.test(c);
+const readColours=value=>value&&typeof value==='object'&&!Array.isArray(value)?Object.fromEntries(Object.entries(value).slice(0,64).filter(([id,c])=>/^[a-zA-Z0-9_-]{1,80}$/.test(id)&&validColour(c))):{};
+const recolour=c=>{for(const p of parts){const value=partColours[p.id];if(validColour(value))p.material.color.set(value);else p.material.color.set(p.colour)}};
+function discoverParts(){const ids=new Set();parts=materials().filter(m=>m.color).slice(0,64).map((m,index)=>{let id=(m.name||'part_'+(index+1)).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,65);if(ids.has(id))id+='_'+index;ids.add(id);return {id,label:id.replace(/^part_/,'').replaceAll('_',' ').replace(/^./,c=>c.toUpperCase()),colour:'#'+m.color.getHexString(),material:m}});parent.postMessage({type:'model-parts',parts:parts.map(({material,...p})=>p)},location.origin)}
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let down;
+renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
+renderer.domElement.addEventListener('pointerup',e=>{if(!model||!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)return;pointer.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObject(model,true)[0];if(!hit)return;const material=Array.isArray(hit.object.material)?hit.object.material[hit.face?.materialIndex||0]:hit.object.material,p=parts.find(p=>p.material===material);if(p)parent.postMessage({type:'select-part',id:p.id},location.origin)});
+const dispose=root=>{root?.traverse(o=>{if(!o.isMesh)return;o.geometry.dispose();for(const mat of Array.isArray(o.material)?o.material:[o.material]){for(const value of Object.values(mat))if(value?.isTexture)value.dispose();mat.dispose()}})};
+addEventListener('message',async e=>{
+ if(e.origin!==location.origin||e.source!==parent)return;
+ if(e.data.type==='colour'&&validColour(e.data.colour)){latestColour=e.data.colour;partColours=readColours(e.data.partColours);recolour(latestColour);return}
+ if(e.data.type!=='load'||!/^(\/api\/media\/[a-z0-9-]+\.glb|\/models\/collection-[0-3](-[a-f0-9]{16})?\.glb)$/.test(e.data.url))return;
+ partColours=readColours(e.data.partColours);if(validColour(e.data.colour))latestColour=e.data.colour;if(loadedUrl===e.data.url){recolour(latestColour);return}loadedUrl=e.data.url;message.style.display='grid';message.textContent='Preparing your 3D view…';const current=++request;try{const gltf=await new GLTFLoader().loadAsync(e.data.url);if(current!==request){dispose(gltf.scene);return}if(model){scene.remove(model);dispose(model);}model=gltf.scene;scene.add(model);discoverParts();const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());model.position.sub(center);const radius=Math.max(size.x,size.y,size.z);if(!Number.isFinite(radius)||radius<=0)throw Error();camera.position.set(radius*1.2,radius*.7,radius*2.2);camera.near=radius/100;camera.far=radius*100;camera.updateProjectionMatrix();controls.target.set(0,0,0);controls.minDistance=radius*.6;controls.maxDistance=radius*5;initial=camera.position.clone();controls.update();if(latestColour)recolour(latestColour);message.style.display='none';}catch{if(current!==request)return;loadedUrl='';message.textContent='This 3D model could not be opened. Please use the product photographs.'}
+});
+document.getElementById('left').onclick=()=>{if(model)model.rotation.y-=Math.PI/8};document.getElementById('right').onclick=()=>{if(model)model.rotation.y+=Math.PI/8};document.getElementById('reset').onclick=()=>{if(initial)camera.position.copy(initial);if(model)model.rotation.set(0,0,0);controls.update()};
+parent.postMessage({type:'viewer-ready'},location.origin);
+renderer.setAnimationLoop(()=>{if(document.hidden)return;controls.update();renderer.render(scene,camera)});
+}catch{message.textContent='3D is unavailable on this device. Your product photographs are still available.'}
+</script></body></html>
+
