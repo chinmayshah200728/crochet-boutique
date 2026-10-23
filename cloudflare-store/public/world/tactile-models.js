@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {texture} from './yarn-texture.js';
-export function yarn(colour,repeat=3){const map=texture.clone();map.repeat.set(repeat*.42,repeat*.42);map.needsUpdate=true;return new T.MeshPhysicalMaterial({color:colour,map,bumpMap:map,bumpScale:.07,roughness:.86,sheen:1,sheenRoughness:.85,sheenColor:new T.Color(colour).lerp(new T.Color('white'),.4)})}
+export function yarn(colour,repeat=3){const map=texture.clone();map.repeat.set(repeat*.65,repeat*.42);map.needsUpdate=true;return new T.MeshPhysicalMaterial({color:colour,map,bumpMap:map,bumpScale:.035,roughness:.86,sheen:1,sheenRoughness:.85,sheenColor:new T.Color(colour).lerp(new T.Color('white'),.4)})}
 const sphere=new T.SphereGeometry(1,32,20);
 export function mesh(parent,geo,mat,p=[0,0,0],s=[1,1,1],rot=[0,0,0]){const m=new T.Mesh(geo,mat);m.position.set(...p);m.scale.set(...s);m.rotation.set(...rot);m.castShadow=m.receiveShadow=true;parent.add(m);return m}
 export function oval(parent,mat,p,s,rot=[0,0,0]){return mesh(parent,sphere,mat,p,s,rot)}
