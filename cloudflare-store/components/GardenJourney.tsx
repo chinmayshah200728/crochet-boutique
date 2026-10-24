@@ -1,30 +1,3 @@
-'use client';
-import {useEffect,useState} from 'react';
-import LivingGarden from './LivingGarden';
-
-export default function GardenJourney(){
- const [open,setOpen]=useState(false);
- useEffect(()=>{
-  const timer=setTimeout(()=>setOpen(true),matchMedia('(prefers-reduced-motion: reduce)').matches?600:3200);
-  return()=>clearTimeout(timer);
- },[]);
- return <section className={'garden-journey branded-garden'+(open?' garden-revealed':'')} id="home">
-  <div className="restored-world journey-sticky">
-   <LivingGarden/>
-   <div className="garden-welcome">
-    <span className="eyebrow">A LITTLE WORLD, HANDMADE</span>
-    <h1>Small stitches.<br/><em>Extraordinary feelings.</em></h1>
-    <p>Find a little wonder. Take a little love home.</p>
-   </div>
-   <div className={'grand-landing-curtains'+(open?' open':'')} aria-hidden={open}>
-    <div className="grand-drape grand-drape-left"/><div className="grand-drape grand-drape-right"/>
-    <div className="curtain-brand">
-     <span className="eyebrow">WELCOME TO</span>
-     <div className="curtain-wordmark">crochetbyprisha</div>
-     <p>Some things are made by hand.<br/><em>The best things are made with heart.</em></p>
-     <span className="curtain-flourish" aria-hidden="true">✧</span>
-    </div>
-   </div>
-  </div>
- </section>;
-}
+export default function GardenJourney(){return <section className="lavender-hero" id="home" aria-labelledby="welcome-title">
+<div className="lavender-copy garden-welcome"><span className="edition">♡ SMALL-BATCH GIFTS · MADE TO KEEP</span><span className="eyebrow">THE HAPPY HANDMADE EDIT</span><h1 id="welcome-title">Flowers that<br/><em>never fade.</em></h1><p>Pick a bloom. Pick a colour. Give someone a little piece of joy they can keep forever.</p><div className="lavender-actions"><a className="button" href="#collection">Explore the collection ↗</a><a className="text-link" href="#colour-studio">Create your colour ✦</a></div><div className="lavender-note"><span>♡ HAND-CROCHETED WITH LOVE</span><span>PERSONAL. YOURS.</span></div></div>
+<div className="lavender-art"><img className="lavender-photo" src="/art/studio.webp" alt="Handmade pink crochet tulips, burgundy roses and cream daisies" fetchPriority="high" width="900" height="1100"/><a className="keepsake flowers" href="#collection"><img src="/art/sample-0.webp" alt="Crochet bouquet"/><span>01 / FOREVER FLOWERS</span></a><a className="keepsake joys" href="#collection"><img src="/art/sample-2.webp" alt="Daisy crochet scrunchie"/><span>02 / LITTLE JOYS</span></a><span className="keepsake-seal">CRAFTED<br/>FOR<br/>KEEPING</span></div><div className="lavender-ribbon"><span>EVERY STITCH HAS A STORY</span><span>HANDMADE · PERSONAL · YOURS</span></div></section>}
