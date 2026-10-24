@@ -119,7 +119,7 @@ export const curatedProducts: Product[] = [
 
 export function mergeWithCurated(dbProducts: Product[]): Product[] {
   if (!dbProducts || dbProducts.length === 0) {
-    return curatedProducts;
+    return [];
   }
   const byId = new Map<string, Product>();
   for (const c of curatedProducts) {
@@ -136,7 +136,7 @@ export function mergeWithCurated(dbProducts: Product[]): Product[] {
         name: curated.name,
         description: curated.description,
         price: p.price > 0 ? p.price : curated.price,
-        stock: curated.stock,
+        stock: p.stock,
         lead_time: curated.lead_time,
         images: curated.images,
         dimensions: curated.dimensions,
@@ -152,12 +152,6 @@ export function mergeWithCurated(dbProducts: Product[]): Product[] {
       care: p.care || curated.care,
     };
   });
-
-  for (const c of curatedProducts) {
-    if (!merged.some((p) => p.id === c.id)) {
-      merged.push(c);
-    }
-  }
 
   return merged;
 }
