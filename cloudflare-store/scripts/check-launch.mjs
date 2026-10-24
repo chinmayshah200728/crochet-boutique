@@ -41,3 +41,7 @@ assert.equal((await call('customer/logout',{},recovered.cookie)).status,200);ass
 console.log('PASS: mandatory login, customer isolation, server totals/email, immutable order designs, recovery/logout, customer claims stay pending, bank amount checks, fulfilment gates, duplicate bank-credit rejection.');
 
 
+const quickLogin=await call('customer/login',{email,password:changedPassword});
+const quickOrder=await call('orders',{...order,requestId:randomUUID(),items:order.items.map(i=>({...i,partColours:{}}))},quickLogin.cookie);
+assert.equal(quickOrder.status,201,JSON.stringify(quickOrder.data));
+console.log('PASS: Quick add accepts default colours without opening the 3D view.');

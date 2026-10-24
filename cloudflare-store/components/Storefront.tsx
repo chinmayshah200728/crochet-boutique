@@ -830,7 +830,7 @@ function Bag({
        <Field label="Delivery address" hint="House / Flat, Street, Locality, City, State, and PIN code. Shipping across India.">
         <textarea required autoComplete="street-address" minLength={15} maxLength={700} rows={3} value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/>
        </Field>
-       <p className="notice">Place your order first. Your QR and payment-app buttons will appear next. Payment is confirmed manually by the studio.</p>
+       
 
        <p className="fine">Your delivery information is encrypted and shared only with our shipping partner to deliver your handmade parcel.</p>
        <button className="button full" disabled={busy}>
