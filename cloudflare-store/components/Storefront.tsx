@@ -745,6 +745,10 @@ function Bag({
    setResult(r);
    update([]);
    refresh();
+   if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)&&s.upiId){
+    const query=new URLSearchParams({pa:s.upiId,pn:s.payee,am:(r.total/100).toFixed(2),cu:'INR',tr:r.id,tn:'Order '+r.id.slice(0,8)});
+    window.location.href='upi://pay?'+query.toString();
+   }
   }catch(e){
    setError((e as Error).message);
   }finally{
@@ -758,7 +762,7 @@ function Bag({
     <div className="order-success">
      <Flower2 size={48} strokeWidth={1}/>
      <h2>Thank you,<em> {form.customer.split(' ')[0]}.</em></h2>
-     <p>Your order has been placed. Payment is pending until the studio verifies receipt.</p>
+     <p>Your order has been placed. Awaiting payment verification. Pay using the options below; the studio will confirm receipt.</p>
      <div className="order-receipt">
       <span>Order reference</span>
       <strong>{result.id}</strong>
@@ -826,11 +830,11 @@ function Bag({
        <Field label="Delivery address" hint="House / Flat, Street, Locality, City, State, and PIN code. Shipping across India.">
         <textarea required autoComplete="street-address" minLength={15} maxLength={700} rows={3} value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/>
        </Field>
-       <PaymentInstructions settings={s} amount={subtotal+s.shipping} reference="" beforeOrder/><p className="notice">After paying, return here and place your order. If you already paid, do not pay again. The studio verifies every payment.</p>
+       <p className="notice">Place your order first. Your QR and payment-app buttons will appear next. Payment is confirmed manually by the studio.</p>
 
        <p className="fine">Your delivery information is encrypted and shared only with our shipping partner to deliver your handmade parcel.</p>
        <button className="button full" disabled={busy}>
-        {busy?'Placing your order…':'Place order · '+money(subtotal+s.shipping)}
+        {busy?'Placing your order…':'Place order & pay · '+money(subtotal+s.shipping)}
         <Arrow/>
        </button>
        <button type="button" className="text-link" disabled={busy} onClick={()=>setStep(0)}>Back to review bag</button>
