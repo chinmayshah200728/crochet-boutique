@@ -1,5 +1,4 @@
 'use client';
-import {PaymentReference} from './CustomerAccount';
 import {useEffect,useState} from 'react';
 import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box,ShieldCheck,Check,Layers} from 'lucide-react';
 import ProductImage from './ProductImage';
@@ -617,7 +616,7 @@ export function ProductView({
      {p.stock>0?`Available to order · ${p.stock} ready in studio`:'Currently sold out'} · {p.lead_time}
     </p>
 
-    {p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
+    <details className="optional-colours"><summary>Customise colours (optional)</summary><p className="fine">Happy with the original? Add to bag using the default colours.</p>{p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
 
     <div className="colour-label">
      <span>Your chosen colour</span>
@@ -636,7 +635,7 @@ export function ProductView({
     </div>
     <small className="colour-hint">Choose from our curated studio palette or pick any custom shade. Actual dyed cotton yarn may vary slightly.</small>
 
-    {Object.keys(partColours).length>0&&<ColourSummary colours={partColours}/>}
+    {Object.keys(partColours).length>0&&<ColourSummary colours={partColours}/>}</details>
 
     <Field label="Make it personal (optional gift note or custom detail)">
      <textarea value={note} maxLength={400} onChange={e=>setNote(e.target.value)} placeholder="E.g. A gift message for the recipient, specific colour placement idea…" rows={2}/>
@@ -759,14 +758,14 @@ function Bag({
     <div className="order-success">
      <Flower2 size={48} strokeWidth={1}/>
      <h2>Thank you,<em> {form.customer.split(' ')[0]}.</em></h2>
-     <p>Your order has been placed. Payment is pending until verified with your UPI transaction reference.</p>
+     <p>Your order has been placed. Payment is pending until the studio verifies receipt.</p>
      <div className="order-receipt">
       <span>Order reference</span>
       <strong>{result.id}</strong>
       <span>Total</span>
       <strong>{money(result.total)}</strong>
      </div>
-     <PaymentInstructions settings={s} amount={result.total} reference={result.id}/><PaymentReference orderId={result.id}/>
+     <PaymentInstructions settings={s} amount={result.total} reference={result.id}/>
      <p>Please keep this reference for your records.{s.email&&<> Questions? Email <a href={'mailto:'+s.email}>{s.email}</a></>}</p>
      <button className="button" onClick={onClose}>Back to the garden <Arrow/></button>
     </div>
@@ -827,7 +826,7 @@ function Bag({
        <Field label="Delivery address" hint="House / Flat, Street, Locality, City, State, and PIN code. Shipping across India.">
         <textarea required autoComplete="street-address" minLength={15} maxLength={700} rows={3} value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/>
        </Field>
-       <p className="notice">Place your order to reserve your pieces. Instant UPI scan details and reference instructions will appear next.</p>
+       <PaymentInstructions settings={s} amount={subtotal+s.shipping} reference="" beforeOrder/><p className="notice">After paying, return here and place your order. If you already paid, do not pay again. The studio verifies every payment.</p>
 
        <p className="fine">Your delivery information is encrypted and shared only with our shipping partner to deliver your handmade parcel.</p>
        <button className="button full" disabled={busy}>

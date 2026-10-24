@@ -30,3 +30,4 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 @media(max-width:760px){.orb-lilac{width:190px;height:190px;left:9%;top:28%}.orb-cream{width:145px;height:145px;right:8%;top:46%}.orb-rose{width:100px;height:100px}.atelier-caption{font-size:27px;top:9%}}
 @media(prefers-reduced-motion:reduce){.atelier-light,.atelier-orb,.atelier-thread path,.atelier-spark,.lavender-art .keepsake{animation:none}}
 .utr-form{margin-top:24px;padding:24px;border:1px solid var(--line);border-radius:16px;background:#f3edf7;text-align:left}.utr-form h3{margin-top:0}.utr-form [role=status]{color:#4e6148;font-size:13px;line-height:1.6}
+.optional-colours{margin:20px 0;border-block:1px solid var(--line);padding:16px 0}.optional-colours summary{cursor:pointer;font-weight:500}.optional-colours[open] summary{margin-bottom:18px}
