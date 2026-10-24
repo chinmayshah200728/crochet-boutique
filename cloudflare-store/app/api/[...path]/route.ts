@@ -64,6 +64,18 @@ async function route(request:Request){
   }
  }
  if(admin&&parts[1]==='settings'&&method==='PUT'){const s=settingsInput.parse(await body(request));await env.DB.prepare('INSERT INTO settings (id,value) VALUES (?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value').bind('store',JSON.stringify(s)).run();return json({ok:true});}
+ if(admin&&parts[1]==='orders'&&method==='DELETE'){
+  const id=z.string().uuid().parse(parts[2]),data=z.object({confirmation:z.string()}).parse(await body(request));
+  if(data.confirmation!==id.slice(0,8).toUpperCase())return json({error:'Enter the order number to confirm permanent deletion.'},400);
+  const order=await env.DB.prepare('SELECT status,verified_at FROM orders WHERE id=?').bind(id).first();
+  if(!order)return json({error:'Order not found.'},404);
+  if(order.verified_at)return json({error:'Verified-payment orders must be retained as payment records. You can cancel the order instead.'},409);
+  await env.DB.batch([
+   env.DB.prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status='awaiting_payment' AND verified_at IS NULL").bind(id),
+   env.DB.prepare('DELETE FROM order_items WHERE order_id=? AND EXISTS (SELECT 1 FROM orders WHERE id=? AND verified_at IS NULL)').bind(id,id),
+   env.DB.prepare('DELETE FROM orders WHERE id=? AND verified_at IS NULL').bind(id)
+  ]);return json({ok:true});
+ }
  if(admin&&parts[1]==='orders'&&method==='PUT'){
   const id=z.string().uuid().parse(parts[2]),data=z.object({status:z.enum(statuses as [string,...string[]]),tracking:z.string().trim().max(300),bankReference:z.string().max(80).optional(),receivedAmount:z.number().int().optional(),confirmCredit:z.boolean().optional()}).parse(await body(request));
   const order=await env.DB.prepare('SELECT status,total,verified_at FROM orders WHERE id=?').bind(id).first();if(!order)return json({error:'Order not found.'},404);
