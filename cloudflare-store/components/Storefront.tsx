@@ -1,4 +1,5 @@
 'use client';
+import {PaymentReference} from './CustomerAccount';
 import {useEffect,useState} from 'react';
 import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box,ShieldCheck,Check,Layers} from 'lucide-react';
 import ProductImage from './ProductImage';
@@ -765,7 +766,7 @@ function Bag({
       <span>Total</span>
       <strong>{money(result.total)}</strong>
      </div>
-     <PaymentInstructions settings={s} amount={result.total} reference={result.id}/>
+     <PaymentInstructions settings={s} amount={result.total} reference={result.id}/><PaymentReference orderId={result.id}/>
      <p>Please keep this reference for your records.{s.email&&<> Questions? Email <a href={'mailto:'+s.email}>{s.email}</a></>}</p>
      <button className="button" onClick={onClose}>Back to the garden <Arrow/></button>
     </div>
@@ -827,9 +828,7 @@ function Bag({
         <textarea required autoComplete="street-address" minLength={15} maxLength={700} rows={3} value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/>
        </Field>
        <p className="notice">Place your order to reserve your pieces. Instant UPI scan details and reference instructions will appear next.</p>
-       <Field label="UPI transaction reference / UTR (optional)" hint="You can place your order first and share the transaction ID right after payment.">
-        <input value={form.payment_ref} maxLength={80} placeholder="12-digit UPI reference (UTR)" onChange={e=>setForm({...form,payment_ref:e.target.value})}/>
-       </Field>
+
        <p className="fine">Your delivery information is encrypted and shared only with our shipping partner to deliver your handmade parcel.</p>
        <button className="button full" disabled={busy}>
         {busy?'Placing your order…':'Place order · '+money(subtotal+s.shipping)}
