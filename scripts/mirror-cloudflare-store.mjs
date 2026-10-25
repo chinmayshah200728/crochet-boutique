@@ -19,7 +19,7 @@ const files = [
   'scripts/install-pnpm.sh', 'scripts/check-store.mjs', 'scripts/check-worker.mjs',
   'scripts/check-launch.mjs', 'scripts/check-discovery.mjs',
   'scripts/check-live-discovery.mjs', 'scripts/prepare-cloudflare.mjs',
-  'scripts/prepare-pages.mjs', 'scripts/export-collection-models.mjs',
+  'scripts/prepare-pages.mjs', 'scripts/export-collection-models.mjs', 'scripts/export-matching-models.mjs',
   'scripts/optimise-art.mjs',
 ];
 const ignored = /(^|\/)(?:\.env[^/]*|\.wrangler|node_modules|dist|\.next|payment-qr\.jpg|cloudflare\.settings\.[^/]+|wrangler\.[^/]+|[^/]*\.(?:log|pem|key|sqlite|sqlite3|db|db-wal|db-shm)|tsconfig\.tsbuildinfo)$/i;

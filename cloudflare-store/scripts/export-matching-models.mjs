@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import * as T from 'three';
+import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+class Reader{readAsArrayBuffer(b){b.arrayBuffer().then(r=>{this.result=r;this.onloadend?.()})}readAsDataURL(b){b.arrayBuffer().then(r=>{this.result='data:application/octet-stream;base64,'+Buffer.from(r).toString('base64');this.onloadend?.()})}}
+globalThis.FileReader=Reader;
+const mat=(name,color,metal=false)=>{const m=new T.MeshStandardMaterial({color,roughness:metal?.3:.9,metalness:metal?.8:0,side:T.DoubleSide});m.name='part_'+name;return m};
+const add=(g,geo,m,pos,scale=[1,1,1],rz=0)=>{const o=new T.Mesh(geo,m);o.position.set(...pos);o.scale.set(...scale);o.rotation.z=rz;g.add(o);return o};
+const oval=(g,m,p,s,r=0)=>add(g,new T.SphereGeometry(1,24,16),m,p,s,r);
+for(const type of ['sunflower','rosebud']){const g=new T.Group(),green=mat('leaves','#74835c'),stem=mat('stem','#647547'),gold=mat('clasp','#bc9854',true);
+if(type==='sunflower'){const yellow=mat('petals','#e8ad27'),brown=mat('centre','#51321f'),pot=mat('pot','#d9c9aa');add(g,new T.CylinderGeometry(.43,.32,.62,48),pot,[0,-.98,0]);add(g,new T.CylinderGeometry(.39,.39,.025,48),brown,[0,-.66,0]);add(g,new T.TorusGeometry(.415,.035,12,48),pot,[0,-.65,0]).rotation.x=Math.PI/2;add(g,new T.CylinderGeometry(.025,.03,1.12,12),stem,[0,-.13,0]);oval(g,green,[.24,-.18,0],[.3,.1,.035],.45);for(let i=0;i<16;i++){const a=i*Math.PI/8;oval(g,yellow,[Math.sin(a)*.47,.78+Math.cos(a)*.47,0],[.12,.3,.055],-a)}oval(g,brown,[0,.78,.05],[.36,.36,.12]);for(let i=0;i<110;i++){const a=i*2.39996,r=.32*Math.sqrt(i/110);oval(g,brown,[Math.cos(a)*r,.78+Math.sin(a)*r,.16],[.024,.024,.018])}}
+else{const pink=mat('rose_petals','#c38a91');for(let ring=0;ring<4;ring++){const count=5+ring;for(let i=0;i<count;i++){const a=i*2*Math.PI/count+ring*.5,r=.07+ring*.095;const o=oval(g,pink,[Math.cos(a)*r,.05+Math.sin(a)*r,.16-ring*.07],[.16+ring*.04,.24+ring*.03,.045],a-.6);o.rotation.y=.35}}add(g,new T.CylinderGeometry(.025,.025,.7,12),stem,[0,-.55,-.05]);oval(g,green,[-.17,-.45,-.04],[.2,.09,.03],-.5);oval(g,green,[.17,-.6,-.04],[.2,.09,.03],.5);add(g,new T.TorusGeometry(.23,.025,12,48),gold,[0,.69,-.03]);add(g,new T.TorusGeometry(.07,.018,10,24),gold,[0,.43,-.03])}
+const data=await new GLTFExporter().parseAsync(g,{binary:true});fs.writeFileSync('public/models/'+type+'-v1.glb',Buffer.from(data));console.log(type,data.byteLength)}
