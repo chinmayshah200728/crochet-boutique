@@ -290,40 +290,10 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     </section>
 
     {/* The Impossibly-You Studio */}
-    <section className="custom-section" id="colour-studio">
-     <div className="studio-caption">
-      <span className="eyebrow">02 / CRAFT BECOMES YOURS</span>
-      <p>One thread. A thousand possibilities.</p>
-     </div>
-     <div className="yarn-art" aria-hidden="true" style={{color:studioColour}}>
-      <div className="yarn-ball" style={{backgroundColor:studioColour}}/>
-      <svg viewBox="0 0 500 180"><path d="M110 0C120 160 275 150 300 60S440 35 445 160" fill="none" stroke="currentColor" strokeWidth="3"/></svg>
-      <div className="colour-note">
-       <span>A LITTLE MORE YOU.</span>
-       <div>{palette.slice(0,5).map(c=><i key={c} style={{background:c}}/>)}</div>
-       <em>Your colour. Your story.</em>
-      </div>
-     </div>
-     <div>
-      <span className="eyebrow">02 — THE IMPOSSIBLY-YOU STUDIO</span>
-      <h2>Your favourite shades.<br/><em>Our gentle needles.</em></h2>
-      <p>Your favourite colour. An inside joke. A very specific gift idea.<br/>Let’s turn what’s in your head into something you can hold close.</p>
-      {data.settings.email?(
-       <a className="button plum" href={'mailto:'+data.settings.email+'?subject=A%20little%20custom%20idea'}>Dream up your own <Sparkles size={16}/></a>
-      ):(
-       <a className="button plum" href="#collection">Explore the collection <Arrow/></a>
-      )}
-      <div className="studio-palette" aria-label="Try a yarn colour">
-       {palette.slice(0,6).map(c=>(
-        <button key={c} aria-label={'Preview yarn '+c} aria-pressed={studioColour===c} onClick={()=>setStudioColour(c)} style={{background:c}}/>
-       ))}
-       <label>Any shade<input aria-label="Preview any yarn colour" type="color" value={studioColour} onChange={e=>setStudioColour(e.target.value)}/></label>
-      </div>
-      <p className="fine" aria-live="polite">Your active colour story: {studioColour.toUpperCase()}</p>
-      <a className="text-link" href="#collection">Choose a piece in the catalogue to customise ↗</a>
-      <small>Colour previews are an artistic guide; subtle yarn dye variations celebrate handmade authenticity.</small>
-     </div>
-    </section>
+    <section className="colour-edit" id="colour-studio">
+<div><span className="eyebrow">THE COLOUR EDIT</span><h2>A little more <em>you.</em></h2><p>Love it as it is? Quick add and it’s yours.<br/>For a personal touch, explore colours on your chosen piece.</p><a className="button plum" href="#collection">Find your piece <Arrow/></a></div>
+<div className="colour-edit-card"><div className="colour-edit-preview" style={{backgroundColor:studioColour}} aria-hidden="true"/><span className="eyebrow">FIND YOUR SHADE</span><div className="colour-edit-swatches" aria-label="Preview a colour">{palette.slice(0,6).map(c=><button key={c} aria-label={'Preview '+c} aria-pressed={studioColour===c} onClick={()=>setStudioColour(c)} style={{background:c}}/>)}<label title="Choose any colour"><input aria-label="Choose any colour" type="color" value={studioColour} onChange={e=>setStudioColour(e.target.value)}/><span>+</span></label></div><p className="fine" aria-live="polite">Preview: {studioColour.toUpperCase()}</p><small>Just exploring here. Choose your product to save its colours. Actual yarn shades may vary.</small></div>
+</section>
 
     {/* Craft Values */}
     <section className="values">
