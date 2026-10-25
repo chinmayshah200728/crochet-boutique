@@ -32,7 +32,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
  const [menu,setMenu]=useState(false);
  const [wishlist,setWishlist]=useState<string[]>([]);
  const [savedOnly,setSavedOnly]=useState(false);
- const [studioColour,setStudioColour]=useState('#C38A91');
 
  useEffect(()=>{
   try{
@@ -135,7 +134,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     <button className="mobile-menu-button" aria-label="Toggle navigation" aria-expanded={menu} onClick={()=>setMenu(!menu)}>☰</button>
     <nav className="desktop-nav">
      <a href="#collection">The collection</a>
-     <a href="#colour-studio">Colour studio</a>
      <a href="#trust-information">Handmade trust</a>
      <a href="#story">Our story</a>
     </nav>
@@ -161,7 +159,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
       <button className="mobile-close" onClick={()=>setMenu(false)}>✕</button>
      </div>
      <a href="#collection" onClick={()=>setMenu(false)}>Shop the collection</a>
-     <a href="#colour-studio" onClick={()=>setMenu(false)}>Interactive colour studio</a>
      <a href="#trust-information" onClick={()=>setMenu(false)}>Handmade & shipping trust</a>
      <a href="/about">Meet Prisha & our story</a>
      <a href="/help">Delivery, UPI & FAQs</a>
@@ -288,12 +285,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
       </div>
      )}
     </section>
-
-    {/* The Impossibly-You Studio */}
-    <section className="colour-edit" id="colour-studio">
-<div><span className="eyebrow">THE COLOUR EDIT</span><h2>A little more <em>you.</em></h2><p>Love it as it is? Quick add and it’s yours.<br/>For a personal touch, explore colours on your chosen piece.</p><a className="button plum" href="#collection">Find your piece <Arrow/></a></div>
-<div className="colour-edit-card"><div className="colour-edit-preview" style={{backgroundColor:studioColour}} aria-hidden="true"/><span className="eyebrow">FIND YOUR SHADE</span><div className="colour-edit-swatches" aria-label="Preview a colour">{palette.slice(0,6).map(c=><button key={c} aria-label={'Preview '+c} aria-pressed={studioColour===c} onClick={()=>setStudioColour(c)} style={{background:c}}/>)}<label title="Choose any colour"><input aria-label="Choose any colour" type="color" value={studioColour} onChange={e=>setStudioColour(e.target.value)}/><span>+</span></label></div><p className="fine" aria-live="polite">Preview: {studioColour.toUpperCase()}</p><small>Just exploring here. Choose your product to save its colours. Actual yarn shades may vary.</small></div>
-</section>
 
     {/* Craft Values */}
     <section className="values">
@@ -441,7 +432,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     </div>
     <div>
      <a href="#collection">The collection</a>
-     <a href="#colour-studio">Colour studio</a>
      <a href="#trust-information">Handmade trust</a>
      <a href="/about">Meet Prisha</a>
      <a href="/help">Orders & questions</a><a href="/crochet-guide">Crochet gift & care guide</a>
