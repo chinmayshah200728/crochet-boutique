@@ -12,7 +12,7 @@ function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWi
 const materials=()=>{const result=new Set();model?.traverse(o=>{if(o.isMesh)for(const mat of Array.isArray(o.material)?o.material:[o.material])result.add(mat)});return [...result]};
 const validColour=c=>typeof c==='string'&&/^#[a-fA-F0-9]{6}$/.test(c);
 const readColours=value=>value&&typeof value==='object'&&!Array.isArray(value)?Object.fromEntries(Object.entries(value).slice(0,64).filter(([id,c])=>/^[a-zA-Z0-9_-]{1,80}$/.test(id)&&validColour(c))):{};
-const recolour=c=>{for(const p of parts){const value=partColours[p.id];if(validColour(value))p.material.color.set(value);else p.material.color.set(p.colour)}};
+const recolour=c=>{for(const p of parts){const value=partColours.whole_product||partColours[p.id];if(validColour(value))p.material.color.set(value);else p.material.color.set(p.colour)}};
 function discoverParts(){const ids=new Set();parts=materials().filter(m=>m.color).slice(0,64).map((m,index)=>{let id=(m.name||'part_'+(index+1)).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,65);if(ids.has(id))id+='_'+index;ids.add(id);return {id,label:id.replace(/^part_/,'').replaceAll('_',' ').replace(/^./,c=>c.toUpperCase()),colour:'#'+m.color.getHexString(),material:m}});parent.postMessage({type:'model-parts',parts:parts.map(({material,...p})=>p)},location.origin)}
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let down;
 renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});

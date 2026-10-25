@@ -489,11 +489,13 @@ export function ProductView({
  const [quantity,setQuantity]=useState(1);
  const [photo,setPhoto]=useState(0);
  const [view,setView]=useState(embedded?'photo':p.model?'3d':'photo');
+ const multiPart=/bouquet|flower|soft toy|plush|amigurumi|teddy|doll|bunny/i.test(p.name+' '+p.category)&&!/key.?chain|charm|bow/i.test(p.name);
  const [parts,setParts]=useState<ModelPart[]>([]);
  const [selected,setSelected]=useState('');
  const [partColours,setPartColours]=useState<PartColours>(p.model_colours||{});
 
  function selectPart(id:string){
+  if(!multiPart)return;
   setSelected(id);
   const c=partColours[id]||parts.find(p=>p.id===id)?.colour||colour;
   setColour(c);
@@ -502,6 +504,7 @@ export function ProductView({
 
  function receiveParts(list:ModelPart[]){
   setParts(list);
+  if(!multiPart)return;
   setPartColours(current=>Object.fromEntries(list.map(part=>[part.id,current[part.id]||part.colour])));
   if(!selected&&list[0]){
    setSelected(list[0].id);
@@ -513,7 +516,8 @@ export function ProductView({
  function changeColour(c:string){
   setColour(c);
   setHex(c);
-  if(selected)setPartColours(current=>({...current,[selected]:c}));
+  if(!multiPart)setPartColours({whole_product:c});
+  else if(selected)setPartColours(current=>({...current,[selected]:c}));
  }
 
  const item=()=>({productId:p.id,quantity,colour,note,partColours,modelVersion:p.model});
@@ -555,7 +559,7 @@ export function ProductView({
 
     {view==='3d'&&(
      <small className="model-tip">
-      ✦ Drag gently to rotate. Scroll to zoom. Tap or choose parts below to preview custom colours before ordering.
+      {multiPart?"Drag to rotate. Tap a part to change its colour.":"Drag to rotate. Your selected shade applies to the whole piece."}
      </small>
     )}
    </div>
@@ -576,7 +580,7 @@ export function ProductView({
      {p.stock>0?`Available to order · ${p.stock} ready in studio`:'Currently sold out'} · {p.lead_time}
     </p>
 
-    <details className="optional-colours"><summary>Customise colours (optional)</summary><p className="fine">Happy with the original? Add to bag using the default colours.</p>{p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
+    <details className="optional-colours"><summary>Customise colours (optional)</summary><p className="fine">Happy with the original? Add to bag using the default colours.</p><p className="fine">{multiPart?"Open the 3D view to choose each part separately.":"One shade for the whole piece. Choose any colour below."}</p>{multiPart&&p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
 
     <div className="colour-label">
      <span>Your chosen colour</span>
