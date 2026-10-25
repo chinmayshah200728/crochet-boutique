@@ -219,11 +219,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
          <div className="card-media">
           <a className="product-photo" href={productPath(p)}>
            <ProductImage src={p.images[0]} alt={p.name} loading="lazy"/>
-           {p.images[1]&&(
-            <span className="alternate-photo">
-             <ProductImage src={p.images[1]} alt={p.name+' macro texture view'} loading="lazy"/>
-            </span>
-           )}
            <span className={'photo-tag '+(p.stock>0?'in-stock':'sold-out')}>
             {p.stock>0?(p.lead_time.includes('24-48')?'In stock · 24-48h':'Made to order · 3-5 days'):'Sold out'}
            </span>
@@ -544,7 +539,7 @@ export function ProductView({
     </div>
 
     <div className="gallery">
-     {p.images.map((src,i)=>(
+     {p.images.slice(0,1).map((src,i)=>(
       <button key={src} onClick={()=>{setPhoto(i);setView('photo');}} aria-label={'View photo '+(i+1)} className={photo===i&&view==='photo'?'selected':''}>
        <ProductImage src={src} alt=""/>
       </button>
