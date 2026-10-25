@@ -1,5 +1,5 @@
 import {z} from 'zod';
-const media=z.string().regex(/^(\/api\/media\/[a-z0-9-]+\.(png|jpg|webp|glb)|\/art\/payment-qr\.jpg|\/art\/collection-sheet\.png#[0-3]|\/models\/collection-[0-3](-[a-f0-9]{16})?\.glb)$/);
+const media=z.string().regex(/^(\/api\/media\/[a-z0-9-]+\.(png|jpg|webp|glb)|\/art\/payment-qr\.jpg|\/art\/collection-sheet\.png#[0-3]|\/models\/(?:collection-[0-3](-[a-f0-9]{16})?|sunflower-v1|rosebud-v1)\.glb)$/);
 const partColours=z.record(z.string().regex(/^[a-zA-Z0-9_-]{1,80}$/),z.string().regex(/^#[0-9a-fA-F]{6}$/)).refine(v=>Object.keys(v).length<=64).default({});
 const colour=z.string().regex(/^#[0-9a-fA-F]{6}$/);
 export const productInput=z.object({name:z.string().trim().min(2).max(120),description:z.string().trim().min(5).max(5000),category:z.string().trim().min(2).max(60),price:z.number().int().min(100).max(100000000),stock:z.number().int().min(0).max(10000),status:z.enum(['draft','active','archived']),images:z.array(media.refine(s=>!s.endsWith('.glb'))).max(6),colours:z.array(colour).max(100),model:z.union([z.literal(''),media.refine(s=>s.endsWith('.glb'))]),model_colours:partColours,lead_time:z.string().trim().min(2).max(100)}).superRefine((p,c)=>{if(p.status==='active'&&!p.images.length)c.addIssue({code:'custom',path:['images'],message:'Add a product photograph before publishing.'});});
