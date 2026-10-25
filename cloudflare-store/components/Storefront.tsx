@@ -474,7 +474,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      <a href="#colour-studio">Colour studio</a>
      <a href="#trust-information">Handmade trust</a>
      <a href="/about">Meet Prisha</a>
-     <a href="/help">Orders & questions</a>
+     <a href="/help">Orders & questions</a><a href="/crochet-guide">Crochet gift & care guide</a>
      {data.settings.email&&<a href={'mailto:'+data.settings.email}>Say hello <Arrow/></a>}
      {data.settings.instagram&&(
       <a href={'https://www.instagram.com/'+data.settings.instagram+'/'} target="_blank" rel="noreferrer">

@@ -10,3 +10,5 @@ const robots=await get('/robots.txt');assert.equal(robots.status,200);assert(rob
 assert.equal((await get('/products/missing')).status,404);
 const admin=await get('/admin');assert(admin.body.includes('noindex'));
 console.log('PASS: server-rendered catalogue, product metadata/schema, answer content, sitemap/robots, missing-product 404 and private-page noindex.');
+
+const guide=await get('/crochet-guide');assert.equal(guide.status,200);assert(guide.body.includes('Do I have to choose colours'));assert(map.body.includes('/crochet-guide'));
