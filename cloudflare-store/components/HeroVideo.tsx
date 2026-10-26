@@ -7,7 +7,7 @@ export default function HeroVideo(){
   let frame=0;
   const update=()=>{
    frame=0;
-   const image=ref.current,hero=image?.closest('.lavender-hero');
+   const image=ref.current,hero=image?.closest('.garden-backdrop-sticky');
    if(!image||!hero)return;
    const rect=hero.getBoundingClientRect();
    const offset=media.matches?0:Math.max(0,Math.min(-rect.top,rect.height))*.18;

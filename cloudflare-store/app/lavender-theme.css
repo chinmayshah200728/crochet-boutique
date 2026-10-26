@@ -71,3 +71,24 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
  .mobile-garden-scroll{display:flex;align-items:center;gap:14px;margin-top:28px;color:#fff4eb;font-size:10px;letter-spacing:.12em;text-decoration:none}
  .mobile-garden-scroll span{font-size:20px}
 }
+/* Products pass through one continuous garden as the page scrolls naturally. */
+.garden-experience{position:relative;isolation:isolate;background:#423b49}
+.garden-backdrop{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.garden-backdrop-sticky{position:sticky;top:0;height:100svh;overflow:hidden}
+.garden-backdrop-sticky:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#201a2bc9,#201a2b45 65%,#201a2b20)}
+.garden-backdrop .crochet-hero-video{width:100%;height:100%;inset:0;object-fit:cover;object-position:55% center}
+.garden-experience .lavender-hero{background:transparent}
+.garden-pieces{position:relative;scroll-margin-top:100px;padding-bottom:8vh}
+.garden-piece-step{min-height:90svh;display:flex;align-items:center;justify-content:flex-end;padding:8vh 8vw;box-sizing:border-box}
+.garden-piece-step:nth-child(even){justify-content:flex-start}
+.garden-piece-card{display:block;width:min(440px,100%);background:#fff9f0f5;color:#463651;text-decoration:none;border:1px solid #ffffff90;border-radius:22px;overflow:hidden;box-shadow:0 24px 80px #160f2645;transition:transform .25s}
+.garden-piece-card:hover{transform:translateY(-5px)}
+.garden-piece-card:focus-visible{outline:4px solid #e4b3c9;outline-offset:6px}
+.garden-piece-card>img{display:block;width:100%;height:clamp(220px,36svh,360px);object-fit:cover}
+.garden-piece-copy{padding:24px 28px 28px}
+.garden-piece-copy .eyebrow{font-size:9px;color:#786681;letter-spacing:.13em}
+.garden-piece-copy h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,3vw,40px);line-height:1.08;margin:12px 0}
+.garden-piece-copy p{margin:0 0 20px}
+.garden-piece-copy .button{display:inline-block;background:#514064;color:#fff8ef;font-size:12px}
+@media(max-width:760px){.garden-piece-step{padding:60px 22px;min-height:90svh;justify-content:center}.garden-piece-step:nth-child(even){justify-content:center}.garden-piece-copy{padding:22px}.garden-backdrop-sticky:after{background:linear-gradient(180deg,#201a2b22,#201a2b88 55%,#201a2bc9)}}
+@media(prefers-reduced-motion:reduce){.garden-backdrop-sticky{position:static}.garden-backdrop{position:fixed}.garden-piece-card{transition:none}.garden-piece-card:hover{transform:none}}
