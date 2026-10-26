@@ -564,18 +564,7 @@ export function ProductView({
     {embedded?<h1>{p.name}</h1>:<h2>{p.name}</h2>}
     <p className="detail-price">{money(p.price)}</p>
 
-    <div className="detail-delivery-badge">
-     <span>🚚 {p.lead_time.includes('24-48')?'Dispatches in 24–48 hours':'Made to order · Dispatches in 3–5 days'} · Delivery across India</span>
-    </div>
-
-    <p className="detail-description">{p.description}</p>
-
-    <p className="availability-note">
-     <span className={'status-dot '+(p.stock>0?'green':'red')}/>
-     {p.stock>0?`Available to order · ${p.stock} ready in studio`:'Currently sold out'} · {p.lead_time}
-    </p>
-
-    <details className="optional-colours"><summary>Customise colours (optional)</summary><p className="fine">Happy with the original? Add to bag using the default colours.</p><p className="fine">{multiPart?"Open the 3D view to choose each part separately.":"One shade for the whole piece. Choose any colour below."}</p>{multiPart&&p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
+    <details className="optional-colours" open><summary>Customise colours (optional)</summary><p className="fine">Happy with the original? Add to bag using the default colours.</p><p className="fine">{multiPart?"Open the 3D view to choose each part separately.":"One shade for the whole piece. Choose any colour below."}</p>{multiPart&&p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
 
     <div className="colour-label">
      <span>Your chosen colour</span>
@@ -615,6 +604,17 @@ export function ProductView({
     <button className="button secondary full buy-now-btn" disabled={!canOrder} onClick={()=>purchase(true)}>
      Buy now with UPI ↗
     </button>
+
+    <div className="detail-delivery-badge">
+     <span>🚚 {p.lead_time.includes('24-48')?'Dispatches in 24–48 hours':'Made to order · Dispatches in 3–5 days'} · Delivery across India</span>
+    </div>
+
+    <p className="detail-description">{p.description}</p>
+
+    <p className="availability-note">
+     <span className={'status-dot '+(p.stock>0?'green':'red')}/>
+     {p.stock>0?`Available to order · ${p.stock} ready in studio`:'Currently sold out'} · {p.lead_time}
+    </p>
 
     <div className="product-accordions">
      <details className="accordion-item" open>

@@ -110,3 +110,11 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 @keyframes landing-piece-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @media(max-width:760px){.landing-garden-stage{padding:110px 24px 90px;align-items:center}.landing-garden-background{object-position:55% center}.landing-feature{grid-template-columns:1fr;gap:16px;max-width:340px;margin:auto}.landing-feature>img{height:30svh;min-height:160px}.landing-feature h2{font-size:30px;margin:8px 0}.landing-feature p{margin-bottom:14px}.landing-garden-bottom{left:24px;right:24px;font-size:10px}.landing-garden-intro h1{font-size:clamp(48px,12vw,70px)}}
 @media(prefers-reduced-motion:reduce){.landing-garden.has-pieces{height:auto}.landing-garden-stage{position:relative}.landing-feature{animation:none}}
+/* Keep configuration close to the preview, before longer product details. */
+.product-detail .detail-media{aspect-ratio:1;max-height:520px}
+.product-detail .optional-colours{margin:12px 0;padding:12px 0}
+.product-detail .optional-colours .fine{margin:6px 0;font-size:11px}
+.product-detail .detail-price{margin:8px 0 12px}
+.product-detail .detail-copy>h1,.product-detail .detail-copy>h2{font-size:clamp(28px,3vw,44px);margin:8px 0}
+.product-detail .detail-delivery-badge{margin-top:24px}
+@media(max-width:760px){.product-detail{grid-template-columns:1fr;gap:14px}.product-detail>div:first-child{position:static}.product-detail .detail-media{height:32svh;min-height:220px;max-height:320px;aspect-ratio:auto}.product-detail .gallery{margin:6px 0}.product-detail .gallery button{height:38px}.product-detail .model-tip{font-size:10px}.product-detail .colour-plate{gap:8px}.product-detail .colour-plate button{width:32px;height:32px}}
