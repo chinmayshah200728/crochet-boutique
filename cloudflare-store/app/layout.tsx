@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  verification: {google: "fQ2qnLuI1z2w06rHoCCcivSKh9oyorJLvHkGKW3ahy8"},
   metadataBase: new URL("https://crochetbyprisha.pages.dev"),
   title: "Handmade Crochet Flowers & Personalised Gifts | crochetbyprisha",
   alternates:{canonical:"/"},
