@@ -92,3 +92,21 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 .garden-piece-copy .button{display:inline-block;background:#514064;color:#fff8ef;font-size:12px}
 @media(max-width:760px){.garden-piece-step{padding:60px 22px;min-height:90svh;justify-content:center}.garden-piece-step:nth-child(even){justify-content:center}.garden-piece-copy{padding:22px}.garden-backdrop-sticky:after{background:linear-gradient(180deg,#201a2b22,#201a2b88 55%,#201a2bc9)}}
 @media(prefers-reduced-motion:reduce){.garden-backdrop-sticky{position:static}.garden-backdrop{position:fixed}.garden-piece-card{transition:none}.garden-piece-card:hover{transform:none}}
+/* A short, pinned landing introduction; the regular shop follows immediately. */
+.landing-garden{position:relative;background:#423b49;min-height:90svh}
+.landing-garden.has-pieces{height:240svh}
+.landing-garden-stage{position:sticky;top:0;height:100svh;min-height:560px;overflow:hidden;isolation:isolate;display:flex;align-items:center;padding:90px 8vw;box-sizing:border-box;color:#fff8ef}
+.landing-garden-background,.landing-garden-shade{position:absolute;inset:0;width:100%;height:100%;z-index:-2;object-fit:cover;object-position:center}
+.landing-garden-shade{z-index:-1;background:linear-gradient(90deg,#201a2bd9,#201a2b66 55%,#201a2b22)}
+.landing-garden-intro{max-width:570px}.landing-garden-intro[hidden]{display:none}
+.landing-garden-intro .eyebrow,.landing-feature .eyebrow{font-size:10px;letter-spacing:.16em}
+.landing-garden-intro h1{font-family:var(--serif);font-weight:400;font-size:clamp(50px,6.5vw,100px);line-height:1.02;margin:26px 0}.landing-garden-intro h1 em{color:#ffd8e3}
+.landing-garden-intro p{max-width:350px;line-height:1.8;margin-bottom:28px}
+.landing-garden-stage .button{display:inline-block;background:#fff8ed;color:#514064;font-size:12px}
+.landing-feature{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:28px;width:min(780px,100%);text-decoration:none;color:inherit;animation:landing-piece-in .4s ease-out}
+.landing-feature>img{width:100%;height:clamp(230px,45svh,420px);object-fit:cover;border-radius:18px;box-shadow:0 20px 60px #0005}
+.landing-feature h2{font-family:var(--serif);font-size:clamp(30px,4vw,54px);line-height:1.08;font-weight:400;margin:16px 0}.landing-feature p{margin:0 0 24px}
+.landing-garden-bottom{position:absolute;bottom:28px;left:8vw;right:8vw;display:flex;justify-content:space-between;gap:20px;font-size:11px}.landing-garden-bottom a{color:inherit}
+@keyframes landing-piece-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media(max-width:760px){.landing-garden-stage{padding:110px 24px 90px;align-items:center}.landing-garden-background{object-position:55% center}.landing-feature{grid-template-columns:1fr;gap:16px;max-width:340px;margin:auto}.landing-feature>img{height:30svh;min-height:160px}.landing-feature h2{font-size:30px;margin:8px 0}.landing-feature p{margin-bottom:14px}.landing-garden-bottom{left:24px;right:24px;font-size:10px}.landing-garden-intro h1{font-size:clamp(48px,12vw,70px)}}
+@media(prefers-reduced-motion:reduce){.landing-garden.has-pieces{height:auto}.landing-garden-stage{position:relative}.landing-feature{animation:none}}
