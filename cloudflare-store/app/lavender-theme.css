@@ -33,3 +33,25 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 .optional-colours{margin:20px 0;border-block:1px solid var(--line);padding:16px 0}.optional-colours summary{cursor:pointer;font-weight:500}.optional-colours[open] summary{margin-bottom:18px}
 .order-delete{border-top:1px solid var(--line);margin-top:30px;padding-top:20px}.order-delete p{font-size:13px;line-height:1.7}.order-delete .text-link{margin:16px}.button.danger{background:#943c51;border-color:#943c51}
 .crochet-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.hero-video-toggle{position:absolute;left:20px;bottom:26px;z-index:6;border:1px solid #fff8;border-radius:24px;padding:10px 16px;background:#41364bba;color:white;font-size:12px;cursor:pointer;backdrop-filter:blur(8px)}.hero-video-toggle:focus-visible{outline:3px solid white;outline-offset:3px}
+/* One immersive mobile scene, with text over the moving garden. */
+.mobile-garden-scroll{display:none}
+@media(max-width:760px){
+ .lavender-hero{display:block;min-height:620px;min-height:max(620px,calc(100svh - 100px));background:#423b49}
+ .lavender-hero .lavender-art{position:absolute;inset:0;min-height:0;z-index:0}
+ .lavender-hero .lavender-art:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(33,27,41,.08) 0%,rgba(33,27,41,.12) 22%,rgba(33,27,41,.72) 49%,rgba(33,27,41,.94) 100%);pointer-events:none;z-index:1}
+ .lavender-hero .crochet-hero-video{object-position:55% center}
+ .lavender-hero .lavender-copy{box-sizing:border-box;min-height:620px;min-height:max(620px,calc(100svh - 100px));padding:210px 24px 30px;justify-content:flex-end;background:none;z-index:2;pointer-events:none}
+ .lavender-hero .lavender-copy a{pointer-events:auto}
+ .lavender-hero .edition{margin:0 0 16px;font-size:8px;padding:8px 11px;background:#30253555}
+ .lavender-hero .lavender-copy>.eyebrow{display:none}
+ .lavender-hero .garden-welcome h1{font-size:clamp(42px,12vw,70px);line-height:1.02;margin:0 0 18px;letter-spacing:-.035em}
+ .lavender-hero .garden-welcome p{max-width:330px;font-size:13px;line-height:1.7;margin:0 0 22px;color:#fff8f1}
+ .lavender-hero .lavender-actions .button{min-height:48px;display:inline-flex;align-items:center;padding:14px 23px;font-size:12px}
+ .lavender-hero .lavender-note,.lavender-hero .lavender-ribbon,.lavender-hero .keepsake,.lavender-hero .keepsake-seal{display:none}
+ .lavender-hero .hero-video-toggle{left:auto;right:16px;top:16px;bottom:auto;z-index:3;min-height:44px;background:#302535b3}
+ .mobile-garden-scroll{display:flex;align-items:center;gap:14px;margin-top:24px;color:#fff4eb;font-size:10px;letter-spacing:.12em;text-decoration:none}
+ .mobile-garden-scroll span{font-size:20px;animation:gentle-scroll 2s ease-in-out infinite}
+ #collection{scroll-margin-top:90px}
+}
+@keyframes gentle-scroll{50%{transform:translateY(4px)}}
+@media(prefers-reduced-motion:reduce){.mobile-garden-scroll span{animation:none}}
