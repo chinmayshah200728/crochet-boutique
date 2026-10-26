@@ -55,3 +55,6 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 }
 @keyframes gentle-scroll{50%{transform:translateY(4px)}}
 @media(prefers-reduced-motion:reduce){.mobile-garden-scroll span{animation:none}}
+/* The garden drifts more slowly than the copy during natural page scrolling. */
+.lavender-hero .crochet-hero-video{top:-20%;height:140%;transform:translate3d(0,var(--garden-scroll,0px),0);will-change:transform}
+@media(prefers-reduced-motion:reduce){.lavender-hero .crochet-hero-video{top:0;height:100%;transform:none;will-change:auto}}
