@@ -58,3 +58,16 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 /* The garden drifts more slowly than the copy during natural page scrolling. */
 .lavender-hero .crochet-hero-video{top:-20%;height:140%;transform:translate3d(0,var(--garden-scroll,0px),0);will-change:transform}
 @media(prefers-reduced-motion:reduce){.lavender-hero .crochet-hero-video{top:0;height:100%;transform:none;will-change:auto}}
+/* Keep the immersive garden composition consistent on laptop and tablet. */
+@media(min-width:761px){
+ .lavender-hero{display:block;min-height:max(680px,calc(100svh - 134px));background:#423b49}
+ .lavender-hero .lavender-art{position:absolute;inset:0;min-height:0;z-index:0}
+ .lavender-hero .lavender-art:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(31,26,35,.84),rgba(31,26,35,.53) 40%,rgba(31,26,35,.05) 75%),linear-gradient(0deg,rgba(31,26,35,.35),transparent 40%);pointer-events:none;z-index:1}
+ .lavender-hero .lavender-copy{box-sizing:border-box;min-height:max(680px,calc(100svh - 134px));width:min(720px,65%);padding:65px 5vw 50px;justify-content:center;background:none;z-index:2;pointer-events:none}
+ .lavender-hero .lavender-copy a{pointer-events:auto}
+ .lavender-hero .garden-welcome h1{font-size:clamp(60px,6.5vw,100px);line-height:1.02}
+ .lavender-hero .garden-welcome p{max-width:360px;color:#fff8f1}
+ .lavender-hero .lavender-note,.lavender-hero .lavender-ribbon,.lavender-hero .keepsake,.lavender-hero .keepsake-seal{display:none}
+ .mobile-garden-scroll{display:flex;align-items:center;gap:14px;margin-top:28px;color:#fff4eb;font-size:10px;letter-spacing:.12em;text-decoration:none}
+ .mobile-garden-scroll span{font-size:20px}
+}
