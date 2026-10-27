@@ -28,6 +28,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
  const [toast,setToast]=useState('');
  const [customer,setCustomer]=useState<Customer|null>(null);
  const [account,setAccount]=useState(false);
+ useEffect(()=>{if(new URLSearchParams(location.search).get('account')==='1')setAccount(true)},[]);
  const [accountChecked,setAccountChecked]=useState(false);
  const [menu,setMenu]=useState(false);
  const [wishlist,setWishlist]=useState<string[]>([]);

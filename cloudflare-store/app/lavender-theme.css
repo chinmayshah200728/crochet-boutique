@@ -118,3 +118,12 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 .product-detail .detail-copy>h1,.product-detail .detail-copy>h2{font-size:clamp(28px,3vw,44px);margin:8px 0}
 .product-detail .detail-delivery-badge{margin-top:24px}
 @media(max-width:760px){.product-detail{grid-template-columns:1fr;gap:14px}.product-detail>div:first-child{position:static}.product-detail .detail-media{height:32svh;min-height:220px;max-height:320px;aspect-ratio:auto}.product-detail .gallery{margin:6px 0}.product-detail .gallery button{height:38px}.product-detail .model-tip{font-size:10px}.product-detail .colour-plate{gap:8px}.product-detail .colour-plate button{width:32px;height:32px}}
+.product-reviews,.related-products{margin-top:64px;padding-top:40px;border-top:1px solid #dfd5e4}
+.product-reviews h2,.related-products h2{font-size:clamp(28px,4vw,42px);line-height:1.15;margin:14px 0 20px}
+.related-products>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.related-products>div>a{display:block;min-width:0;text-decoration:none;color:inherit;background:#fffaf6;border:1px solid #e7dfe9;border-radius:16px;overflow:hidden;padding-bottom:18px}
+.related-products>div>a img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:0}
+.related-products>div>a h3{font-size:23px;line-height:1.2;margin:16px 16px 8px}.related-products>div>a>span{display:block;margin:0 16px;font-size:14px}
+.product-review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.product-review-grid article{padding:24px;background:#fffaf6;border-radius:14px}.product-review-grid article>span{color:#91633d}.product-review-grid small{display:block;margin-top:8px;color:#776b7c}.product-review-grid p{white-space:pre-wrap;overflow-wrap:anywhere}
+.write-review{margin-top:24px;padding:24px;background:#f0eaf3;border-radius:14px}.write-review summary{cursor:pointer;font-weight:600}.write-review form{max-width:600px;margin-top:20px}.write-review label{display:block;margin-bottom:16px}.write-review select,.write-review textarea{display:block;box-sizing:border-box;width:100%;padding:12px;border:1px solid #cdbdd7;border-radius:8px;margin-top:8px;font:inherit;background:#fff}.write-review p{font-size:13px}
+@media(max-width:760px){.related-products>div{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.related-products>div>a h3{font-size:20px;margin:12px 12px 8px}.related-products>div>a>span{margin:0 12px}.product-review-grid{grid-template-columns:1fr}.product-reviews,.related-products{margin-top:40px}}

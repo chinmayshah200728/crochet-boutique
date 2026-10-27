@@ -26,6 +26,17 @@ async function route(request:Request){
   if(parts.length!==2||!/^([a-z0-9-]+)\.(png|jpg|webp|glb)$/.test(parts[1]))return json({error:'File not found.'},404);
   return await getMedia(parts[1])||json({error:'File not found.'},404);
  }
+ if(parts[0]==='reviews'&&method==='POST'){
+  const customer=await customerIdentity(request);if(!customer)return json({error:'Please sign in with your customer account to leave a review.'},401);
+  const input=z.object({productId:z.string().uuid(),rating:z.number().int().min(1).max(5),body:z.string().trim().min(10).max(2000)}).parse(await body(request));
+  const purchase=await env.DB.prepare("SELECT o.id FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.customer_id=? AND i.product_id=? AND o.status='completed' LIMIT 1").bind(customer.id,input.productId).first();
+  if(!purchase)return json({error:'You can review this piece after your order is marked completed.'},403);
+  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(customer.id+':'+input.productId)))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  const id=hash.slice(0,8)+'-'+hash.slice(8,12)+'-4'+hash.slice(13,16)+'-a'+hash.slice(17,20)+'-'+hash.slice(20,32),now=new Date().toISOString();
+  const result=await env.DB.prepare('INSERT OR IGNORE INTO reviews(id,customer,body,rating,product_id,published,date,created_at) VALUES(?,?,?,?,?,0,?,?)').bind(id,customer.name,input.body,input.rating,input.productId,now.slice(0,10),now).run();
+  if(!result.meta.changes)return json({error:'You have already submitted a review for this piece.'},409);
+  return json({ok:true});
+ }
  if(parts[0]==='store'&&method==='GET'){
   const [products,reviews,settings]=await Promise.all([env.DB.prepare("SELECT * FROM products WHERE status='active' ORDER BY created_at DESC").all(),env.DB.prepare('SELECT * FROM reviews WHERE published=1 ORDER BY date DESC LIMIT 50').all(),storeSettings()]);return json({products:mergeWithCurated(products.results.map(decode)),reviews:reviews.results,settings});
  }
