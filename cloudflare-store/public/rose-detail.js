@@ -7,13 +7,15 @@ export function refineRose(root){
  old.forEach(o=>o.removeFromParent());
  material.roughness=1;
  const group=new THREE.Group();root.add(group);
- const stitchGeometry=new THREE.TorusGeometry(.012,.004,4,8,Math.PI*1.65);
+ const core=new THREE.Mesh(new THREE.SphereGeometry(.12,32,24),material);core.scale.set(1,1,.8);core.position.set(0,.02,.29);group.add(core);
+ const spiral=[];for(let i=0;i<=120;i++){const t=i/120,a=t*Math.PI*5,r=.015+.105*t;spiral.push(new THREE.Vector3(Math.cos(a)*r,.02+Math.sin(a)*r,.38-.045*t))}group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(spiral),120,.014,6,false),material));
+ const stitchGeometry=new THREE.TorusGeometry(.011,.0035,5,10,Math.PI*1.65);
  for(let ring=0;ring<4;ring++){
   const count=ring===0?3:5+ring;
   for(let petal=0;petal<count;petal++){
    const angle=petal*Math.PI*2/count+ring*.61;
-   const width=.105+ring*.055,height=.16+ring*.065,radius=.035+ring*.086;
-   const point=(u,v)=>new THREE.Vector3(width*u*Math.sin(Math.PI*(.12+.78*v)),radius+height*v,.22-ring*.045+.12*(1-u*u)-.15*v*v);
+   const width=.13+ring*.065,height=.17+ring*.06,radius=.02+ring*.075;
+   const point=(u,v)=>new THREE.Vector3(width*u*Math.sin(Math.PI*(.12+.78*v)),radius+height*v,.23-ring*.04+.16*(1-u*u)-.13*v*v+.035*Math.sin(v*Math.PI));
    const positions=[],uv=[],indices=[],n=16;
    for(let y=0;y<=n;y++)for(let x=0;x<=n;x++){const u=x/n*2-1,v=y/n,p=point(u,v);positions.push(p.x,p.y,p.z);uv.push(x/n,y/n)}
    for(let y=0;y<n;y++)for(let x=0;x<n;x++){const a=y*(n+1)+x;indices.push(a,a+1,a+n+1,a+1,a+n+2,a+n+1)}
