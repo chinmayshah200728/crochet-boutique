@@ -1,4 +1,5 @@
 'use client';
+import {wiggleProduct} from '../lib/product-motion';
 import {useEffect,useState} from 'react';
 import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box,ShieldCheck,Check,Layers} from 'lucide-react';
 import ProductImage from './ProductImage';
@@ -218,7 +219,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
        {products.map((p,index)=>(
         <article className="product-card editorial-card" key={p.id}>
          <div className="card-media">
-          <a className="product-photo" href={productPath(p)}>
+          <a className="product-photo" href={productPath(p)} onPointerEnter={e=>{if(e.pointerType==='mouse')wiggleProduct(e.currentTarget)}} onPointerDown={e=>wiggleProduct(e.currentTarget)}>
            <ProductImage src={p.images[0]} alt={p.name} loading="lazy"/>
            <span className={'photo-tag '+(p.stock>0?'in-stock':'sold-out')}>
             {p.stock>0?(p.lead_time.includes('24-48')?'In stock · 24-48h':'Made to order · 3-5 days'):'Sold out'}
