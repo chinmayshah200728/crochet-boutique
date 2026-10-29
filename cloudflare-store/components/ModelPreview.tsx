@@ -7,6 +7,6 @@ export default function ModelPreview({url,colour,title,partColours={},onParts,on
  useEffect(()=>{const ready=(e:MessageEvent)=>{if(e.origin!==location.origin||e.source!==frame.current?.contentWindow)return;if(e.data?.type==='viewer-ready')load();if(e.data?.type==='model-parts')callbacks.current.onParts?.(e.data.parts);if(e.data?.type==='select-part')callbacks.current.onSelect?.(e.data.id)};window.addEventListener('message',ready);return()=>window.removeEventListener('message',ready)},[]);
  useEffect(()=>{frame.current?.contentWindow?.postMessage({type:'colour',colour,partColours},location.origin)},[colour,partColours]);
  useEffect(load,[url]);
- return <iframe ref={frame} title={title} src="/model-viewer.html?v=rose-20261029" onLoad={load}/>;
+ return <iframe ref={frame} title={title} src="/model-viewer.html?v=tulips-20261029" onLoad={load}/>;
 }
 
