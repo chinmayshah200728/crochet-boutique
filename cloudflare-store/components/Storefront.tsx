@@ -485,7 +485,7 @@ export function ProductView({
  const [quantity,setQuantity]=useState(1);
  const [photo,setPhoto]=useState(0);
  const [view,setView]=useState(p.model?'3d':'photo');
- const multiPart=/hamper|gift set|bouquet|flower|soft toy|plush|amigurumi|teddy|doll|bunny/i.test(p.name+' '+p.category)&&!/key.?chain|charm|bow/i.test(p.name);
+ const multiPart=/collection-2/.test(p.model||'')||/scrunchie|screnchie|scrunchy|hamper|gift set|bouquet|flower|soft toy|plush|amigurumi|teddy|doll|bunny/i.test(p.name+' '+p.category)&&!/key.?chain|charm|bow/i.test(p.name);
  const [parts,setParts]=useState<ModelPart[]>([]);
  const [selected,setSelected]=useState('');
  const [partColours,setPartColours]=useState<PartColours>(p.model_colours||{});
