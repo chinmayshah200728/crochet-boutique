@@ -145,3 +145,10 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 @keyframes garden-light-travel{from{opacity:.35;transform:translateX(-4%)}to{opacity:.85;transform:translateX(5%)}}
 @keyframes keepsake-drift{0%,100%{transform:translateY(5px) rotate(var(--tilt))}50%{transform:translateY(-18px) rotate(calc(var(--tilt) + 3deg))}}
 @media(prefers-reduced-motion:reduce){.landing-garden-background,.garden-sunlight,.garden-keepsake{animation:none;will-change:auto}}
+/* A visible, gentle sway for homepage products, even without hovering. */
+.garden-keepsake{animation:home-product-shake 2.8s ease-in-out infinite;transform-origin:50% 18%}
+.keepsake-1{animation-delay:-1.4s}
+.landing-feature>img{animation:home-feature-shake 3.2s ease-in-out infinite;transform-origin:50% 25%}
+@keyframes home-product-shake{0%,100%{transform:translateY(0) rotate(calc(var(--tilt) - 3deg))}50%{transform:translateY(-8px) rotate(calc(var(--tilt) + 3deg))}}
+@keyframes home-feature-shake{0%,100%{rotate:-2deg}50%{rotate:2deg}}
+@media(prefers-reduced-motion:reduce){.garden-keepsake,.landing-feature>img{animation:none}}
