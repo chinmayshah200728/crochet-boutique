@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta name="robots" content="noindex,follow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Product in 3D</title><style>body{margin:0;background:#eee8df;font:12px system-ui;color:#62675b;overflow:hidden}canvas{display:block}#message{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:30px}#controls{position:absolute;bottom:12px;right:12px;display:flex;gap:5px}button{background:#f8f5eb;border:1px solid #d5d3c6;border-radius:20px;padding:8px 12px;cursor:pointer}</style><script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/":"/vendor/three/addons/"}}</script></head><body><div id="message">Preparing your 3D view…</div><div id="controls"><button id="left" aria-label="Rotate model left">↶</button><button id="right" aria-label="Rotate model right">↷</button><button id="reset">Reset</button></div><script type="module">
 import * as THREE from 'three';
-import {refineRose} from '/rose-detail.js?v=20261027-4';
+import {refineRose} from '/rose-detail.js?v=20261029-rose';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const message=document.getElementById('message');
@@ -30,4 +30,5 @@ parent.postMessage({type:'viewer-ready'},location.origin);
 renderer.setAnimationLoop(()=>{if(document.hidden)return;controls.update();renderer.render(scene,camera)});
 }catch{message.textContent='3D is unavailable on this device. Your product photographs are still available.'}
 </script></body></html>
+
 
