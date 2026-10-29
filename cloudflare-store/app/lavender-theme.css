@@ -137,3 +137,11 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 @keyframes keepsake-drift{0%,100%{transform:translateY(0) rotate(var(--tilt))}50%{transform:translateY(-12px) rotate(calc(var(--tilt) + 2deg))}}@keyframes garden-glow{to{opacity:.35}}@keyframes garden-float{50%{transform:translate(15px,-30px);opacity:.8}}
 @media(max-width:760px){.landing-garden-intro{width:100%;padding-bottom:150px}.landing-garden-intro h1{font-size:clamp(46px,11vw,66px);margin:15px 0}.garden-pill{margin-bottom:17px}.garden-keepsakes{top:auto;bottom:65px;right:26px;width:180px;height:155px}.garden-keepsake{width:110px;padding:5px 5px 8px}.garden-keepsake span{font-size:12px;margin:5px 0 0}.garden-keepsake small,.garden-handnote,.keepsake-1{display:none}.garden-keepsake img{aspect-ratio:1.2}.garden-promises{font-size:9px;gap:12px}.landing-garden-intro p{font-size:13px;max-width:300px}.landing-garden-stage{min-height:720px}.garden-keepsakes .keepsake-0{top:0}.landing-garden-shade{background:linear-gradient(90deg,#211a2bb3,#211a2b33),linear-gradient(0deg,#211a2b55,transparent)}}
 @media(prefers-reduced-motion:reduce){.garden-keepsake,.garden-sparks i,.garden-sunlight{animation:none}}
+/* Living garden: slow camera movement and light passing through the scene. */
+.landing-garden-background{animation:garden-camera 18s ease-in-out infinite alternate;transform-origin:65% 55%;will-change:transform}
+.garden-sunlight{background:radial-gradient(ellipse at 70% 8%,#ffe6b54a,transparent 58%);animation:garden-light-travel 12s ease-in-out infinite alternate}
+.garden-keepsake{animation-duration:5.5s}
+@keyframes garden-camera{from{transform:scale(1.045) translate(-.6%,.3%)}to{transform:scale(1.13) translate(1.1%,-1%)}}
+@keyframes garden-light-travel{from{opacity:.35;transform:translateX(-4%)}to{opacity:.85;transform:translateX(5%)}}
+@keyframes keepsake-drift{0%,100%{transform:translateY(5px) rotate(var(--tilt))}50%{transform:translateY(-18px) rotate(calc(var(--tilt) + 3deg))}}
+@media(prefers-reduced-motion:reduce){.landing-garden-background,.garden-sunlight,.garden-keepsake{animation:none;will-change:auto}}
