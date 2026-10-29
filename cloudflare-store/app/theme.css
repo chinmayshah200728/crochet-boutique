@@ -229,3 +229,5 @@
 
 
 
+
+.upload-grid>div>button.photo-cover{top:auto;bottom:4px;left:4px;right:4px;border-radius:5px;padding:6px;font-size:10px;background:#fffdf6;color:#49395f}.upload-grid>div>button.photo-cover:disabled{opacity:1;background:#49395f;color:white}.gallery{flex-wrap:wrap;gap:8px}

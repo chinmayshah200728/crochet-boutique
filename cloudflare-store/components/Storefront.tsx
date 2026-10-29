@@ -184,7 +184,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
 
      <div className="collection-controls">
       <div className="tabs" aria-label="Product categories">
-       {['All little things',...categories.filter(c=>data.products.some(p=>p.category===c))].map(c=>(
+       {['All little things',...Array.from(new Set(data.products.map(p=>p.category))).sort()].map(c=>(
         <button className={category===c?'active':''} key={c} onClick={()=>setCategory(c)}>
          {c}
         </button>
@@ -540,7 +540,7 @@ export function ProductView({
     </div>
 
     <div className="gallery">
-     {p.images.slice(0,1).map((src,i)=>(
+     {p.images.map((src,i)=>(
       <button key={src} onClick={()=>{setPhoto(i);setView('photo');}} aria-label={'View photo '+(i+1)} className={photo===i&&view==='photo'?'selected':''}>
        <ProductImage src={src} alt=""/>
       </button>
