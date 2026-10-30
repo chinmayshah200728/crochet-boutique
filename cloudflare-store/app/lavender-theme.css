@@ -152,3 +152,7 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 @keyframes home-product-shake{0%,100%{transform:translateY(0) rotate(calc(var(--tilt) - 3deg))}50%{transform:translateY(-8px) rotate(calc(var(--tilt) + 3deg))}}
 @keyframes home-feature-shake{0%,100%{rotate:-2deg}50%{rotate:2deg}}
 @media(prefers-reduced-motion:reduce){.garden-keepsake,.landing-feature>img{animation:none}}
+/* Stronger homepage motion requested by the owner. */
+.garden-keepsake{animation-duration:1.65s}.landing-feature>img{animation-duration:1.8s}
+@keyframes home-product-shake{0%,100%{transform:translate(-8px,0) rotate(calc(var(--tilt) - 10deg))}50%{transform:translate(8px,-18px) rotate(calc(var(--tilt) + 10deg))}}
+@keyframes home-feature-shake{0%,100%{rotate:-7deg;translate:-6px 0}50%{rotate:7deg;translate:6px -12px}}
