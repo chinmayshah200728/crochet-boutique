@@ -158,3 +158,13 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 @keyframes home-feature-shake{0%,100%{rotate:-30deg;translate:-6px 0}50%{rotate:30deg;translate:6px -12px}}
 
 .landing-garden[data-product-motion="on"] .garden-keepsake{animation:home-product-shake 6s ease-in-out infinite!important}.landing-garden[data-product-motion="on"] .keepsake-1{animation-delay:-3s!important}.landing-garden[data-product-motion="on"] .landing-feature>img{animation:home-feature-shake 6s ease-in-out infinite!important}.landing-garden[data-product-motion="off"] .garden-keepsake,.landing-garden[data-product-motion="off"] .landing-feature>img{animation:none!important}.landing-garden-bottom button{color:inherit;border:1px solid #ffffff80;border-radius:20px;padding:6px 12px;background:#30203966;font-size:11px}
+/* Show both homepage keepsakes on phones with room for their swing. */
+@media(max-width:760px){
+ .landing-garden-stage{min-height:860px}
+ .landing-garden-intro{padding-bottom:270px}
+ .garden-keepsakes{left:12%;right:12%;width:auto;bottom:85px;height:210px}
+ .garden-keepsakes .garden-keepsake{display:block;width:110px;padding:6px 6px 10px;transform-origin:50% 18%}
+ .garden-keepsakes .keepsake-0{top:0;left:0;right:auto;bottom:auto}
+ .garden-keepsakes .keepsake-1{top:45px;right:0;left:auto;bottom:auto}
+ .garden-keepsakes .garden-handnote{display:none}
+}
