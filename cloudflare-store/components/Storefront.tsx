@@ -1,7 +1,7 @@
 'use client';
 import {wiggleProduct} from '../lib/product-motion';
-import {useEffect,useState} from 'react';
-import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box,ShieldCheck,Check,Layers} from 'lucide-react';
+import {useEffect,useState,lazy,Suspense} from 'react';
+import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box,ShieldCheck,Check,Layers,User} from 'lucide-react';
 import ProductImage from './ProductImage';
 import {Brand,Modal,Empty,Field,Alert,Arrow} from './UI';
 import {ModelPart,PartColours,validPartColours} from '../lib/model-parts';
@@ -9,9 +9,10 @@ import {PartSelector,ColourSummary} from './PartColours';
 import GardenJourney from './GardenJourney';
 import CustomerAccount from './CustomerAccount';
 import type {Customer} from '../lib/customer-auth';
-import ModelPreview from './ModelPreview';
+const ModelPreview=lazy(()=>import('./ModelPreview'));
 import PaymentInstructions from './PaymentInstructions';
-import {api,Product,Review,Settings,CartItem,defaults,money,palette,categories} from '../lib/store';
+import {api,Product,Review,Settings,CartItem,defaults,money,palette,categories,dispatchText,productAlt} from '../lib/store';
+import {testimonials,returnsPolicy,extraFaqs} from '../lib/shop-content';
 import {productPath} from '../lib/seo';
 
 type StoreData={products:Product[];reviews:Review[];settings:Settings};
@@ -32,6 +33,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
  useEffect(()=>{if(new URLSearchParams(location.search).get('account')==='1')setAccount(true)},[]);
  const [accountChecked,setAccountChecked]=useState(false);
  const [menu,setMenu]=useState(false);
+ const [mobileAction,setMobileAction]=useState('shop');
  const [wishlist,setWishlist]=useState<string[]>([]);
  const [savedOnly,setSavedOnly]=useState(false);
 
@@ -133,23 +135,21 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
   <>
    <div className="announcement">{data.settings.announcement}</div>
    <header className="store-nav">
-    <button className="mobile-menu-button" aria-label="Toggle navigation" aria-expanded={menu} onClick={()=>setMenu(!menu)}>☰</button>
     <nav className="desktop-nav">
-     <a href="#collection">The collection</a>
-     <a href="#trust-information">Handmade trust</a>
-     <a href="#story">Our story</a>
+     <a href="#collection">Shop</a>
+     <a href="#trust-information">Why handmade</a>
+     <a href="#story">About</a>
     </nav>
     <Brand/>
     <div className="nav-right">
-     <button className="saved-nav-btn" onClick={()=>setSavedOnly(!savedOnly)} aria-label="View saved wishlist">
+     <button className="saved-nav-btn" onClick={()=>{setSavedOnly(!savedOnly);location.hash='collection'}} aria-pressed={savedOnly} aria-label="View saved wishlist">
       <Heart size={16} fill={wishlist.length>0?'#a46e7d':'none'} color={wishlist.length>0?'#a46e7d':'currentColor'}/>
-      <span>Saved ({wishlist.length})</span>
+
      </button>
-     <button className="account-button" onClick={()=>setAccount(true)}>{customer?'My account':'Sign in'}</button>
-     <a href="/admin" className="studio-link">The studio <Arrow/></a>
+     <button className="account-button" aria-label="Your account" onClick={()=>setAccount(true)}><User size={18}/></button>
      <button className="bag-button" onClick={()=>setBag(true)} aria-label={'Open shopping bag, '+totalCount+' items'}>
       <ShoppingBag size={18}/>
-      <span>Bag ({totalCount})</span>
+      <span className="bag-count">{totalCount}</span>
      </button>
     </div>
    </header>
@@ -180,7 +180,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
        <span className="eyebrow">01 — THE HANDMADE CATALOGUE</span>
        <h2>A garden full of<br/><em>little happy things.</em></h2>
       </div>
-      <p>Explore a shape.<br/>Make the colours your own.<br/>Keep a little handmade happiness forever.</p>
+      <p>Pick a piece, tap a part, choose any colour. See it in 3D before you order.</p>
      </div>
 
      <div className="collection-controls">
@@ -192,10 +192,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
        ))}
       </div>
       <div className="search-sort">
-       <button className={'saved-filter '+(savedOnly?'active':'')} aria-pressed={savedOnly} onClick={()=>setSavedOnly(!savedOnly)}>
-        <Heart size={14} fill={savedOnly?'currentColor':'none'}/>
-        {savedOnly?'Showing saved':'Saved ('+wishlist.length+')'}
-       </button>
        <label className="search">
         <Search size={14}/>
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search bouquets, bows, scrunchies…" aria-label="Search products"/>
@@ -218,18 +214,15 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
       <div className="product-grid">
        {products.map((p,index)=>(
         <article className="product-card editorial-card" key={p.id}>
+         <a className="card-cover-link" href={productPath(p)} aria-label={"View "+p.name}/>
          <div className="card-media">
           <a className="product-photo" href={productPath(p)} onPointerEnter={e=>{if(e.pointerType==='mouse')wiggleProduct(e.currentTarget)}} onPointerDown={e=>wiggleProduct(e.currentTarget)}>
-           <ProductImage src={p.images[0]} alt={p.name} loading="lazy"/>
-           <span className={'photo-tag '+(p.stock>0?'in-stock':'sold-out')}>
-            {p.stock>0?(p.lead_time.includes('24-48')?'In stock · 24-48h':'Made to order · 3-5 days'):'Sold out'}
-           </span>
+           <ProductImage src={p.images[0]} alt={productAlt(p)} loading="lazy"/>
            {p.model&&(
             <span className="photo-model-badge">
-             <Box size={11}/> 3D Customizable
+             <Box size={11}/> Customisable
             </span>
            )}
-           <span className="photo-action">Discover your piece ↗</span>
           </a>
 
           <button
@@ -253,7 +246,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
 
          <div className="card-index">
           <strong>{String(index+1).padStart(2,'0')} / {String(products.length).padStart(2,'0')}</strong>
-          <span>{p.model?'Customisable · 3D colours':p.category}</span>
+          <span>{p.category}</span>
          </div>
 
          <div className="product-card-title">
@@ -265,10 +258,9 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
           <div className="mini-swatches" title="Available yarn palette">
            {p.colours.slice(0,5).map(c=><i key={c} style={{background:c}}/>)}
           </div>
-          <span className="meta-lead">{p.lead_time}</span>
+          <span className="meta-lead">{p.stock>0&&<i className="stock-dot"/>}{dispatchText(p)}</span>
          </div>
 
-         <a className="product-detail-link" href={productPath(p)}>View details & custom colours ↗</a>
         </article>
        ))}
       </div>
@@ -288,17 +280,17 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      <div>
       <Flower2/>
       <h3>Hands, not machines.</h3>
-      <p>Slowly made, stitch by stitch.<br/>A human touch in every single piece.</p>
+      <p>A human touch in every stitch.</p>
      </div>
      <div>
       <Gift/>
       <h3>A gift with feeling.</h3>
-      <p>A colour they cherish.<br/>A thoughtful reminder of love and care.</p>
+      <p>Their favourite colour, made with care.</p>
      </div>
      <div>
       <Heart/>
       <h3>Made to be kept.</h3>
-      <p>Everlasting cotton blooms<br/>that never wilt or lose their beauty.</p>
+      <p>Little keepsakes to love for longer.</p>
      </div>
     </section>
 
@@ -309,7 +301,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
       <span>a little yarn,<br/>a whole lot of heart.</span>
      </div>
      <div>
-      <span className="eyebrow">03 — SMALL STUDIO. SINCERE WORK.</span>
+      <span className="eyebrow">02 — SMALL STUDIO. SINCERE WORK.</span>
       <h2>A human made this.<br/><em>You can feel it.</em></h2>
       <p>crochetbyprisha was born from a simple belief: the best things are made with patience and sincere intention.</p>
       <p>A bouquet that stays with you. A little bow charm on your bag. A quiet gift that whispers “I thought of you.” We turn soft combed cotton into keepsakes you will hold onto for years.</p>
@@ -398,21 +390,25 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
       </details>
       <details>
        <summary>What is your return & exchange policy?</summary>
-       <p>{data.settings.returns}</p>
+       <p>{returnsPolicy}</p>
       </details>
+      {extraFaqs.map(f=><details key={f.question}><summary>{f.question}</summary><p>{f.answer}</p></details>)}
      </div>
     </section>
 
+    <section className="section collector-section"><h2>Loved by little-joy collectors</h2><p className="fine">Review placeholders — awaiting customer stories.</p><div className="review-grid">{testimonials.map(t=><blockquote key={t.id}><span className="eyebrow">{t.placeholder?'PLACEHOLDER · NOT A CUSTOMER REVIEW':''}</span><p>{t.quote}</p><footer>{t.name} · {t.city}</footer></blockquote>)}</div></section>
+    <section className="section ordering-section"><h2>How ordering works</h2><ol className="ordering-steps">{['Choose and customise','Pay by UPI','Prisha confirms and starts crafting'].map((text,i)=><li key={text}><span>{i+1}</span><h3>{text}</h3></li>)}</ol></section>
+    <section className="section instagram-section"><h2>A little yarn, everyday joy.</h2><a href="https://www.instagram.com/crochetby_prisha/" target="_blank" rel="noreferrer">Follow @crochetby_prisha ↗</a><div className="instagram-strip">{data.products.filter(p=>p.images.length).slice(0,4).map(p=><a key={p.id} href="https://www.instagram.com/crochetby_prisha/" target="_blank" rel="noreferrer"><ProductImage src={p.images[0]} alt={productAlt(p)} loading="lazy"/></a>)}</div></section>
     {/* Newsletter Section */}
     <section className="newsletter-section">
      <div className="newsletter-card">
       <span className="eyebrow">A CORNER OF WONDER</span>
       <h2>Join the studio circle.</h2>
       <p>Receive occasional love notes from Prisha featuring new seasonal bloom drops, limited yarn palettes, and holiday gift releases.</p>
-      <form className="newsletter-form" onSubmit={e=>{e.preventDefault();setToast('Thank you for joining our studio circle! We are so glad to have you.');}}>
-       <input type="email" required placeholder="Enter your email address" aria-label="Your email address"/>
+      <form className="newsletter-form" onSubmit={e=>{e.preventDefault();const email=new FormData(e.currentTarget).get('email');location.href='mailto:crochetbyprisha@gmail.com?subject=Join%20the%20studio%20circle&body='+encodeURIComponent('Please send studio updates to '+email+'.');setToast('Send the email draft to request studio updates.');}}>
+       <input type="email" name="email" required placeholder="Enter your email address" aria-label="Your email address"/>
        <button type="submit" className="button">Join with heart <ArrowRight size={15}/></button>
-      </form>
+      </form><p className="fine">Opens your email app. Your address is used only for requested studio updates; unsubscribe anytime.</p>
      </div>
     </section>
 
@@ -428,8 +424,8 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      <p>A little world, made with love in India.</p>
     </div>
     <div>
-     <a href="#collection">The collection</a>
-     <a href="#trust-information">Handmade trust</a>
+     <a href="#collection">Shop</a>
+     <a href="#trust-information">Why handmade</a>
      <a href="/about">Meet Prisha</a>
      <a href="/help">Orders & questions</a><a href="/crochet-guide">Crochet gift & care guide</a>
      {data.settings.email&&<a href={'mailto:'+data.settings.email}>Say hello <Arrow/></a>}
@@ -438,7 +434,6 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
        Instagram @{data.settings.instagram}
       </a>
      )}
-     <a href="/admin">Studio login <Arrow/></a>
     </div>
     <div className="footer-bottom">
      <span>© {new Date().getFullYear()} crochetbyprisha · Handcrafted in Gujarat, India</span>
@@ -448,16 +443,16 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
 
    {/* Fixed Mobile Bottom Navigation */}
    <nav className="mobile-bottom" aria-label="Shopping shortcuts">
-    <a href="#collection"><Flower2 size={18}/>Shop</a>
-    <button onClick={findProducts}><Search size={18}/>Search</button>
-    <button onClick={()=>setAccount(true)}><Heart size={18}/>Account</button>
-    <button onClick={()=>setBag(true)}>
+    <a href="#collection" aria-current={mobileAction==='shop'&&!account&&!bag?'page':undefined} onClick={()=>setMobileAction('shop')}><Flower2 size={18}/>Shop</a>
+    <button aria-pressed={mobileAction==='search'&&!account&&!bag} onClick={()=>{setMobileAction('search');findProducts()}}><Search size={18}/>Search</button>
+    <button aria-pressed={account} onClick={()=>setAccount(true)}><User size={18}/>Account</button>
+    <button aria-pressed={bag} onClick={()=>setBag(true)}>
      <ShoppingBag size={18}/>
      Bag {totalCount>0&&<span className="mobile-badge">{totalCount}</span>}
     </button>
    </nav>
 
-   {product&&<ProductView settings={data.settings} product={product} onClose={()=>setProduct(null)} onAdd={add}/>}
+   {product&&<Suspense fallback={<div role="status">Opening your piece…</div>}><ProductView settings={data.settings} product={product} onClose={()=>setProduct(null)} onAdd={add}/></Suspense>}
    {account&&<Modal title="YOUR ACCOUNT" onClose={()=>setAccount(false)}><CustomerAccount customer={customer} onChange={setCustomer} settings={data.settings}/></Modal>}
    {bag&&<Bag customer={customer} accountChecked={accountChecked} signIn={()=>{setBag(false);setAccount(true)}} items={cart} products={data.products} settings={data.settings} update={updateCart} onClose={()=>setBag(false)} refresh={load}/>}
    {toast&&<div className="toast" role="status"><Heart size={16}/><span>{toast}</span></div>}
@@ -534,9 +529,9 @@ export function ProductView({
    <div className="product-media-column">
     <div className="detail-media">
      {view==='3d'&&p.model?(
-      <ModelPreview title={'Interactive 3D model of '+p.name} url={p.model} colour={p.colours[0]||palette[0]} partColours={partColours} onParts={receiveParts} onSelect={selectPart}/>
+      <Suspense fallback={<p role="status">Loading your 3D preview…</p>}><ModelPreview title={'Interactive 3D model of '+p.name} url={p.model} colour={p.colours[0]||palette[0]} partColours={partColours} onParts={receiveParts} onSelect={selectPart}/></Suspense>
      ):(
-      <ProductImage src={p.images[photo]||p.images[0]} alt={p.name}/>
+      <ProductImage src={p.images[photo]||p.images[0]} alt={productAlt(p)}/>
      )}
     </div>
 
@@ -604,18 +599,16 @@ export function ProductView({
     </div>
 
     <button className="button secondary full buy-now-btn" disabled={!canOrder} onClick={()=>purchase(true)}>
-     Buy now with UPI ↗
+     Buy now with UPI →
     </button>
 
-    <div className="detail-delivery-badge">
-     <span>🚚 {p.lead_time.includes('24-48')?'Dispatches in 24–48 hours':'Made to order · Dispatches in 3–5 days'} · Delivery across India</span>
-    </div>
+
 
     <p className="detail-description">{p.description}</p>
 
     <p className="availability-note">
      <span className={'status-dot '+(p.stock>0?'green':'red')}/>
-     {p.stock>0?`Available to order · ${p.stock} ready in studio`:'Currently sold out'} · {p.lead_time}
+     {dispatchText(p)}
     </p>
 
     <div className="product-accordions">
@@ -645,7 +638,7 @@ export function ProductView({
     </div>
 
     <p className="fine">Your colour choices and gift notes are saved securely with your order. Simple UPI checkout verified directly by the studio.</p>
-    {!embedded&&<a className="text-link" href={productPath(p)}>Full dedicated product page ↗</a>}
+    {!embedded&&<a className="text-link" href={productPath(p)}>Full dedicated product page →</a>}
    </div>
   </div>
  );
@@ -748,7 +741,7 @@ function Bag({
         const p=products.find(p=>p.id===item.productId);
         return (
          <div className="bag-item" key={i}>
-          {p?.images[0]&&<ProductImage src={p.images[0]} alt={p.name}/>}
+          {p?.images[0]&&<ProductImage src={p.images[0]} alt={productAlt(p)}/>}
           <div>
            <h3>{p?.name||'Unavailable item'}</h3>
            <span className="bag-colour"><i style={{background:item.colour}}/>{item.colour}</span>
@@ -791,7 +784,7 @@ function Bag({
        <Field label="Delivery address" hint="House / Flat, Street, Locality, City, State, and PIN code. Shipping across India.">
         <textarea required autoComplete="street-address" minLength={15} maxLength={700} rows={3} value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/>
        </Field>
-       
+
 
        <p className="fine">Your delivery information is encrypted and shared only with our shipping partner to deliver your handmade parcel.</p>
        <button className="button full" disabled={busy}>

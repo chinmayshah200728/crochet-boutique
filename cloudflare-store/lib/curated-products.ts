@@ -1,4 +1,4 @@
-import type {Product} from './store';
+import {normaliseProduct,type Product} from './store';
 
 export const curatedProducts: Product[] = [
   {
@@ -153,5 +153,5 @@ export function mergeWithCurated(dbProducts: Product[]): Product[] {
     };
   });
 
-  return merged;
+  return merged.map(normaliseProduct);
 }

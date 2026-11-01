@@ -1,7 +1,7 @@
 import {env} from 'cloudflare:workers';
 import {ZodError,z} from 'zod';
 import {owner} from '../../../lib/owner';
-import {defaults,statuses} from '../../../lib/store';
+import {defaults,statuses,correctProductName,normaliseProduct} from '../../../lib/store';
 import {productInput,reviewInput,settingsInput,orderInput} from '../../../lib/validation';
 import {getMedia,putMedia} from '../../../lib/media';
 import {customerRoute,customerIdentity} from '../../../lib/customer-auth';
@@ -11,7 +11,7 @@ import {studioAuth} from '../../../lib/studio-auth';
 import {mergeWithCurated} from '../../../lib/curated-products';
 
 const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
-const decode=(p:any)=>({...p,images:JSON.parse(p.images),colours:JSON.parse(p.colours),model_colours:JSON.parse(p.model_colours||'{}')});
+const decode=(p:any)=>normaliseProduct({...p,name:correctProductName(p.name),images:JSON.parse(p.images),colours:JSON.parse(p.colours),model_colours:JSON.parse(p.model_colours||'{}')});
 async function storeSettings(){const row=await env.DB.prepare('SELECT value FROM settings WHERE id=?').bind('store').first<{value:string}>();return {...defaults,...(row?JSON.parse(row.value):{})};}
 async function body(request:Request){if(Number(request.headers.get('content-length'))>65536)throw new Error('Request is too large.');const text=await request.text();if(text.length>65536)throw new Error('Request is too large.');return JSON.parse(text);}
 async function route(request:Request){
@@ -63,7 +63,7 @@ async function route(request:Request){
  if(admin&&parts[1]==='products'&&(method==='POST'||method==='PUT')){
   const p=productInput.parse(await body(request)),id=method==='POST'?crypto.randomUUID():z.string().uuid().parse(parts[2]),now=new Date().toISOString();
   if(method==='PUT'&&!await env.DB.prepare('SELECT id FROM products WHERE id=?').bind(id).first())return json({error:'Product not found.'},404);
-  await env.DB.prepare('INSERT INTO products (id,name,description,category,price,stock,status,images,colours,model,model_colours,lead_time,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,category=excluded.category,price=excluded.price,stock=excluded.stock,status=excluded.status,images=excluded.images,colours=excluded.colours,model=excluded.model,model_colours=excluded.model_colours,lead_time=excluded.lead_time,updated_at=excluded.updated_at').bind(id,p.name,p.description,p.category,p.price,p.stock,p.status,JSON.stringify(p.images),JSON.stringify(p.colours),p.model,JSON.stringify(p.model_colours),p.lead_time,now,now).run();return json({id});
+  await env.DB.prepare('INSERT INTO products (id,name,description,category,price,stock,status,images,colours,model,model_colours,lead_time,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,category=excluded.category,price=excluded.price,stock=excluded.stock,status=excluded.status,images=excluded.images,colours=excluded.colours,model=excluded.model,model_colours=excluded.model_colours,lead_time=excluded.lead_time,updated_at=excluded.updated_at').bind(id,correctProductName(p.name),p.description,p.category,p.price,p.stock,p.status,JSON.stringify(p.images),JSON.stringify(p.colours),p.model,JSON.stringify(p.model_colours),p.lead_time,now,now).run();return json({id});
  }
  if(admin&&parts[1]==='reviews'){
   if(method==='DELETE'){const id=z.string().uuid().parse(parts[2]);await env.DB.prepare('DELETE FROM reviews WHERE id=?').bind(id).run();return json({ok:true});}
