@@ -176,3 +176,6 @@ body{background:var(--paper);color:var(--ink)}::selection{background:#e6c6db;col
 @media(max-width:760px){.ordering-steps{grid-template-columns:1fr}.instagram-strip{grid-template-columns:repeat(2,1fr)}.card-hover-actions{flex-wrap:wrap}.card-hover-actions button{flex:1 1 100%}.nav-right{gap:2px}.garden-keepsakes{bottom:65px}.newsletter-form{display:flex;flex-wrap:wrap;gap:12px}.newsletter-form input{min-width:0;flex:1 1 200px}}
 
 :root{--muted:#675c70;--rose:#805472;--sage:#695574}.wordmark span{color:#705a70}.mobile-bottom [aria-current=page]{background:#ded3e9;color:#352840}.landing-garden-intro h1 em{color:#ffe1eb}.product-card .quick-view{color:#4b385f;background:#faf7f5}.product-card .quick-add-btn{color:#fff;background:#514064}
+
+.editorial-card .card-media{aspect-ratio:auto;overflow:visible}.editorial-card .product-photo{height:auto}.editorial-card .product-photo>img:first-child{opacity:1!important}.editorial-card .card-hover-actions{inset:auto!important;margin:0;width:100%;box-sizing:border-box}.editorial-card .wish-button{width:44px;height:44px}
+
