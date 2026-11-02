@@ -1,4 +1,6 @@
 'use client';
+import {WelcomeIntro,Announcement,ColourTeaser,Testimonials,HomeFaq,InstagramStrip} from './HomeDelights';
+import {useHomeMotion} from '../lib/home-motion';
 import {wiggleProduct} from '../lib/product-motion';
 import {useEffect,useState,lazy,Suspense} from 'react';
 import {ShoppingBag,ArrowRight,Heart,Flower2,Gift,Sparkles,Minus,Plus,Trash2,Search,Box,ShieldCheck,Check,Layers,User} from 'lucide-react';
@@ -129,12 +131,14 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
   .filter(p=>(!savedOnly||wishlist.includes(p.id))&&(category==='All little things'||p.category===category)&&((p.name+' '+p.description).toLowerCase().includes(search.toLowerCase())))
   .sort((a,b)=>sort==='low'?a.price-b.price:sort==='high'?b.price-a.price:0);
 
+ const motion=useHomeMotion(category+'|'+sort+'|'+search+'|'+savedOnly+'|'+products.map(p=>p.id).join(','));
+ const [newsletterReady,setNewsletterReady]=useState(false);
  const totalCount=cart.reduce((a,i)=>a+i.quantity,0);
 
  return (
-  <>
-   <div className="announcement">{data.settings.announcement}</div>
-   <header className="store-nav">
+  <div className="home-experience">
+   <WelcomeIntro/><Announcement/>
+   <header className={`store-nav ${motion.scrolled?'nav-scrolled':''} ${motion.hidden&&!menu?'nav-hidden':''}`}><button className="home-menu-toggle" aria-label="Open information menu" aria-expanded={menu} onClick={()=>setMenu(!menu)}>☰</button>
     <nav className="desktop-nav">
      <a href="#collection">Shop</a>
      <a href="#trust-information">Why handmade</a>
@@ -149,7 +153,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      <button className="account-button" aria-label="Your account" onClick={()=>setAccount(true)}><User size={18}/></button>
      <button className="bag-button" onClick={()=>setBag(true)} aria-label={'Open shopping bag, '+totalCount+' items'}>
       <ShoppingBag size={18}/>
-      <span className="bag-count">{totalCount}</span>
+      <span key={totalCount} className="bag-count">{totalCount}</span>
      </button>
     </div>
    </header>
@@ -158,15 +162,13 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     <nav className="mobile-menu" aria-label="Mobile navigation">
      <div className="mobile-menu-head">
       <span className="eyebrow">CROCHETBYPRISHA</span>
-      <button className="mobile-close" onClick={()=>setMenu(false)}>✕</button>
+      <button aria-label="Close menu" className="mobile-close" onClick={()=>setMenu(false)}>✕</button>
      </div>
-     <a href="#collection" onClick={()=>setMenu(false)}>Shop the collection</a>
+     
      <a href="#trust-information" onClick={()=>setMenu(false)}>Handmade & shipping trust</a>
      <a href="/about">Meet Prisha & our story</a>
      <a href="/help">Delivery, UPI & FAQs</a>
-     <button onClick={()=>{setMenu(false);setAccount(true)}} className="button secondary">
-      {customer?'My account ('+customer.name+')':'Sign in / Register'}
-     </button>
+
     </nav>
    )}
 
@@ -205,7 +207,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      </div>
 
      {loading?(
-      <div className="loading">Gathering the little things…</div>
+      <div className="product-grid" aria-label="Loading products" aria-busy="true">{[1,2,3].map(i=><div className="product-skeleton" key={i}/>)}</div>
      ):error?(
       <Empty title="The garden is taking a moment" body={error}>
        <button className="button secondary" onClick={load}>Try again</button>
@@ -213,11 +215,11 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      ):products.length?(
       <div className="product-grid">
        {products.map((p,index)=>(
-        <article className="product-card editorial-card" key={p.id}>
+        <article className="product-card editorial-card" key={p.id} data-product-id={p.id}>
          <a className="card-cover-link" href={productPath(p)} aria-label={"View "+p.name}/>
          <div className="card-media">
           <a className="product-photo" href={productPath(p)} onPointerEnter={e=>{if(e.pointerType==='mouse')wiggleProduct(e.currentTarget)}} onPointerDown={e=>wiggleProduct(e.currentTarget)}>
-           <ProductImage src={p.images[0]} alt={productAlt(p)} loading="lazy"/>
+           <ProductImage src={p.images[0]} alt={productAlt(p)} loading="lazy"/>{p.images[1]&&<span className="home-alternate-photo"><ProductImage src={p.images[1]} alt={productAlt(p)+' — another view'} loading="lazy"/></span>}
            {p.model&&(
             <span className="photo-model-badge">
              <Box size={11}/> Customisable
@@ -275,6 +277,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      )}
     </section>
 
+    <ColourTeaser/>
     {/* Craft Values */}
     <section className="values">
      <div>
@@ -295,13 +298,13 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     </section>
 
     {/* Craftsmanship Story */}
-    <section className="story section" id="story">
+    <section className="story section" id="story"><svg className="story-thread" viewBox="0 0 100 600" aria-hidden="true"><path pathLength="1" d="M50 0 C-20 120 120 180 50 270 S-10 430 50 600"/></svg>
      <div className="story-image">
       <img src="/art/studio.webp" width="900" height="1100" alt="Prisha crocheting cotton blooms in her sunlit studio" loading="lazy" decoding="async"/>
       <span>a little yarn,<br/>a whole lot of heart.</span>
      </div>
      <div>
-      <span className="eyebrow">02 — SMALL STUDIO. SINCERE WORK.</span>
+      <span className="eyebrow">03 — SMALL STUDIO. SINCERE WORK.</span>
       <h2>A human made this.<br/><em>You can feel it.</em></h2>
       <p>crochetbyprisha was born from a simple belief: the best things are made with patience and sincere intention.</p>
       <p>A bouquet that stays with you. A little bow charm on your bag. A quiet gift that whispers “I thought of you.” We turn soft combed cotton into keepsakes you will hold onto for years.</p>
@@ -365,50 +368,20 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      </section>
     )}
 
-    {/* Frequently Asked Questions */}
-    <section className="faq section">
-     <div>
-      <span className="eyebrow">QUESTIONS & ANSWERS</span>
-      <h2>Before your<br/><em>happy mail arrives.</em></h2>
-     </div>
-     <div>
-      <details>
-       <summary>How long will my piece take to make and deliver?</summary>
-       <p>{data.settings.dispatch}</p>
-      </details>
-      <details>
-       <summary>Can I customize colours for any piece?</summary>
-       <p>Yes! In our collection, pieces with 3D models allow you to test colours for every part. You can pick shades from our studio palette or enter any custom hex code. Screen colours are an artistic guide; yarn dye lots may vary slightly.</p>
-      </details>
-      <details>
-       <summary>How does UPI payment work?</summary>
-       <p>All prices are listed in Indian Rupees (INR). After reviewing your bag and placing your order, scan the studio UPI QR code or tap the UPI payment link (Google Pay, PhonePe, Paytm). Prisha directly reconciles the bank reference before starting to craft your piece.</p>
-      </details>
-      <details>
-       <summary>How do I care for my crochet flower or accessory?</summary>
-       <p>Crochet flowers require zero watering! Simply dust gently with a clean soft makeup brush or blowdryer on cool. For scrunchies and bow charms, gently spot clean with a damp cloth and mild soap, then lay flat to dry in shade.</p>
-      </details>
-      <details>
-       <summary>What is your return & exchange policy?</summary>
-       <p>{returnsPolicy}</p>
-      </details>
-      {extraFaqs.map(f=><details key={f.question}><summary>{f.question}</summary><p>{f.answer}</p></details>)}
-     </div>
-    </section>
-
-    <section className="section collector-section"><h2>Loved by little-joy collectors</h2><p className="fine">Review placeholders — awaiting customer stories.</p><div className="review-grid">{testimonials.map(t=><blockquote key={t.id}><span className="eyebrow">{t.placeholder?'PLACEHOLDER · NOT A CUSTOMER REVIEW':''}</span><p>{t.quote}</p><footer>{t.name} · {t.city}</footer></blockquote>)}</div></section>
-    <section className="section ordering-section"><h2>How ordering works</h2><ol className="ordering-steps">{['Choose and customise','Pay by UPI','Prisha confirms and starts crafting'].map((text,i)=><li key={text}><span>{i+1}</span><h3>{text}</h3></li>)}</ol></section>
-    <section className="section instagram-section"><h2>A little yarn, everyday joy.</h2><a href="https://www.instagram.com/crochetby_prisha/" target="_blank" rel="noreferrer">Follow @crochetby_prisha ↗</a><div className="instagram-strip">{data.products.filter(p=>p.images.length).slice(0,4).map(p=><a key={p.id} href="https://www.instagram.com/crochetby_prisha/" target="_blank" rel="noreferrer"><ProductImage src={p.images[0]} alt={productAlt(p)} loading="lazy"/></a>)}</div></section>
+    <HomeFaq/>
+    <Testimonials/>
+    <section className="section ordering-section"><span className="eyebrow">04 · FROM OUR HANDS TO YOURS</span><h2>How ordering works</h2><ol className="ordering-steps">{['Choose and customise','Pay by UPI','Prisha confirms and starts crafting'].map((text,i)=><li key={text}><span>{i+1}</span><h3>{text}</h3></li>)}</ol></section>
+    <InstagramStrip/>
     {/* Newsletter Section */}
     <section className="newsletter-section">
      <div className="newsletter-card">
       <span className="eyebrow">A CORNER OF WONDER</span>
       <h2>Join the studio circle.</h2>
       <p>Receive occasional love notes from Prisha featuring new seasonal bloom drops, limited yarn palettes, and holiday gift releases.</p>
-      <form className="newsletter-form" onSubmit={e=>{e.preventDefault();const email=new FormData(e.currentTarget).get('email');location.href='mailto:crochetbyprisha@gmail.com?subject=Join%20the%20studio%20circle&body='+encodeURIComponent('Please send studio updates to '+email+'.');setToast('Send the email draft to request studio updates.');}}>
+      <form className="newsletter-form" onSubmit={e=>{e.preventDefault();const email=new FormData(e.currentTarget).get('email');location.href='mailto:crochetbyprisha@gmail.com?subject=Join%20the%20studio%20circle&body='+encodeURIComponent('Please send studio updates to '+email+'.');setNewsletterReady(true);}}>
        <input type="email" name="email" required placeholder="Enter your email address" aria-label="Your email address"/>
        <button type="submit" className="button">Join with heart <ArrowRight size={15}/></button>
-      </form><p className="fine">Opens your email app. Your address is used only for requested studio updates; unsubscribe anytime.</p>
+      </form>{newsletterReady&&<p className="newsletter-result" role="status">♡ Your email draft is ready. Send it to request studio updates.</p>}<p className="fine">Opens your email app. Your address is used only for requested studio updates; unsubscribe anytime.</p>
      </div>
     </section>
 
@@ -418,7 +391,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     </div>
    </main>
 
-   <footer className="store-footer">
+   <footer className="store-footer"><svg className="footer-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 Q180 0 360 30 T720 30 T1080 30 T1440 30 V60 H0Z"/></svg><a className="back-to-top" href="#home">Back to top ↑</a>
     <div>
      <Brand/>
      <p>A little world, made with love in India.</p>
@@ -456,7 +429,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
    {account&&<Modal title="YOUR ACCOUNT" onClose={()=>setAccount(false)}><CustomerAccount customer={customer} onChange={setCustomer} settings={data.settings}/></Modal>}
    {bag&&<Bag customer={customer} accountChecked={accountChecked} signIn={()=>{setBag(false);setAccount(true)}} items={cart} products={data.products} settings={data.settings} update={updateCart} onClose={()=>setBag(false)} refresh={load}/>}
    {toast&&<div className="toast" role="status"><Heart size={16}/><span>{toast}</span></div>}
-  </>
+  </div>
  );
 }
 

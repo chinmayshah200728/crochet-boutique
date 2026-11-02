@@ -1,33 +1,20 @@
 'use client';
-import {wiggleProduct} from '../lib/product-motion';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useRef,useState,type CSSProperties} from 'react';
+import {Pause,Play,ChevronDown} from 'lucide-react';
 import {Product,money,productAlt} from '../lib/store';
 import {productPath} from '../lib/seo';
 export default function GardenJourney({products=[]}:{products?:Product[]}){
- const pieces=products.filter(p=>p.status==='active').slice(0,3);
- const ref=useRef<HTMLDivElement>(null);
- const [step,setStep]=useState(0);
-
-
- useEffect(()=>{
-  let frame=0;
-  const media=matchMedia('(prefers-reduced-motion: reduce)');
-  const mobile=matchMedia('(max-width: 760px)');
-  const update=()=>{frame=0;const el=ref.current;if(!el)return;const r=el.getBoundingClientRect();const travel=el.offsetHeight-window.innerHeight;const progress=travel>0?Math.max(0,Math.min(1,-r.top/travel)):0;setStep(media.matches||mobile.matches?0:Math.min(pieces.length,Math.floor(progress*(pieces.length+1))))};
-  const scroll=()=>{if(!frame)frame=requestAnimationFrame(update)};
-  update();window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('resize',scroll);media.addEventListener('change',scroll);mobile.addEventListener('change',scroll);
-  return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',scroll);window.removeEventListener('resize',scroll);media.removeEventListener('change',scroll);mobile.removeEventListener('change',scroll)};
- },[pieces.length]);
- const piece=pieces[step-1];
- return <div className={`landing-garden ${pieces.length?'has-pieces':''}`} ref={ref} id="home" data-product-motion="on">
+ const root=useRef<HTMLDivElement>(null),[paused,setPaused]=useState(false),[reduced,setReduced]=useState(true),[visible,setVisible]=useState(true);
+ useEffect(()=>{const m=matchMedia('(prefers-reduced-motion: reduce)');const change=()=>setReduced(m.matches);change();m.addEventListener('change',change);const io=new IntersectionObserver(([e])=>setVisible(e.isIntersecting));if(root.current)io.observe(root.current);return()=>{m.removeEventListener('change',change);io.disconnect()}},[]);
+ const moving=!paused&&!reduced&&visible;
+ useEffect(()=>{const el=root.current;if(!el)return;let frame=0;const draw=()=>{frame=0;el.style.setProperty('--garden-y',moving?Math.min(40,Math.max(0,-el.getBoundingClientRect().top*.1))+'px':'0px')};const scroll=()=>{if(!frame)frame=requestAnimationFrame(draw)};draw();window.addEventListener('scroll',scroll,{passive:true});return()=>{window.removeEventListener('scroll',scroll);cancelAnimationFrame(frame)}},[moving]);
+ return <div ref={root} id="home" className="landing-garden premium-garden" data-product-motion={moving?'on':'off'} onPointerMove={e=>{if(!moving||e.pointerType!=='mouse')return;const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.setProperty('--pointer-x',((e.clientX-r.left)/r.width-.5)*16+'px');e.currentTarget.style.setProperty('--pointer-y',((e.clientY-r.top)/r.height-.5)*16+'px')}} onPointerLeave={e=>{e.currentTarget.style.setProperty('--pointer-x','0px');e.currentTarget.style.setProperty('--pointer-y','0px')}}>
   <section className="landing-garden-stage" aria-label="Welcome to crochetbyprisha">
-   <img className="landing-garden-background" src="/art/garden.webp" alt="A handmade crochet garden" width="1536" height="1024" fetchPriority="high"/>
-   <div className="landing-garden-shade"/><div className="garden-sunlight" aria-hidden="true"/><div className="garden-sparks" aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i} style={{left:`${15+i*9}%`,top:`${20+(i*17)%65}%`,animationDelay:`${-i*1.3}s`}}/>)}</div>
-   <div className="landing-garden-intro" hidden={!!piece}>
-    <span className="garden-pill">A little world, made by hand</span><span className="eyebrow">THE CROCHETBYPRISHA COLLECTION</span><h1>Flowers that<br/><em>never fade.</em></h1><p>Pick a bloom. Pick a colour. Give someone a little piece of joy they can keep forever.</p><a className="button" href="#collection">Find your little joy →</a><p className="hero-delivery">Free delivery across India · Hand-packed gift-ready</p><div className="garden-promises"><span>Made by hand</span><span>Colours chosen by you</span></div>
-   </div>
-   {!piece&&<div className="garden-keepsakes" aria-label="Discover handmade pieces">{pieces.slice(0,2).map((p,i)=><a onPointerEnter={e=>{if(e.pointerType==='mouse')wiggleProduct(e.currentTarget)}} onPointerDown={e=>wiggleProduct(e.currentTarget)} className={`garden-keepsake keepsake-${i}`} key={p.id} href={productPath(p)}><img src={p.images[0]} alt={productAlt(p)} width="400" height="500"/><span>{p.name}</span><small>{money(p.price)} · Take a closer look →</small></a>)}<span className="garden-handnote">Little things.<br/>Big feelings.</span></div>}
-   {piece&&<a key={piece.id} className="landing-feature" onPointerEnter={e=>{if(e.pointerType==='mouse')wiggleProduct(e.currentTarget)}} onPointerDown={e=>wiggleProduct(e.currentTarget)} href={productPath(piece)}><img src={piece.images[0]||'/art/garden.webp'} alt={piece.name} width="400" height="400"/><div><span className="eyebrow">{piece.category}</span><h2>{piece.name}</h2><p>{money(piece.price)}</p><span className="button">View this piece →</span></div></a>}
+   <img className="landing-garden-background" src="/art/garden.webp" srcSet="/art/garden-768.webp 768w, /art/garden-1280.webp 1280w, /art/garden.webp 1536w" alt="A storybook garden made of crochet flowers, a bridge and a little cottage" width="1536" height="1024" sizes="100vw" fetchPriority="high"/>
+   <div className="landing-garden-shade"/><div className="garden-sparks" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i} style={{left:`${10+i*11}%`,top:`${15+i*9}%`,animationDelay:`${-i}s`}}/>)}</div>
+   <div className="landing-garden-intro"><span className="eyebrow">CROCHETBYPRISHA · A LITTLE WORLD, MADE BY HAND</span><h1 aria-label="Flowers that never fade.">{['Flowers','that'].map((word,i)=><span className="word-mask" key={word}><span style={{'--word-delay':`${i*80}ms`} as CSSProperties}>{word} </span></span>)}<br/><em>{['never','fade.'].map((word,i)=><span className="word-mask" key={word}><span style={{'--word-delay':`${(i+2)*80}ms`} as CSSProperties}>{word} </span></span>)}<svg className="drawn-underline" viewBox="0 0 400 18" aria-hidden="true"><path pathLength="1" d="M3 12 Q180 -4 397 10 M30 16 Q200 6 360 15"/></svg></em></h1><p>Pick a bloom. Pick a colour. Give someone a little piece of joy they can keep forever.</p><a className="button hero-cta" href="#collection">Find your little joy <span aria-hidden="true">→</span></a><p className="hero-delivery">Free delivery across India · Hand-packed gift-ready</p></div>
+   <div className="garden-keepsakes" aria-label="Handmade favourites">{products.filter(p=>p.status==='active').slice(0,2).map((p,i)=><a className={`garden-keepsake keepsake-${i}`} key={p.id} href={productPath(p)}><img src={p.images[0]} alt={productAlt(p)} width="400" height="500" sizes="(max-width:760px) 160px, 240px"/><span>{p.name}</span><small>{money(p.price)}</small></a>)}<span className="garden-handnote">Little things.<br/>Big feelings.</span></div>
+   <a className="garden-chevron" href="#collection" aria-label="Discover the collection"><ChevronDown/></a><button className="garden-motion-toggle" onClick={()=>setPaused(!paused)} disabled={reduced} aria-label={reduced?'Motion disabled by your device preference':paused?'Play garden movement':'Pause garden movement'} aria-pressed={paused||reduced}>{paused||reduced?<Play size={18}/>:<Pause size={18}/>}</button>
   </section>
  </div>
 }
