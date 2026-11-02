@@ -1,5 +1,7 @@
-import {deliveryCharge} from '../lib/shipping';
 'use client';
+import {deliveryCharge} from '../lib/shipping';
+import ShippingProgress from './ShippingProgress';
+import MakerStory from './MakerStory';
 import {WelcomeIntro,Announcement,ColourTeaser,Testimonials,HomeFaq,InstagramStrip} from './HomeDelights';
 import {useHomeMotion} from '../lib/home-motion';
 import {wiggleProduct} from '../lib/product-motion';
@@ -299,20 +301,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     </section>
 
     {/* Craftsmanship Story */}
-    <section className="story section" id="story"><svg className="story-thread" viewBox="0 0 100 600" aria-hidden="true"><path pathLength="1" d="M50 0 C-20 120 120 180 50 270 S-10 430 50 600"/></svg>
-     <div className="story-image">
-      <img src="/art/studio.webp" width="900" height="1100" alt="Prisha crocheting cotton blooms in her sunlit studio" loading="lazy" decoding="async"/>
-      <span>a little yarn,<br/>a whole lot of heart.</span>
-     </div>
-     <div>
-      <span className="eyebrow">03 — SMALL STUDIO. SINCERE WORK.</span>
-      <h2>A human made this.<br/><em>You can feel it.</em></h2>
-      <p>crochetbyprisha was born from a simple belief: the best things are made with patience and sincere intention.</p>
-      <p>A bouquet that stays with you. A little bow charm on your bag. A quiet gift that whispers “I thought of you.” We turn soft combed cotton into keepsakes you will hold onto for years.</p>
-      <span className="signature">With love, Prisha ♡</span>
-      <a className="text-link" href="#collection">Find a piece of your own <Arrow/></a>
-     </div>
-    </section>
+    <MakerStory settings={data.settings}/>
 
     {/* Trust & Purchase Transparency Section */}
     <section className="trust-section section" id="trust-information">
@@ -534,8 +523,27 @@ export function ProductView({
     <span className="eyebrow">{p.category}</span>
     {embedded?<h1>{p.name}</h1>:<h2>{p.name}</h2>}
     <p className="detail-price">{money(p.price)}</p>
+    <div className="purchase-actions"><div className="purchase-total"><small>Item total</small><strong>{money(p.price*quantity)}</strong></div>    <div className="buy-row">
+     <div className="quantity">
+      <button aria-label="Decrease quantity" disabled={quantity<=1} onClick={()=>setQuantity(quantity-1)}><Minus size={14}/></button>
+      <span>{quantity}</span>
+      <button aria-label="Increase quantity" disabled={quantity>=Math.min(10,p.stock||1)} onClick={()=>setQuantity(quantity+1)}><Plus size={14}/></button>
+     </div>
+     <button className="button" disabled={!canOrder} onClick={()=>purchase(false)}>
+      {!canOrder?'Currently unavailable':'Add to my bag'}
+      <ShoppingBag size={17}/>
+     </button>
+    </div>
 
-    <details className="optional-colours" open><summary>Customise colours (optional)</summary><p className="fine">Happy with the original? Add to bag using the default colours.</p><p className="fine">{multiPart?"Open the 3D view to choose each part separately.":"One shade for the whole piece. Choose any colour below."}</p>{multiPart&&p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
+    <button className="button secondary full buy-now-btn" disabled={!canOrder} onClick={()=>purchase(true)}>
+     Buy now with UPI →
+    </button>
+
+
+
+</div>
+
+    <details className="optional-colours" open><summary>Customise colours (optional)</summary><p className="fine">Keep the original, or choose a shade below.</p>{multiPart&&p.model&&parts.length>0&&<PartSelector parts={parts} selected={selected} onSelect={selectPart}/>}
 
     <div className="colour-label">
      <span>Your chosen colour</span>
@@ -554,29 +562,11 @@ export function ProductView({
     </div>
     <small className="colour-hint">Choose from our curated studio palette or pick any custom shade. Actual dyed cotton yarn may vary slightly.</small>
 
-    {Object.keys(partColours).length>0&&<ColourSummary colours={partColours}/>}</details>
+    {Object.keys(partColours).length>0&&<details className="chosen-colours"><summary>View selected colours</summary><ColourSummary colours={partColours}/></details>}</details>
 
-    <Field label="Make it personal (optional gift note or custom detail)">
+    <details className="gift-note"><summary>Add a gift note (optional)</summary><Field label="Your message or custom detail">
      <textarea value={note} maxLength={400} onChange={e=>setNote(e.target.value)} placeholder="E.g. A gift message for the recipient, specific colour placement idea…" rows={2}/>
-    </Field>
-
-    <div className="buy-row">
-     <div className="quantity">
-      <button aria-label="Decrease quantity" disabled={quantity<=1} onClick={()=>setQuantity(quantity-1)}><Minus size={14}/></button>
-      <span>{quantity}</span>
-      <button aria-label="Increase quantity" disabled={quantity>=Math.min(10,p.stock||1)} onClick={()=>setQuantity(quantity+1)}><Plus size={14}/></button>
-     </div>
-     <button className="button" disabled={!canOrder} onClick={()=>purchase(false)}>
-      {!canOrder?'Currently unavailable':'Add to my bag'}
-      <ShoppingBag size={17}/>
-     </button>
-    </div>
-
-    <button className="button secondary full buy-now-btn" disabled={!canOrder} onClick={()=>purchase(true)}>
-     Buy now with UPI →
-    </button>
-
-
+    </Field></details>
 
     <p className="detail-description">{p.description}</p>
 
@@ -709,6 +699,8 @@ function Bag({
     <>
      <h2>{step?'Where should we send your pieces?':'Your chosen treasures.'}</h2>
      <Alert>{error}</Alert>
+     <ShippingProgress subtotal={subtotal} shipping={shipping}/>
+     {!!step&&<p className="checkout-total">Order total <strong>{money(subtotal+shipping)}</strong> · including {shipping?money(shipping)+' delivery':'free delivery'}</p>}
      {!step?(
       <>
        {items.map((item,i)=>{

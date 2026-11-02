@@ -1,0 +1,2 @@
+import {orderSteps,orderProgress} from '../lib/order-progress';
+export default function OrderProgress({status}:{status:string}){const state=orderProgress(status);return <section className="order-progress" aria-label="Order progress"><strong>{state.label}</strong><p>{state.description}</p>{state.index>=0&&<ol>{orderSteps.map((step,i)=><li key={step.key} className={i<state.index?'done':i===state.index?'current':''} aria-current={i===state.index?'step':undefined}><span aria-hidden="true">{i<state.index?'✓':i+1}</span>{step.label}</li>)}</ol>}</section>}

@@ -1,0 +1,3 @@
+import {money} from '../lib/store';
+import {freeDeliveryRemaining} from '../lib/shipping';
+export default function ShippingProgress({subtotal,shipping}:{subtotal:number;shipping:number}){const remaining=freeDeliveryRemaining(subtotal);return <aside className="shipping-progress" aria-label="Delivery savings"><p role="status">{shipping===0?'Your bag qualifies for free delivery.':<>Add <strong>{money(remaining)}</strong> more for free delivery.</>}</p><progress max={49901} value={shipping===0?49901:Math.min(subtotal,49901)} aria-label="Progress towards free delivery"/><small>{shipping===0?'No delivery charge on this order.':<>Delivery is {money(shipping)} now. Free on product totals above ₹499.</>}</small></aside>}
