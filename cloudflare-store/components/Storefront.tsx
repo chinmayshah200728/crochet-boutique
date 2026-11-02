@@ -1,3 +1,4 @@
+import {deliveryCharge} from '../lib/shipping';
 'use client';
 import {WelcomeIntro,Announcement,ColourTeaser,Testimonials,HomeFaq,InstagramStrip} from './HomeDelights';
 import {useHomeMotion} from '../lib/home-motion';
@@ -657,7 +658,7 @@ function Bag({
  });
  const [requestId]=useState(()=>crypto.randomUUID());
 
- const subtotal=items.reduce((v,i)=>v+(products.find(p=>p.id===i.productId)?.price||0)*i.quantity,0);
+ const subtotal=items.reduce((v,i)=>v+(products.find(p=>p.id===i.productId)?.price||0)*i.quantity,0); const shipping=deliveryCharge(subtotal,s.shipping);
  const unavailable=items.some(i=>{
   const p=products.find(p=>p.id===i.productId);
   return !p||p.stock<i.quantity;
@@ -737,9 +738,9 @@ function Bag({
         <span>Subtotal</span>
         <strong>{money(subtotal)}</strong>
         <span>Delivery across India</span>
-        <strong>{s.shipping?money(s.shipping):'Complimentary'}</strong>
+        <strong>{shipping?money(shipping):'Free'}</strong>
         <span>Estimated Total</span>
-        <strong>{money(subtotal+s.shipping)}</strong>
+        <strong>{money(subtotal+shipping)}</strong>
        </div>
        {!s.acceptingOrders&&<p className="notice">The studio is preparing to accept orders. Your bag is saved on this device.</p>}
        {unavailable&&<Alert>Some items exceed current stock. Update quantity to continue.</Alert>}
@@ -761,7 +762,7 @@ function Bag({
 
        <p className="fine">Your delivery information is encrypted and shared only with our shipping partner to deliver your handmade parcel.</p>
        <button className="button full" disabled={busy}>
-        {busy?'Placing your order…':'Place order & pay · '+money(subtotal+s.shipping)}
+        {busy?'Placing your order…':'Place order & pay · '+money(subtotal+shipping)}
         <Arrow/>
        </button>
        <button type="button" className="text-link" disabled={busy} onClick={()=>setStep(0)}>Back to review bag</button>
