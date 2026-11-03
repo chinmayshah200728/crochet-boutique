@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {DatabaseSync} from 'node:sqlite';
+import {base32,totp,matchTotp} from '../lib/totp.ts';
+import {limitedText,RequestLimitError} from '../lib/request-security.ts';
+const secret=base32(Buffer.from('12345678901234567890'));
+for(const [t,expected] of [[59,'94287082'],[1111111109,'07081804'],[1111111111,'14050471'],[1234567890,'89005924'],[2000000000,'69279037'],[20000000000,'65353130']])assert.equal(totp(secret,Math.floor(t/30),8),expected);
+const counter=100000,code=totp(secret,counter);
+assert.equal(matchTotp(secret,code,counter*30000),counter);
+assert.equal(matchTotp(secret,code,counter*30000,counter),-1);
+assert.equal(matchTotp(secret,'invalid',counter*30000),-1);
+assert.equal(await limitedText(new Request('https://test.invalid',{method:'POST',body:'abc'}),3),'abc');
+await assert.rejects(limitedText(new Request('https://test.invalid',{method:'POST',body:'abcd'}),3),RequestLimitError);
+const db=new DatabaseSync(':memory:');db.exec('CREATE TABLE orders(id INTEGER,customer_id TEXT,status TEXT)');db.exec(readFileSync(new URL('../drizzle/0009_pending_order_limit.sql',import.meta.url),'utf8'));const insert=db.prepare('INSERT INTO orders VALUES(?,?,?)');for(let i=0;i<3;i++)insert.run(i,'test','awaiting_payment');assert.throws(()=>insert.run(4,'test','awaiting_payment'),/pending_order_limit/);insert.run(5,'different','awaiting_payment');db.exec("UPDATE orders SET status='cancelled' WHERE id=0");insert.run(6,'test','awaiting_payment');db.close();console.log('Security self-tests passed');

@@ -1,3 +1,4 @@
+import {limitedText} from './request-security';
 import {env} from 'cloudflare:workers';
 import {z} from 'zod';
 import {timingSafeEqual} from 'node:crypto';
@@ -25,7 +26,7 @@ export async function customerRoute(request:Request,action:string){
  if(request.headers.get('origin')!==new URL(request.url).origin)return json({error:'Use the form on this website.'},403);
  if(action==='reference'){
   const customer=await customerIdentity(request);if(!customer)return json({error:'Please sign in.'},401);
-  const text=await request.text();if(text.length>2048)return json({error:'Request is too large.'},400);
+  const text=await limitedText(request,4096);if(text.length>2048)return json({error:'Request is too large.'},400);
   const data=z.object({orderId:z.string().uuid(),reference:z.string().trim().min(3).max(80)}).parse(JSON.parse(text));
   const reference=normaliseReference(data.reference);if(!validReference(reference))return json({error:'Enter the transaction reference shown in your payment app (8–64 letters or digits).'},400);
   const result=await env.DB.prepare("UPDATE orders SET payment_ref=? WHERE id=? AND customer_id=? AND status='awaiting_payment'").bind(reference,data.orderId,customer.id).run();
@@ -33,7 +34,7 @@ export async function customerRoute(request:Request,action:string){
  }
  if(action==='logout'){await env.DB.prepare('DELETE FROM customer_sessions WHERE token_hash=?').bind(await digest(token(request))).run();return json({ok:true},200,{'Set-Cookie':cookie(request,'',0)})}
  if(!['register','login','recover','password'].includes(action))return json({error:'Not found.'},404);
- const text=await request.text();if(text.length>4096)return json({error:'Request is too large.'},400);
+ const text=await limitedText(request,4096);if(text.length>4096)return json({error:'Request is too large.'},400);
  let raw;try{raw=JSON.parse(text)}catch{return json({error:'Please check your details.'},400)}
  const email=z.string().trim().toLowerCase().email().max(200).parse(raw.email);
  const now=Date.now();for(const dimension of [request.headers.get('cf-connecting-ip')||'local',email]){const key='customer:'+await digest(dimension);const rate=await env.DB.prepare('INSERT INTO rate_limits(id,count,expires) VALUES (?,1,?) ON CONFLICT(id) DO UPDATE SET count=CASE WHEN expires<? THEN 1 ELSE count+1 END,expires=CASE WHEN expires<? THEN ? ELSE expires END RETURNING count').bind(key,now+900000,now,now,now+900000).first<{count:number}>();if((rate?.count||0)>15)return json({error:'Too many attempts. Please try again in 15 minutes.'},429)}

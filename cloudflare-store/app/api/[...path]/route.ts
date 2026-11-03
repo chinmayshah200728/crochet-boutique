@@ -1,3 +1,4 @@
+import {limitedText,limitedBytes,RequestLimitError} from '../../../lib/request-security';
 import {deliveryCharge} from '../../../lib/shipping';
 import {env} from 'cloudflare:workers';
 import {ZodError,z} from 'zod';
@@ -14,15 +15,17 @@ import {mergeWithCurated} from '../../../lib/curated-products';
 const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const decode=(p:any)=>normaliseProduct({...p,name:correctProductName(p.name),images:JSON.parse(p.images),colours:JSON.parse(p.colours),model_colours:JSON.parse(p.model_colours||'{}')});
 async function storeSettings(){const row=await env.DB.prepare('SELECT value FROM settings WHERE id=?').bind('store').first<{value:string}>();return {...defaults,...(row?JSON.parse(row.value):{})};}
-async function body(request:Request){if(Number(request.headers.get('content-length'))>65536)throw new Error('Request is too large.');const text=await request.text();if(text.length>65536)throw new Error('Request is too large.');return JSON.parse(text);}
+async function body(request:Request){return JSON.parse(await limitedText(request));}
 async function route(request:Request){
  try{
  const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean).slice(1),method=request.method;
  if(parts[0]==='customer')return await customerRoute(request,parts[1]);
- if(parts[0]==='auth')return studioAuth(request,parts[1]);
+ if(parts[0]==='auth')return await studioAuth(request,parts[1]);
  const admin=parts[0]==='admin';
  if(method!=='GET'){const origin=request.headers.get('origin');if(!origin||origin!==url.origin)return json({error:'Please submit this form from the store website.'},403);}
  if(admin&&!(await owner()))return json({error:'Sign in with the store owner account to continue.'},401);
+ if(admin&&parts[1]==='security'&&method==='GET'){const row=await env.DB.prepare("SELECT json_extract(value,'$.totpSecret') IS NOT NULL AS enabled FROM settings WHERE id='admin_credentials'").first<{enabled:number}>();return json({mfa:!!row?.enabled});}
+ if(parts[0]==='health'&&method==='GET'){await env.DB.prepare('SELECT 1').first();return json({ok:true});}
  if(parts[0]==='media'&&method==='GET'){
   if(parts.length!==2||!/^([a-z0-9-]+)\.(png|jpg|webp|glb)$/.test(parts[1]))return json({error:'File not found.'},404);
   return await getMedia(parts[1])||json({error:'File not found.'},404);
@@ -47,7 +50,7 @@ async function route(request:Request){
  }
  if(admin&&parts[1]==='upload'&&method==='POST'){
   const limit=16*1024*1024;if(Number(request.headers.get('content-length'))>limit)return json({error:'File must be smaller than 15 MB.'},413);
-  const data=await request.formData(),file=data.get('file');if(!(file instanceof File)||!file.size||file.size>15*1024*1024)return json({error:'Choose a file under 15 MB.'},400);
+  const uploadBody=await limitedBytes(request,limit);const data=await new Response(uploadBody,{headers:{'Content-Type':request.headers.get('content-type')||''}}).formData(),file=data.get('file');if(!(file instanceof File)||!file.size||file.size>15*1024*1024)return json({error:'Choose a file under 15 MB.'},400);
   const bytes=new Uint8Array(await file.arrayBuffer());let ext='',type='';
   if(bytes[0]===137&&bytes[1]===80&&bytes[2]===78&&bytes[3]===71){ext='png';type='image/png';}
   else if(bytes[0]===255&&bytes[1]===216&&bytes[2]===255){ext='jpg';type='image/jpeg';}
@@ -109,9 +112,9 @@ async function route(request:Request){
   for(const i of o.items){const p=await env.DB.prepare("SELECT * FROM products WHERE id=? AND status='active'").bind(i.productId).first<any>();if(!p||p.stock<i.quantity)return json({error:'An item is no longer available in this quantity. Please refresh your bag.'},409);const model=/^\/models\/collection-[0-3]\.glb$/.test(p.model)?collectionModels[Number(p.model.match(/collection-(\d)/)[1])]:p.model;if(model&&i.modelVersion!==model)return json({error:'This product’s 3D design has changed. Remove it from your bag, reopen the product and confirm your colours.'},409);if(model&&!Object.keys(i.partColours).length){i.partColours=JSON.parse(p.model_colours||'{}');}total+=p.price*i.quantity;lines.push({...i,name:p.name,price:p.price,model_snapshot:model});}
   const shipping=deliveryCharge(total,s.shipping);total+=shipping;
   const statements=[env.DB.prepare('INSERT INTO orders(id,customer,email,phone,address,total,shipping,status,payment_ref,tracking,created_at,customer_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,o.customer,o.email,o.phone,o.address,total,shipping,'awaiting_payment',o.payment_ref,'',new Date().toISOString(),customer.id),...lines.map(i=>env.DB.prepare('INSERT INTO order_items(id,order_id,product_id,name,price,quantity,colour,note,part_colours,model_snapshot) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(crypto.randomUUID(),id,i.productId,i.name,i.price,i.quantity,i.colour,i.note,JSON.stringify(i.partColours),i.model_snapshot))];
-  try{await env.DB.batch(statements);}catch{return json({error:'One of these items was just reserved. Refresh your bag and try again.'},409);}return json({id,total},201);
+  try{await env.DB.batch(statements);}catch(e){if(String(e).includes('pending_order_limit'))return json({error:'You already have three orders awaiting payment verification. Contact Prisha before placing another.'},409);return json({error:'One of these items was just reserved. Refresh your bag and try again.'},409);}return json({id,total},201);
  }
  return json({error:'Not found.'},404);
- }catch(error){if(error instanceof ZodError)return json({error:error.issues.map(i=>`${i.path.join(' ')} ${i.message}`).join('. ')},400);if(error instanceof SyntaxError)return json({error:'Please check the submitted information.'},400);console.error('Store request failed',error instanceof Error?error.message:'Unknown error');return json({error:'The studio could not complete this request. Please try again shortly.'},500);}
+ }catch(error){if(error instanceof RequestLimitError)return json({error:'Request is too large.'},413);if(error instanceof ZodError)return json({error:error.issues.map(i=>`${i.path.join(' ')} ${i.message}`).join('. ')},400);if(error instanceof SyntaxError)return json({error:'Please check the submitted information.'},400);console.error(JSON.stringify({event:'store_request_failed',id:crypto.randomUUID(),method:request.method}));return json({error:'The studio could not complete this request. Please try again shortly.'},500);}
 }
 export const GET=route;export const POST=route;export const PUT=route;export const DELETE=route;

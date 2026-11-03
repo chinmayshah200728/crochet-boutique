@@ -8,7 +8,7 @@ const source = path.resolve(repo, '..', 'crochetbyprisha-store');
 const target = path.join(repo, 'cloudflare-store');
 const dirs = ['app', 'components', 'db', 'drizzle', 'hooks', 'lib', 'public', 'vendor', 'scripts/connector-preview'];
 const files = [
-  'package.json', 'package-lock.json', 'tsconfig.json', 'next.config.ts',
+  'SECURITY-OPERATIONS.md', 'scripts/security-selftest.mjs', 'package.json', 'package-lock.json', 'tsconfig.json', 'next.config.ts',
   'next-env.d.ts', 'postcss.config.mjs', 'eslint.config.mjs', 'vite.config.ts',
   'drizzle.config.ts', 'cloudflare-env.d.ts', 'components.json', '.npmrc',
   'build/connector-preview-plugin.mjs', 'build/connector-preview-worker.mjs',
