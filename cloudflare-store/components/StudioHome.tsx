@@ -1,8 +1,17 @@
 import './StudioHome.css';
 export default function StudioHome(){
- return <section id="home" className="welcome-thread" aria-label="Welcome to crochetbyprisha">
-  <div className="welcome-thread-copy"><span className="welcome-thread-label">A SMALL STUDIO. A PERSONAL TOUCH.</span><h1>Some things<br/>are worth<br/><em>making slowly.</em></h1><p>A hook, a little yarn, and something made just for you.<br/>Welcome to Prisha’s world of crochet.</p><a href="#collection" className="welcome-thread-button">Step into the shop <span aria-hidden="true">↗</span></a><a href="#story" className="welcome-thread-about">Meet the maker →</a></div>
-  <div className="welcome-thread-art" aria-hidden="true"><div className="thread-paper"><span>A NOTE FROM THE STUDIO</span><p>Made with time.<br/>Given with love.</p><small>With love, Prisha</small></div><svg className="thread-trail" viewBox="0 0 600 640" fill="none"><path d="M610 600C470 680 515 388 390 460S120 560 100 400 410 355 340 240 490 90 610 70" stroke="#bd705d" strokeWidth="5"/><path d="M610 600C470 680 515 388 390 460S120 560 100 400 410 355 340 240 490 90 610 70" stroke="#edb49c" strokeWidth="1.5" strokeDasharray="2 5"/></svg><div className="thread-skein skein-rose"/><div className="thread-skein skein-sage"/><div className="thread-hook"/><span className="thread-art-note">a little patience,<br/>a little possibility.</span><span className="thread-stitch stitch-one">✳</span><span className="thread-stitch stitch-two">✳</span></div>
-  <div className="welcome-thread-bottom"><span>HANDMADE, ONE STITCH AT A TIME</span><a href="#collection">Discover the collection ↓</a><span>YOUR COLOURS. YOUR LITTLE DETAILS.</span></div>
+ return <section id="home" className="atelier-home" aria-label="The crochet atelier">
+  <img className="atelier-backdrop" src="/art/atelier-lavender-v1.webp" alt="" fetchPriority="high" width="1672" height="941"/>
+  <div className="atelier-shade"/>
+  <div className="atelier-rail" aria-hidden="true"><span>01</span><i/><span>THE ATELIER</span></div>
+  <div className="atelier-copy">
+   <span className="atelier-eyebrow">THE CROCHET ATELIER</span>
+   <h1>Made slowly.<br/><em>Loved for longer.</em></h1>
+   <p>A little yarn. A very personal kind of magic.<br/>Thoughtful crochet, made by hand and close to the heart.</p>
+   <a className="atelier-cta" href="#collection">Explore the collection <span aria-hidden="true">↗</span></a>
+   <a className="atelier-maker" href="#story">Meet the hands behind the thread →</a>
+  </div>
+  <aside className="atelier-note"><span>A NOTE FROM THE STUDIO</span><p>Small stitches.<br/><em>Bigger feelings.</em></p><a href="#story">With love, Prisha ↗</a></aside>
+  <div className="atelier-foot"><span>HANDMADE WITH CARE</span><a href="#collection">A LITTLE WORLD TO DISCOVER <b aria-hidden="true">↓</b></a><span>ALWAYS A LITTLE PERSONAL</span></div>
  </section>
 }
