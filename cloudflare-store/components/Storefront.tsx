@@ -2,7 +2,7 @@
 import {deliveryCharge} from '../lib/shipping';
 import ShippingProgress from './ShippingProgress';
 import MakerStory from './MakerStory';
-import {WelcomeIntro,Announcement,ColourTeaser,Testimonials,HomeFaq,InstagramStrip} from './HomeDelights';
+import {Announcement,HomeFaq,InstagramStrip} from './HomeDelights';
 import {useHomeMotion} from '../lib/home-motion';
 import {wiggleProduct} from '../lib/product-motion';
 import {useEffect,useState,lazy,Suspense} from 'react';
@@ -11,7 +11,7 @@ import ProductImage from './ProductImage';
 import {Brand,Modal,Empty,Field,Alert,Arrow} from './UI';
 import {ModelPart,PartColours,validPartColours} from '../lib/model-parts';
 import {PartSelector,ColourSummary} from './PartColours';
-import GardenJourney from './GardenJourney';
+import StudioHome from './StudioHome';
 import CustomerAccount from './CustomerAccount';
 import type {Customer} from '../lib/customer-auth';
 const ModelPreview=lazy(()=>import('./ModelPreview'));
@@ -140,7 +140,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
 
  return (
   <div className="home-experience">
-   <WelcomeIntro/><Announcement/>
+   <Announcement/>
    <header className={`store-nav ${motion.scrolled?'nav-scrolled':''} ${motion.hidden&&!menu?'nav-hidden':''}`}><button className="home-menu-toggle" aria-label="Open information menu" aria-expanded={menu} onClick={()=>setMenu(!menu)}>☰</button>
     <nav className="desktop-nav">
      <a href="#collection">Shop</a>
@@ -176,7 +176,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
    )}
 
    <main id="main-content">
-    <GardenJourney products={data.products}/>
+    <StudioHome products={data.products}/>
 
     {/* The Collection */}
     <section className="collection section" id="collection">
@@ -280,7 +280,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
      )}
     </section>
 
-    <ColourTeaser/>
+
     {/* Craft Values */}
     <section className="values">
      <div>
@@ -359,7 +359,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     )}
 
     <HomeFaq/>
-    <Testimonials/>
+
     <section className="section ordering-section"><span className="eyebrow">04 · FROM OUR HANDS TO YOURS</span><h2>How ordering works</h2><ol className="ordering-steps">{['Choose and customise','Pay by UPI','Prisha confirms and starts crafting'].map((text,i)=><li key={text}><span>{i+1}</span><h3>{text}</h3></li>)}</ol></section>
     <InstagramStrip/>
     {/* Newsletter Section */}
