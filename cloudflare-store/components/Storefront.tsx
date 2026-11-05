@@ -2,7 +2,7 @@
 import {deliveryCharge} from '../lib/shipping';
 import ShippingProgress from './ShippingProgress';
 import MakerStory from './MakerStory';
-import {Announcement,HomeFaq,InstagramStrip} from './HomeDelights';
+import {Announcement,HomeFaq} from './HomeDelights';
 import {useHomeMotion} from '../lib/home-motion';
 import {wiggleProduct} from '../lib/product-motion';
 import {useEffect,useState,lazy,Suspense} from 'react';
@@ -167,7 +167,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
       <span className="eyebrow">CROCHETBYPRISHA</span>
       <button aria-label="Close menu" className="mobile-close" onClick={()=>setMenu(false)}>✕</button>
      </div>
-     
+
      <a href="#trust-information" onClick={()=>setMenu(false)}>Handmade & shipping trust</a>
      <a href="/about">Meet Prisha & our story</a>
      <a href="/help">Delivery, UPI & FAQs</a>
@@ -361,7 +361,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
     <HomeFaq/>
 
     <section className="section ordering-section"><span className="eyebrow">04 · FROM OUR HANDS TO YOURS</span><h2>How ordering works</h2><ol className="ordering-steps">{['Choose and customise','Pay by UPI','Prisha confirms and starts crafting'].map((text,i)=><li key={text}><span>{i+1}</span><h3>{text}</h3></li>)}</ol></section>
-    <InstagramStrip/>
+
     {/* Newsletter Section */}
     <section className="newsletter-section">
      <div className="newsletter-card">

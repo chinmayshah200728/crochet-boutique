@@ -3,12 +3,10 @@ import {productPath} from '../lib/seo';
 import ProductImage from './ProductImage';
 import './StudioHome.css';
 export default function StudioHome({products=[]}:{products?:Product[]}){
- const available=products.filter(p=>p.status==='active'&&p.images?.length);
- const featured=available.find(p=>/tulip|bouquet/i.test(p.name))||available[0];
- const extras=available.filter(p=>p.id!==featured?.id).slice(0,2);
- return <section id="home" className="atelier-home" aria-label="Welcome to crochetbyprisha">
-  <div className="atelier-copy"><span className="atelier-kicker">THE CROCHETBYPRISHA STUDIO</span><h1>A little gift.<br/>A lot of <em>thought.</em></h1><p>Flowers that stay. Little things to wear and carry. Crochet pieces you can make personal, one colour at a time.</p><a className="atelier-shop" href="#collection">Shop the collection <span aria-hidden="true">↗</span></a><a className="atelier-story" href="#story">Meet Prisha, the maker →</a><div className="atelier-note"><span>Made by hand.<br/>Chosen by you.</span><small>Free delivery above ₹499<br/>₹40 on orders of ₹499 or less</small></div></div>
-  {featured&&<a className="atelier-feature" href={productPath(featured)}><div className="atelier-photo"><ProductImage src={featured.images[0]} alt={productAlt(featured)} loading="eager"/><span className="atelier-photo-label">A PIECE TO KEEP</span></div><div className="atelier-caption"><span>{featured.name}</span><span>{money(featured.price)} ↗</span></div></a>}
-  {extras.length>0&&<div className="atelier-discover"><div><span className="atelier-kicker">SMALL THINGS, WELL CHOSEN</span><p>Something for<br/><em>your everyday.</em></p></div>{extras.map(p=><a href={productPath(p)} key={p.id}><ProductImage src={p.images[0]} alt={productAlt(p)}/><span>{p.name}<small>{money(p.price)} · Take a closer look ↗</small></span></a>)}</div>}
+ const pieces=products.filter(p=>p.status==='active'&&p.images?.some(src=>src.includes('/api/media/'))).slice(0,4);
+ return <section id="home" className="thread-home" aria-label="Welcome to crochetbyprisha">
+ <div className="thread-heading"><span className="thread-label">CROCHETBYPRISHA / HANDMADE IN INDIA</span><h1>A little knot.<br/><em>A lot of joy.</em></h1><div className="thread-intro"><p>A bow for their bag. Flowers for their desk.<br/>Something small that says, “I thought of you.”</p><a href="#collection" className="thread-cta">Find their thing <span aria-hidden="true">↗</span></a></div></div>
+ <div className="thread-doodle" aria-hidden="true"><svg viewBox="0 0 1200 100"><path d="M-20 65 C180 -40 200 130 390 60 S620 -10 760 55 S1000 130 1220 30"/></svg><span>pick your favourite ↓</span></div><div className="thread-window" aria-label="Explore handmade pieces">{pieces.map((p,i)=><a className={'thread-piece thread-piece-'+i} key={p.id} href={productPath(p)}><span className="thread-pin" aria-hidden="true"/><span className="thread-number" aria-hidden="true">0{i+1}</span><div className="thread-image"><ProductImage src={p.images.find(src=>src.includes('/api/media/'))!} alt={productAlt(p)} loading={i<2?'eager':'lazy'}/></div><div className="thread-caption"><span>{p.name}</span><span>{money(p.price)} <b aria-hidden="true">↗</b></span></div></a>)}</div>
+ <div className="thread-footer"><span>Yours to make personal. <a href="#collection">Explore colours →</a></span><span>Free delivery above ₹499 · ₹40 otherwise</span></div>
  </section>
 }
