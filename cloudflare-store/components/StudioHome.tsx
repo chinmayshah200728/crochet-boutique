@@ -3,6 +3,8 @@ export default function StudioHome(){
  return <section id="home" className="atelier-home" aria-label="The crochet atelier">
   <img className="atelier-backdrop" src="/art/atelier-lavender-v1.webp" alt="" fetchPriority="high" width="1672" height="941"/>
   <div className="atelier-shade"/>
+  <div className="atelier-atmosphere" aria-hidden="true"><div className="atelier-light"/><div className="atelier-glow"/>{Array.from({length:12},(_,i)=><i className="atelier-mote" key={i} style={{left:`${8+(i*19)%85}%`,top:`${15+(i*23)%72}%`,animationDelay:`-${i*1.7}s`,animationDuration:`${12+(i%5)*3}s`}}/>)}</div>
+  <label className="atelier-motion-control"><input type="checkbox" defaultChecked className="atelier-motion-toggle" aria-label="Enable background motion"/> Background motion</label>
   <div className="atelier-rail" aria-hidden="true"><span>01</span><i/><span>THE ATELIER</span></div>
   <div className="atelier-copy">
    <span className="atelier-eyebrow">THE CROCHET ATELIER</span>
