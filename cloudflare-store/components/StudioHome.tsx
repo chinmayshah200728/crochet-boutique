@@ -1,12 +1,8 @@
-import {Product,money,productAlt} from '../lib/store';
-import {productPath} from '../lib/seo';
-import ProductImage from './ProductImage';
 import './StudioHome.css';
-export default function StudioHome({products=[]}:{products?:Product[]}){
- const pieces=products.filter(p=>p.status==='active'&&p.images?.some(src=>src.includes('/api/media/'))).slice(0,4);
- return <section id="home" className="thread-home" aria-label="Welcome to crochetbyprisha">
- <div className="thread-heading"><span className="thread-label">CROCHETBYPRISHA / HANDMADE IN INDIA</span><h1>A little knot.<br/><em>A lot of joy.</em></h1><div className="thread-intro"><p>A bow for their bag. Flowers for their desk.<br/>Something small that says, “I thought of you.”</p><a href="#collection" className="thread-cta">Find their thing <span aria-hidden="true">↗</span></a></div></div>
- <div className="thread-doodle" aria-hidden="true"><svg viewBox="0 0 1200 100"><path d="M-20 65 C180 -40 200 130 390 60 S620 -10 760 55 S1000 130 1220 30"/></svg><span>pick your favourite ↓</span></div><div className="thread-window" aria-label="Explore handmade pieces">{pieces.map((p,i)=><a className={'thread-piece thread-piece-'+i} key={p.id} href={productPath(p)}><span className="thread-pin" aria-hidden="true"/><span className="thread-number" aria-hidden="true">0{i+1}</span><div className="thread-image"><ProductImage src={p.images.find(src=>src.includes('/api/media/'))!} alt={productAlt(p)} loading={i<2?'eager':'lazy'}/></div><div className="thread-caption"><span>{p.name}</span><span>{money(p.price)} <b aria-hidden="true">↗</b></span></div></a>)}</div>
- <div className="thread-footer"><span>Yours to make personal. <a href="#collection">Explore colours →</a></span><span>Free delivery above ₹499 · ₹40 otherwise</span></div>
+export default function StudioHome(){
+ return <section id="home" className="welcome-thread" aria-label="Welcome to crochetbyprisha">
+  <div className="welcome-thread-copy"><span className="welcome-thread-label">A SMALL STUDIO. A PERSONAL TOUCH.</span><h1>Some things<br/>are worth<br/><em>making slowly.</em></h1><p>A hook, a little yarn, and something made just for you.<br/>Welcome to Prisha’s world of crochet.</p><a href="#collection" className="welcome-thread-button">Step into the shop <span aria-hidden="true">↗</span></a><a href="#story" className="welcome-thread-about">Meet the maker →</a></div>
+  <div className="welcome-thread-art" aria-hidden="true"><div className="thread-paper"><span>A NOTE FROM THE STUDIO</span><p>Made with time.<br/>Given with love.</p><small>With love, Prisha</small></div><svg className="thread-trail" viewBox="0 0 600 640" fill="none"><path d="M610 600C470 680 515 388 390 460S120 560 100 400 410 355 340 240 490 90 610 70" stroke="#bd705d" strokeWidth="5"/><path d="M610 600C470 680 515 388 390 460S120 560 100 400 410 355 340 240 490 90 610 70" stroke="#edb49c" strokeWidth="1.5" strokeDasharray="2 5"/></svg><div className="thread-skein skein-rose"/><div className="thread-skein skein-sage"/><div className="thread-hook"/><span className="thread-art-note">a little patience,<br/>a little possibility.</span><span className="thread-stitch stitch-one">✳</span><span className="thread-stitch stitch-two">✳</span></div>
+  <div className="welcome-thread-bottom"><span>HANDMADE, ONE STITCH AT A TIME</span><a href="#collection">Discover the collection ↓</a><span>YOUR COLOURS. YOUR LITTLE DETAILS.</span></div>
  </section>
 }

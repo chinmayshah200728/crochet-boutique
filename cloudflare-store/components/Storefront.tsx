@@ -176,7 +176,7 @@ export default function Storefront({initialData}:{initialData?:StoreData}){
    )}
 
    <main id="main-content">
-    <StudioHome products={data.products}/>
+    <StudioHome/>
 
     {/* The Collection */}
     <section className="collection section" id="collection">
