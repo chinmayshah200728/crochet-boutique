@@ -15,3 +15,26 @@
 .atelier-motion-control{position:absolute;right:5%;top:110px;z-index:2;display:flex;align-items:center;gap:8px;font-size:10px;color:#fff4e8;background:#302436a6;border:1px solid #ddcbd555;border-radius:20px;padding:8px 12px;cursor:pointer}.atelier-motion-toggle{accent-color:#ad7899;width:16px;height:16px}.atelier-home:not(:has(.atelier-motion-toggle:checked)) .atelier-backdrop{animation-play-state:paused}.atelier-home:not(:has(.atelier-motion-toggle:checked)) .atelier-atmosphere{display:none}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-backdrop{animation:atelier-drift 20s ease-in-out infinite alternate!important;will-change:transform}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-atmosphere{display:block}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-light{animation:atelier-light-drift 16s ease-in-out infinite alternate!important}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-glow{animation:atelier-glow-breathe 7s ease-in-out infinite!important}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-mote{animation-name:atelier-mote-drift!important;animation-timing-function:ease-in-out!important;animation-iteration-count:infinite!important}
 .home-experience .maker-story{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);max-width:1320px;gap:clamp(30px,6vw,90px);align-items:center}.prisha-portrait{margin:0;position:relative;padding:12px 12px 20px;background:#faf7f5;box-shadow:0 15px 50px #45375412;border:1px solid #e2dce8;transform:rotate(-2deg)}.prisha-portrait img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:center;border-radius:2px}.prisha-portrait figcaption{font-size:11px;text-align:center;color:#65558a;padding-top:15px;letter-spacing:.03em}@media(max-width:760px){.atelier-motion-control{top:92px;right:20px;font-size:9px}.home-experience .maker-story{grid-template-columns:1fr;gap:36px}.prisha-portrait{max-width:400px;width:100%;margin:auto}}
 .atelier-threads{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;pointer-events:none}.yarn-line{stroke:#edbbda;stroke-width:1;opacity:.28}.yarn-spark{stroke:#fff0cb;stroke-width:2;stroke-linecap:round;stroke-dasharray:2 160 5 270;filter:drop-shadow(0 0 4px #ffcf91)}.atelier-threads g{transform-origin:80% 50%}.atelier-threads g:nth-child(2){opacity:.65}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-threads g{animation:yarn-sway 12s ease-in-out infinite alternate!important}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-threads g:nth-child(2){animation-delay:-6s!important;animation-duration:17s!important}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .yarn-spark{animation:yarn-glimmer 16s linear infinite!important}.home-experience .atelier-home:has(.atelier-motion-toggle:checked) .atelier-threads g:nth-child(2) .yarn-spark{animation-direction:reverse!important;animation-duration:22s!important}@keyframes yarn-sway{from{transform:translate(-8px,5px) rotate(-2deg)}to{transform:translate(12px,-12px) rotate(3deg)}}@keyframes yarn-glimmer{from{stroke-dashoffset:0;opacity:.4}50%{opacity:1}to{stroke-dashoffset:-874;opacity:.4}}@media(max-width:760px){.atelier-threads{width:150%;left:-35%}.atelier-backdrop{object-position:62% center}}
+/* Larger, softer glints and a compact mobile composition. */
+.yarn-spark{stroke-width:4;stroke-dasharray:3 150 7 260;filter:drop-shadow(0 0 6px #ffd5a0)}
+.atelier-mote{width:5px;height:5px;box-shadow:0 0 12px 4px #ffd9aa70}
+.atelier-mote:nth-child(3n){width:4px;height:4px}
+@media(max-width:760px){
+.atelier-home{min-height:780px;min-height:max(740px,100svh);padding:145px 22px 235px}
+.atelier-copy h1{font-size:clamp(44px,11vw,68px);max-width:520px;letter-spacing:-.045em}
+.home-experience .atelier-copy>p{max-width:320px;font-size:14px}
+.atelier-backdrop{object-position:65% center}
+.atelier-shade{background:linear-gradient(180deg,#25162fdf 0%,#25162fb0 43%,#25162f22 72%,#25162f99)}
+.atelier-cta{width:100%;max-width:330px;box-sizing:border-box;min-height:52px}
+.atelier-note{bottom:80px;right:22px;padding:14px 18px;max-width:200px}
+.home-experience .atelier-note p{font-size:24px}
+.atelier-foot{left:22px;right:22px;gap:12px}
+.atelier-motion-control{top:94px;min-height:34px;padding:5px 12px;box-sizing:border-box}
+.atelier-motion-toggle{width:18px;height:18px}
+.atelier-threads{width:170%;left:-55%}
+.yarn-spark{stroke-width:5}
+.atelier-mote{width:6px;height:6px}
+.home-experience .maker-story{padding-left:24px;padding-right:24px}
+.prisha-portrait{box-sizing:border-box}
+}
+@media(max-width:380px){.atelier-home{padding-left:18px;padding-right:18px}.atelier-copy h1{font-size:43px}.atelier-eyebrow{letter-spacing:.16em}.atelier-note{bottom:75px}.atelier-foot>span{max-width:110px}}
