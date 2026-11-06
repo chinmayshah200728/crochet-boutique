@@ -6,7 +6,6 @@ export default function StudioHome({products}:{products:Product[]}){
   <img className="atelier-backdrop" src="/art/crochet-yarn-hero.webp" alt="" fetchPriority="high" width="2560" height="1440"/>
   <div className="atelier-shade"/>
   <div className="atelier-atmosphere" aria-hidden="true"><svg className="atelier-threads" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><g><path className="yarn-line" d="M720 -40 C1150 170 650 200 960 410 S700 640 1050 860"/><path className="yarn-spark" d="M720 -40 C1150 170 650 200 960 410 S700 640 1050 860"/></g><g><path className="yarn-line" d="M1250 90 C800 -30 1120 370 780 490 S1000 690 680 850"/><path className="yarn-spark" d="M1250 90 C800 -30 1120 370 780 490 S1000 690 680 850"/></g></svg><div className="atelier-light"/><div className="atelier-glow"/>{Array.from({length:24},(_,i)=><i className="atelier-mote" key={i} style={{left:`${3+(i*19)%94}%`,top:`${4+(i*23)%90}%`,animationDelay:`-${i*1.7}s`,animationDuration:`${12+(i%5)*3}s`}}/>)}</div>
-  <label className="atelier-motion-control"><input type="checkbox" defaultChecked className="atelier-motion-toggle" aria-label="Enable background motion"/> Background motion</label>
   <div className="atelier-rail" aria-hidden="true"><span>01</span><i/><span>THE ATELIER</span></div>
   <div className="atelier-copy">
    <span className="atelier-eyebrow">THE CROCHET ATELIER</span>
